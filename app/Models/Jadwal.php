@@ -10,4 +10,9 @@ class Jadwal extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class);
+    }
 }

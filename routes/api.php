@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\CobaController;
 use App\Http\Controllers\DataPersonalController;
+use App\Http\Controllers\JamKerjaController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +26,8 @@ use Illuminate\Support\Facades\Route;
 // });
 
 Route::post('/login', [LoginController::class, 'login']);
+Route::get('/coba-face', [CobaController::class, 'compareFaces']);
+Route::post('/password-reset', [PasswordResetController::class, 'passreset']);
 Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/getuserinfo', [UserController::class, 'checkuser']);
 
@@ -38,4 +44,11 @@ Route::middleware(['auth:sanctum'])->group(function(){
     //check user active
     Route::get('/active-user-check', [DataPersonalController::class, 'checkuseractive']);
     // Route::post('/logout', [LoginController::class, 'logout']);
+
+    //presensi
+    Route::post('/user-store-presensi', [PresensiController::class, 'store']);
+
+    //get jam kerja
+    Route::get('/get-jam-kerja', [JamKerjaController::class, 'getjamkerja']);
+
 });
