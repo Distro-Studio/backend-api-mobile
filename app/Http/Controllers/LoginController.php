@@ -73,4 +73,15 @@ class LoginController extends Controller
 
         return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email atau password salah'), Response::HTTP_UNAUTHORIZED);
     }
+
+    public function logout(Request $request)
+    {
+        try{
+            $token = $request->user()->currentAccessToken()->delete();
+            return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Logout berhasil'), Response::HTTP_OK);
+
+        } catch(\Exception $e){
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Logout gagal'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }
