@@ -162,7 +162,7 @@ return [
          * Package Service Providers...
          */
         Spatie\Permission\PermissionServiceProvider::class,
-
+        Spatie\Geocoder\GeocoderServiceProvider::class,
         /*
          * Application Service Providers...
          */
@@ -185,6 +185,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
+        'Geocoder' => Spatie\Geocoder\Facades\Geocoder::class,
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 

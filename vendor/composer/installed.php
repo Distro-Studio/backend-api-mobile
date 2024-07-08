@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'laravel/laravel',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => NULL,
+        'pretty_version' => 'dev-master',
+        'version' => 'dev-master',
+        'reference' => 'f6b665e0c47dcb8cbe71c34b4ff7bf1a92306715',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -407,9 +407,9 @@
             'dev_requirement' => false,
         ),
         'laravel/laravel' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => NULL,
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => 'f6b665e0c47dcb8cbe71c34b4ff7bf1a92306715',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -1051,6 +1051,15 @@
             'install_path' => __DIR__ . '/../spatie/flare-client-php',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'spatie/geocoder' => array(
+            'pretty_version' => '3.16.0',
+            'version' => '3.16.0.0',
+            'reference' => '478b700d9edbbc40d71a22ad717b69b46a394552',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/geocoder',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'spatie/ignition' => array(
             'pretty_version' => '1.14.1',
