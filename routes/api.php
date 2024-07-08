@@ -36,13 +36,11 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/getuserinfo', [UserController::class, 'checkuser']);
 
     //data personal
-    Route::post('/input-personal-step1', [DataPersonalController::class, 'step1']);
-    Route::post('/input-personal-step2', [DataPersonalController::class, 'step2']);
-    Route::post('/input-personal-step3', [DataPersonalController::class, 'step3']);
+    Route::post('/input-personal', [DataPersonalController::class, 'step1']);
     Route::post('/input-data-keluarga', [DataPersonalController::class, 'storekeluarga']);
     Route::get('/get-data-keluarga', [DataPersonalController::class, 'getkeluarga']);
     Route::post('/{dataKeluarga}/edit-data-keluarga', [DataPersonalController::class, 'updatekeluarga']);
-    Route::post('/input-personal-step5', [DataPersonalController::class, 'step5']);
+    Route::post('/input-berkas', [DataPersonalController::class, 'step5']);
     Route::post('/input-personal-file', [DataPersonalController::class, 'storepersonalfile']);
 
     //check user active

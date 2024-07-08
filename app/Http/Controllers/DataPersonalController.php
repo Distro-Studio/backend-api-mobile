@@ -19,11 +19,19 @@ class DataPersonalController extends Controller
     public function step1(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'nama' => 'required|max:255',
+            'nama' => 'max:255',
             'tempat_lahir' => 'required',
             'tanggal_lahir' => 'required|date',
             'no_hp' => 'required|numeric',
             'jenis_kelamin' => 'required|in:Pria,Wanita',
+            'nik_ktp' => 'required|integer|digits:16',
+            'no_kk' => 'required|integer|digits:16',
+            'agama' => 'required|string',
+            'golongan_darah' => 'required|in:A,B,AB,O',
+            'tinggi_badan' => 'required|integer',
+            'alamat' => 'required',
+            'tahun_lulus' => 'required|numeric',
+            'no_ijazah' => 'required',
         ],[
             'nama.required' => 'Nama harus diisi',
             'nama.max' => 'Maksimal 255 kata',
@@ -33,49 +41,7 @@ class DataPersonalController extends Controller
             'no_hp.required' => 'No telfon harus di isi',
             'no_hp.numeric' => 'No telfon harus berupa angka',
             'jenis_kelamin.required' => 'Jenis kelamin harus diisi',
-            'jenis_kelamin.in' => 'Jenis kelamin harus Pria atau Wanita'
-        ]);
-
-        if ($validator->fails())
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()),Response::HTTP_NOT_ACCEPTABLE);
-        }
-
-        $user = User::where('id', Auth::user()->id)->first();
-        $data = DataKaryawan::where('user_id', Auth::user()->id)->first();
-
-        if(!$user)
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND,'Akun user tidak ditemukan'),Response::HTTP_NOT_FOUND);
-        }
-
-        if(!$data)
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
-        }
-
-        $user->name = $request->nama;
-        $user->save();
-
-        $data->tempat_lahir = $request->tempat_lahir;
-        $data->tgl_lahir = $request->tanggal_lahir;
-        $data->no_hp = $request->no_hp;
-        $data->jenis_kelamin = $request->jenis_kelamin;
-        $data->save();
-
-        return response()->json(new DataResource(Response::HTTP_OK,'Data berhasil disimpan', $request->all()),Response::HTTP_OK);
-    }
-
-    public function step2(Request $request)
-    {
-        $validator = Validator::make($request->all(),[
-            'nik_ktp' => 'required|integer|digits:16',
-            'no_kk' => 'required|integer|digits:16',
-            'agama' => 'required|string',
-            'golongan_darah' => 'required|in:A,B,AB,O',
-            'tinggi_badan' => 'required|integer',
-            'alamat' => 'required',
-        ],[
+            'jenis_kelamin.in' => 'Jenis kelamin harus Pria atau Wanita',
             'nik_ktp.required' => 'Nomor Induk Kependudukan harus diisi',
             'nik_ktp.integer' => 'Nomor Induk Kependudukan harus berupa angka',
             'nik_ktp.digits' => 'Nomor Induk Kependudukan harus terdiri dari 16 digit',
@@ -88,7 +54,10 @@ class DataPersonalController extends Controller
             'golongan_darah.in' => 'Golongan darah hanya bisa diisi dengan A, B, AB, O',
             'tinggi_badan.required' => 'Tinggi badan harus diisi',
             'tinggi_badan.integer' => 'Tinggi badan harus berupa angka',
-            'alamat.required' => 'Alamat harus diisi'
+            'alamat.required' => 'Alamat harus diisi',
+            'tahun_lulus.required' => 'Tahun lulus harus diisi',
+            'tahun_lulus.numeric' => 'Tahun lulus harus berupa angka',
+            'no_ijazah.required' => 'Nomor ijazah harus diisi',
         ]);
 
         if ($validator->fails())
@@ -96,51 +65,45 @@ class DataPersonalController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()),Response::HTTP_NOT_ACCEPTABLE);
         }
 
-        $data = DataKaryawan::where('user_id', Auth::user()->id)->first();
+        try {
+            $user = User::where('id', Auth::user()->id)->first();
+            $data = DataKaryawan::where('user_id', Auth::user()->id)->first();
 
-        if(!$data)
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
+            if(!$user)
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND,'Akun user tidak ditemukan'),Response::HTTP_NOT_FOUND);
+            }
+
+            if(!$data)
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
+            }
+
+            $nama = null;
+            if($request->nama)
+            {
+                $user->name = $request->nama;
+                $user->save();
+            }
+
+            $data->tempat_lahir = $request->tempat_lahir;
+            $data->tgl_lahir = $request->tanggal_lahir;
+            $data->no_hp = $request->no_hp;
+            $data->jenis_kelamin = $request->jenis_kelamin;
+            $data->nik_ktp = $request->nik_ktp;
+            $data->no_kk = $request->no_kk;
+            $data->agama = $request->agama;
+            $data->golongan_darah = $request->golongan_darah;
+            $data->tinggi_badan = $request->tinggi_badan;
+            $data->alamat = $request->alamat;
+            $data->tahun_lulus = $request->tahun_lulus;
+            $data->save();
+
+            return response()->json(new DataResource(Response::HTTP_OK,'Data berhasil disimpan', $request->all()),Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'),Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $data->nik_ktp = $request->nik_ktp;
-        $data->no_kk = $request->no_kk;
-        $data->agama = $request->agama;
-        $data->golongan_darah = $request->golongan_darah;
-        $data->tinggi_badan = $request->tinggi_badan;
-        $data->alamat = $request->alamat;
-        $data->save();
-
-        return response()->json(new DataResource(Response::HTTP_OK,'Data berhasil disimpan', $request->all()),Response::HTTP_OK);
-    }
-
-    public function step3(Request $request)
-    {
-        $validator = Validator::make($request->all(),[
-            'no_ijasah' => 'required',
-            'tahun_lulus' => 'required'
-        ], [
-            'no_ijasah.required' => 'Nomor ijasah harus diisi',
-            'tahun_lulus.required' => 'Tahun lulus harus diisi'
-        ]);
-
-        if ($validator->fails())
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()),Response::HTTP_NOT_ACCEPTABLE);
-        }
-
-        $data = DataKaryawan::where('user_id', Auth::user()->id)->first();
-
-        if(!$data)
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
-        }
-
-        $data->no_ijasah = $request->no_ijasah;
-        $data->tahun_lulus = $request->tahun_lulus;
-        $data->save();
-
-        return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $request->all()), Response::HTTP_OK);
     }
 
     public function storekeluarga(Request $request)
@@ -162,37 +125,47 @@ class DataPersonalController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()),Response::HTTP_NOT_ACCEPTABLE);
         }
 
-        $data = DataKaryawan::where('user_id', Auth::user()->id)->first();
+        try {
+            $data = DataKaryawan::where('user_id', Auth::user()->id)->first();
 
-        if(!$data)
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
+            if(!$data)
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
+            }
+
+            $keluarga = DataKeluarga::create([
+                'data_karyawan_id' => $data->id,
+                'nama_keluarga' => $request->nama_keluarga,
+                'hubungan' => $request->hubungan,
+                'pendidikan_terakhir' => $request->pendidikan_terakhir,
+                'status_hidup' => $request->status_hidup,
+                'pekerjaan' => $request->pekerjaan,
+                'no_hp' => $request->no_hp,
+                'email' => $request->email,
+            ]);
+
+            return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'),Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        $keluarga = DataKeluarga::create([
-            'data_karyawan_id' => $data->id,
-            'nama_keluarga' => $request->nama_keluarga,
-            'hubungan' => $request->hubungan,
-            'pendidikan_terakhir' => $request->pendidikan_terakhir,
-            'status_hidup' => $request->status_hidup,
-            'pekerjaan' => $request->pekerjaan,
-            'no_hp' => $request->no_hp,
-            'email' => $request->email,
-        ]);
-
-        return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
     }
 
     public function getkeluarga()
     {
-        $karyawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
-        $data = DataKeluarga::where('data_karyawan_id', $karyawan->id)->get();
-        if($data->isEmpty())
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
-        }
+        try {
+            //code...
+            $karyawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+            $data = DataKeluarga::where('data_karyawan_id', $karyawan->id)->get();
+            if($data->isEmpty())
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
+            }
 
-        return response()->json(new DataResource(Response::HTTP_OK, 'Data keluarga '.Auth::user()->name, $data), Response::HTTP_OK);
+            return response()->json(new DataResource(Response::HTTP_OK, 'Data keluarga '.Auth::user()->name, $data), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'),Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function updatekeluarga(DataKeluarga $dataKeluarga, Request $request)
@@ -214,16 +187,20 @@ class DataPersonalController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()),Response::HTTP_NOT_ACCEPTABLE);
         }
 
-        $dataKeluarga->nama_keluarga = $request->nama_keluarga;
-        $dataKeluarga->hubungan = $request->hubungan;
-        $dataKeluarga->pendidikan_terakhir = $request->pendidikan_terakhir;
-        $dataKeluarga->status_hidup = $request->status_hidup;
-        $dataKeluarga->pekerjaan = $request->pekerjaan;
-        $dataKeluarga->no_hp = $request->no_hp;
-        $dataKeluarga->email = $request->email;
-        $dataKeluarga->save();
+        try {
+            $dataKeluarga->nama_keluarga = $request->nama_keluarga;
+            $dataKeluarga->hubungan = $request->hubungan;
+            $dataKeluarga->pendidikan_terakhir = $request->pendidikan_terakhir;
+            $dataKeluarga->status_hidup = $request->status_hidup;
+            $dataKeluarga->pekerjaan = $request->pekerjaan;
+            $dataKeluarga->no_hp = $request->no_hp;
+            $dataKeluarga->email = $request->email;
+            $dataKeluarga->save();
 
-        return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $dataKeluarga), Response::HTTP_OK);
+            return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $dataKeluarga), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'),Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     public function step5(Request $request)
@@ -286,11 +263,11 @@ class DataPersonalController extends Controller
     {
         $validator = Validator::make($request->all(),[
             'nama' => 'required',
-            'kategori' => 'in:Pribadi,Umum',
+            // 'kategori' => 'in:Pribadi,Umum',
             'file' => 'required|file',
         ], [
             'nama.required' => 'Judul harus diisi',
-            'kategori.in' => 'Kategori harus berisi Pribadi atau Umum',
+            // 'kategori.in' => 'Kategori harus berisi Pribadi atau Umum',
             'file.required' => 'File harus diisi',
             'file.file' => 'File harus berupa file'
         ]);
@@ -308,7 +285,7 @@ class DataPersonalController extends Controller
         $berkas = Berkas::create([
             'user_id' => Auth::user()->id,
             'nama' => $request->nama,
-            'kategori' => $request->kategori,
+            'kategori' => 'Pribadi',
             'path' => Storage::url('file/' . $filename),
             'tgl_upload' => date('Y-m-d H:m:s'),
             'nama_file' => $filename,
