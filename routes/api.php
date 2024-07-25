@@ -1,7 +1,10 @@
 <?php
 
 use App\Http\Controllers\CobaController;
+use App\Http\Controllers\CountController;
 use App\Http\Controllers\DataPersonalController;
+use App\Http\Controllers\GetListController;
+use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\JamKerjaController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
@@ -35,6 +38,10 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/logout', [LoginController::class, 'logout']);
     Route::get('/getuserinfo', [UserController::class, 'checkuser']);
 
+    //global request
+    Route::get('get-list-agama', [GetListController::class, 'getlistagama']);
+    Route::get('/get-list-goldar', [GetListController::class, 'getlistgoldar']);
+
     //data personal
     Route::post('/input-personal', [DataPersonalController::class, 'step1']);
     Route::post('/input-data-keluarga', [DataPersonalController::class, 'storekeluarga']);
@@ -48,9 +55,22 @@ Route::middleware(['auth:sanctum'])->group(function(){
     // Route::post('/logout', [LoginController::class, 'logout']);
 
     //presensi
-    Route::post('/user-store-presensi', [PresensiController::class, 'store']);
+    Route::post('/check-in-presensi', [PresensiController::class, 'store']);
+    Route::post('/check-out-presensi', [PresensiController::class, 'checkoutpresensi']);
 
-    //get jam kerja
-    Route::get('/get-jam-kerja', [JamKerjaController::class, 'getjamkerja']);
+    //get jadwal
+    Route::get('/get-today-jadwal', [JadwalController::class, 'gettodayjadwal']);
+    Route::post('/get-jadwal', [JadwalController::class, 'getalljadwal']);
+
+    //activity presensi
+    Route::get('/get-activity-presensi', [PresensiController::class, 'getactivity']);
+
+    //counting
+    Route::get('/count-pending', [CountController::class, 'countTukarandLembur']);
+
+    //get latest pengumuman
+
+    //get another karyawan with same schedule
+    Route::get('/{jadwal}/get-karyawan-same-jadwal',[JadwalController::class, 'getanotherkaryawan']);
 
 });

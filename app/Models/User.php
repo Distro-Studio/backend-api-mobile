@@ -39,4 +39,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function dataKaryawan()
+    {
+        return $this->hasOne(DataKaryawan::class, 'user_id', 'id');
+    }
+
+    // public function 
 }

@@ -23,17 +23,17 @@ class DataPersonalController extends Controller
             'tempat_lahir' => 'required',
             'tanggal_lahir' => 'required|date',
             'no_hp' => 'required|numeric',
-            'jenis_kelamin' => 'required|in:Pria,Wanita',
+            'jenis_kelamin' => 'required|in:0,1,2',
             'nik_ktp' => 'required|integer|digits:16',
             'no_kk' => 'required|integer|digits:16',
-            'agama' => 'required|string',
-            'golongan_darah' => 'required|in:A,B,AB,O',
+            'agama' => 'required',
+            'golongan_darah' => 'required',
             'tinggi_badan' => 'required|integer',
             'alamat' => 'required',
             'tahun_lulus' => 'required|numeric',
             'no_ijazah' => 'required',
         ],[
-            'nama.required' => 'Nama harus diisi',
+            // 'nama.required' => 'Nama harus diisi',
             'nama.max' => 'Maksimal 255 kata',
             'tempat_lahir.required' => 'Tempat lahir harus diisi',
             'tanggal_lahir.required' => 'Tanggal lahir harus diisi',
@@ -49,9 +49,7 @@ class DataPersonalController extends Controller
             'no_kk.integer' => 'Nomor Kartu Keluarga harus berupa angka',
             'no_kk.digits' => 'Nomor Kartu Keluarga harus terdiri dari 16 digit',
             'agama.required' => 'Agama harus diisi',
-            'agama.string' => 'Agama harus berupa huruf',
             'golongan_darah.required' => 'Golongan darah harus diisi',
-            'golongan_darah.in' => 'Golongan darah hanya bisa diisi dengan A, B, AB, O',
             'tinggi_badan.required' => 'Tinggi badan harus diisi',
             'tinggi_badan.integer' => 'Tinggi badan harus berupa angka',
             'alamat.required' => 'Alamat harus diisi',
@@ -92,8 +90,8 @@ class DataPersonalController extends Controller
             $data->jenis_kelamin = $request->jenis_kelamin;
             $data->nik_ktp = $request->nik_ktp;
             $data->no_kk = $request->no_kk;
-            $data->agama = $request->agama;
-            $data->golongan_darah = $request->golongan_darah;
+            $data->kategori_agama_id = $request->agama;
+            $data->kategori_darah_id = $request->golongan_darah;
             $data->tinggi_badan = $request->tinggi_badan;
             $data->alamat = $request->alamat;
             $data->tahun_lulus = $request->tahun_lulus;
@@ -101,7 +99,7 @@ class DataPersonalController extends Controller
 
             return response()->json(new DataResource(Response::HTTP_OK,'Data berhasil disimpan', $request->all()),Response::HTTP_OK);
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'),Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e),Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
     }

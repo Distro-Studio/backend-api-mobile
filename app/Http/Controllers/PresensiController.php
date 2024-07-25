@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\LocationHelper;
+use App\Helpers\UploadFileHelper;
 use App\Helpers\UserActiveHelper;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
+use App\Models\ActivityLog;
 use App\Models\Berkas;
 use App\Models\DataKaryawan;
 use App\Models\Jadwal;
@@ -24,17 +26,17 @@ class PresensiController extends Controller
 {
     public function store(Request $request)
     {
-        // $validator = Validator::make($request->all(), [
-        //     'lat' => 'required',
-        //     'long' => 'required'
-        // ], [
-        //     'lat.required' => 'Latitude harus diisi',
-        //     'long.required' => 'Longitude harus diisi'
-        // ]);
+        $validator = Validator::make($request->all(), [
+            'lat' => 'required',
+            'long' => 'required'
+        ], [
+            'lat.required' => 'Latitude harus diisi',
+            'long.required' => 'Longitude harus diisi'
+        ]);
 
-        // if ($validator->fails()) {
-        //     return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
-        // }
+        if ($validator->fails()) {
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
+        }
 
         $checkuser = UserActiveHelper::checkActive(User::where('id', Auth::user()->id)->first());
         if (!$checkuser) {
@@ -71,11 +73,12 @@ class PresensiController extends Controller
         } elseif ($end->eq($start)) {
             $differenceInMinutes = 0;
             // $status = "Karyawan tepat waktu.";
-            $status = "tepat waktu";
+            $status = "tepatwaktu";
         } else {
             $differenceInMinutes = $start->diffInMinutes($end);
-            $status = "lebih awal";
+            $status = "awal";
         }
+
 
         //cek lokasi user
         $lokasi = LokasiKantor::where('id', 1)->first();
@@ -93,7 +96,7 @@ class PresensiController extends Controller
         );
 
         if ($distance <= $radius) {
-            
+
             $checkpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->where('jam_keluar', NULL)->first();
 
             if($checkpresensi){
@@ -101,28 +104,8 @@ class PresensiController extends Controller
             }
 
             try{
-                $response = Http::asForm()->post('http://127.0.0.1:8001/api/login',[
-                    'username' => 'usermobilerski',
-                    'password' => '12345678'
-                ]);
-                $logininfo = $response->json();
-                $token = $logininfo['data']['token'];
-                $file = $request->file('foto');
-
-                $responseupload = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $token,
-                ])->asMultipart()->post('http://127.0.0.1:8001/api/upload',[
-                    'filename' => 'Check in '. Auth::user()->name,
-                    'file' => fopen($file->getRealPath(), 'r'),
-                    'kategori' => 'Umum'
-                ]);
-
-                $uploadinfo = $responseupload->json();
-                $dataupload = $uploadinfo['data'];
-
-                $logout = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $token,
-                ])->post('http://127.0.0.1:8001/api/logout');
+                // $presensisebelum = Presensi::where('user_id', Auth::user()->id)->where('jam_keluar', NULL)->update(['presensi' => 0]);
+                $dataupload = UploadFileHelper::uploadToServer($request, 'Check in '. Auth::user()->name);
 
                 $saveberkas = Berkas::create([
                     'user_id' => Auth::user()->id,
@@ -146,17 +129,154 @@ class PresensiController extends Controller
                     'lat' => $request->lat,
                     'long' => $request->long,
                     'foto_masuk' => $saveberkas->id,
-                    'presensi' => 'hadir',
                     'kategori' => $status.' '.$differenceInMinutes.' Menit',
+                ]);
+
+                $activity = ActivityLog::create([
+                    'activity' => 'Masuk',
+                    'user_id' => Auth::user()->id,
+                    'kategori' => 'Presensi'
                 ]);
 
                 return response()->json(new DataResource(Response::HTTP_OK, 'Presensi berhasil dilakukan', $presensi), Response::HTTP_OK);
             } catch (\Exception $e){
-                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } else {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda diluar radius kantor'), Response::HTTP_NOT_ACCEPTABLE);
         }
     }
+
+    public function checkoutpresensi(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'lat' => 'required',
+            'long' => 'required'
+        ], [
+            'lat.required' => 'Latitude harus diisi',
+            'long.required' => 'Longitude harus diisi'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
+        }
+
+
+
+        //cek lokasi user
+        $lokasi = LokasiKantor::where('id', 1)->first();
+        $latoffice = $lokasi->lat;
+        $longoffice = $lokasi->long;
+        $latuser = $request->lat;
+        $longuser = $request->long;
+        $radius = $lokasi->radius;
+
+        $distance = LocationHelper::haversineGreatCircleDistance(
+            $latoffice,
+            $longoffice,
+            $latuser,
+            $longuser
+        );
+
+        if ($distance <= $radius) {
+
+
+            $checkpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->where('jam_keluar', NULL)->first();
+
+            if(!$checkpresensi){
+                return response()->json(new DataResource(Response::HTTP_IM_USED, 'Presensi belum dilakukan', $checkpresensi), Response::HTTP_IM_USED);
+            }
+
+            try{
+                // $presensisebelum = Presensi::where('user_id', Auth::user()->id)->where('jam_keluar', NULL)->update(['presensi' => 0]);
+
+                $dataupload = UploadFileHelper::uploadToServer($request, 'Check out '. Auth::user()->name);
+
+                $saveberkas = Berkas::create([
+                    'user_id' => Auth::user()->id,
+                    'nama' => Auth::user()->name,
+                    'kategori' => 'System',
+                    'path' => $dataupload['path'],
+                    'tgl_upload' => date('Y-m-d'),
+                    'nama_file' => $dataupload['nama_file'],
+                    'ext' => $dataupload['ext'],
+                    'size' => $dataupload['size'],
+                    'file_id' => $dataupload['id_file']['id']
+                ]);
+
+                //face recognition
+                $face = true;
+
+                if(!$face)
+                {
+                    return response()->json(new DataResource(Response::HTTP_NOT_ACCEPTABLE, 'Wajah berbeda menurut sistem', [
+                        'lat' => $latuser,
+                        'long' => $longuser,
+                        'id_foto' => $saveberkas->id,
+                    ]), Response::HTTP_NOT_ACCEPTABLE);
+                }
+
+                $time = date('Y-m-d H:i:s');
+
+                $startTime = Carbon::parse($checkpresensi->jam_masuk);
+                $endTime = Carbon::parse($time);
+                $duration = $startTime->diff($endTime);
+
+
+                $checkpresensi->jam_keluar = $time;
+                $checkpresensi->durasi = $duration->h . ' jam ' . $duration->i . ' menit';
+                $checkpresensi->latkeluar = $request->lat;
+                $checkpresensi->longkeluar = $request->long;
+                $checkpresensi->presensi = 1;
+                $checkpresensi->foto_keluar = $saveberkas->id;
+                $checkpresensi->save();
+
+                $activity = ActivityLog::create([
+                    'activity' => 'Keluar',
+                    'user_id' => Auth::user()->id,
+                    'kategori' => 'Presensi'
+                ]);
+
+                return response()->json(new DataResource(Response::HTTP_OK, 'Presensi berhasil dilakukan', $checkpresensi), Response::HTTP_OK);
+            } catch (\Exception $e){
+                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        } else {
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda diluar radius kantor'), Response::HTTP_NOT_ACCEPTABLE);
+        }
+
+    }
+
+    public function getactivity()
+    {
+        try {
+            //code...
+            $activity = ActivityLog::where('user_id', Auth::user()->id)
+                ->where('kategori', 'Presensi')
+                ->select('activity', 'created_at')
+                ->get();
+
+            if ($activity->isEmpty()) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data activity log tidak ditemukan'), Response::HTTP_NOT_FOUND);
+            }
+
+            // Pisahkan tanggal dan jam
+            $formattedActivity = $activity->map(function ($item) {
+                return [
+                    'activity' => $item->activity,
+                    'tanggal' => $item->tanggal,
+                    'jam' => $item->jam,
+                ];
+            });
+
+            return response()->json(new DataResource(Response::HTTP_OK, 'Data activity log', $formattedActivity), Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+
 
 }
