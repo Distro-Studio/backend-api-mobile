@@ -50,8 +50,8 @@ class JadwalController extends Controller
                 $startOfWeek = now()->startOfWeek()->format('Y-m-d');
                 $endOfWeek = now()->endOfWeek()->format('Y-m-d');
 
-                $jadwal = Jadwal::where('user_id', Auth::user()->id)->whereBetween('tgl_mulai', [$startOfWeek, $endOfWeek])->with('shift')->first();
-                if(!$jadwal){
+                $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$startOfWeek, $endOfWeek])->with('shift')->get();
+                if($jadwal->isEmpty()){
                     return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
                 }
 
@@ -62,8 +62,8 @@ class JadwalController extends Controller
                 $startOfWeek = now()->startOfWeek()->format('Y-m-d');
                 $endOfWeek = now()->endOfWeek()->format('Y-m-d');
 
-                $jadwal = Jadwal::where('user_id', Auth::user()->id)->whereBetween('tgl_mulai', [$startOfWeek, $endOfWeek])->with('shift')->first();
-                if(!$jadwal){
+                $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$startOfWeek, $endOfWeek])->with('shift')->get();
+                if($jadwal->isEmpty()){
                     return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
                 }
 
@@ -71,8 +71,8 @@ class JadwalController extends Controller
 
             } else {
                 // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', 'ini kalo gak kosong'), Response::HTTP_OK);
-                $jadwal = Jadwal::where('user_id', Auth::user()->id)->whereBetween('tgl_mulai', [$request->tgl_mulai, $request->tgl_selesai])->with('shift')->first();
-                if(!$jadwal){
+                $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$request->tgl_mulai, $request->tgl_selesai])->with('shift')->get();
+                if($jadwal->isEmpty()){
                     return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
                 }
 
@@ -150,6 +150,45 @@ class JadwalController extends Controller
 
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getjadwalditukar(Jadwal $jadwal)
+    {
+        try {
+            if ($jadwal->shift_id == null)
+            {
+                $karyawanA = Jadwal::where('user_id', Auth::user()->id)
+                    ->where('shift_id', null)
+                    ->where('tgl_mulai', '>=', date('Y-m-d'))
+                    ->get();
+
+                $validSchedules = [];
+
+                foreach($karyawanA as $schedule) {
+                    $karyawanB = Jadwal::where('tgl_mulai', $schedule->tgl_mulai)
+                        ->where('shift_id', null)
+                        ->where('user_id', $jadwal->user_id)
+                        ->exists();
+
+                    if (!$karyawanB) {
+                        // Jika karyawan B tidak libur pada hari yang sama
+                        $validSchedules[] = $schedule;
+                    }
+                }
+
+                return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal ditukar', $validSchedules), Response::HTTP_OK);
+            } else {
+                $schedule = Jadwal::where('user_id', Auth::user()->id)
+                    ->where('shift_id', '!=', null)
+                    ->where('tgl_mulai', '>=', date('Y-m-d'))
+                    ->with('shift')
+                    ->get();
+
+                return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal ditukar', $schedule), Response::HTTP_OK);
+            }
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

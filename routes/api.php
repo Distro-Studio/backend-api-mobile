@@ -77,4 +77,9 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/{user}/get-jadwal-karyawan', [JadwalController::class, 'getuserjadwal']);
     Route::post('/change-schedule', [JadwalController::class, 'changeschedule']);
 
+    //get another karyawan with same unit kerja
+    Route::get('/user-unit-kerja', [GetListController::class, 'getkaryawanunitkerja']);
+
+    //get jadwal yang akan ditukar
+    Route::get('/get-jadwal/{jadwal}/ditukar', [JadwalController::class, 'getjadwalditukar']);
 });
