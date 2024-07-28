@@ -8,7 +8,7 @@ class UserActiveHelper
 {
     public static function checkActive(User $user)
     {
-        if ($user->status_akun == 1) {
+        if ($user->status_aktif == 1) {
             return true;
         } else {
             return false;

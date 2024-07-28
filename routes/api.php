@@ -34,6 +34,8 @@ Route::post('/password-reset', [PasswordResetController::class, 'passreset']);
 Route::post('/check-password-reset', [PasswordResetController::class, 'checktoken']);
 Route::post('/change-password-reset', [PasswordResetController::class, 'changepass']);
 
+Route::get('/cobadownload', [CobaController::class, 'cobadownload']);
+
 Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/logout', [LoginController::class, 'logout']);
     Route::get('/getuserinfo', [UserController::class, 'checkuser']);
@@ -72,5 +74,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
 
     //get another karyawan with same schedule
     Route::get('/{jadwal}/get-karyawan-same-jadwal',[JadwalController::class, 'getanotherkaryawan']);
+    Route::get('/{user}/get-jadwal-karyawan', [JadwalController::class, 'getuserjadwal']);
+    Route::post('/change-schedule', [JadwalController::class, 'changeschedule']);
 
 });
