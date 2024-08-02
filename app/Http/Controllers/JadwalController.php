@@ -137,13 +137,19 @@ class JadwalController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Tidak bisa menukar jadwal yang sama'), Response::HTTP_NOT_ACCEPTABLE);
             }
 
+            $kategori = 1; // default Tukar Shift
+
+            if ($cek->shift_id == null){
+                $kategori = 2; // diubah menjadi Tukar Libur
+            }
+
             $tukarjadwal = TukarJadwal::create([
                 'user_pengajuan' => $jadwalawal->user_id,
                 'jadwal_pengajuan' => $jadwalawal->id,
                 'user_ditukar' => $cek->user_id,
                 'jadwal_ditukar' => $cek->id,
                 'status_penukaran_id' => 1, //Menunggu
-                'kategori_penukaran_id' => 1 //Tukar Shift
+                'kategori_penukaran_id' => $kategori
             ]);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil ditukar', $tukarjadwal), Response::HTTP_OK);

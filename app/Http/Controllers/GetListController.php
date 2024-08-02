@@ -52,9 +52,20 @@ class GetListController extends Controller
                         $query->whereBetween('tgl_mulai', [$startDate, $endDate]);
                     }
                 }]);
-            $user = $query->get();
+            $users = $query->get();
 
-            return response()->json(new DataResource(Response::HTTP_OK, 'User berhasil didapatkan', $user), Response::HTTP_OK);
+            // $user->is_libur = false;
+            $today = Carbon::now()->format('Y-m-d');
+            $users = $users->map(function($user) use ($today) {
+                $isLibur = $user->jadwal->where('tgl_mulai', $today)
+                                   ->where('shift_id', null)
+                                   ->isNotEmpty();
+
+                $user->is_libur = $isLibur ? true : false;
+                return $user;
+            });
+
+            return response()->json(new DataResource(Response::HTTP_OK, 'User berhasil didapatkan', $users), Response::HTTP_OK);
 
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
