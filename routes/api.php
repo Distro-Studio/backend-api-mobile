@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\CobaController;
 use App\Http\Controllers\CountController;
+use App\Http\Controllers\CutiCotroller;
 use App\Http\Controllers\DataPersonalController;
 use App\Http\Controllers\GetListController;
 use App\Http\Controllers\JadwalController;
@@ -82,4 +84,13 @@ Route::middleware(['auth:sanctum'])->group(function(){
 
     //get jadwal yang akan ditukar
     Route::get('/get-jadwal/{jadwal}/ditukar', [JadwalController::class, 'getjadwalditukar']);
+
+    //presensi activity
+    Route::post('/get-presensi-activity', [ActivityController::class, 'getpresensiactivity']);
+
+    Route::post('/get-statistik-cuti', [CutiCotroller::class, 'getstatistik']);
+
+    Route::post('/get-riwayat-cuti', [CutiCotroller::class, 'getriwayat']);
+
+    Route::post('/store-cuti', [CutiCotroller::class, 'storecuti']);
 });
