@@ -11,6 +11,7 @@ use App\Http\Controllers\JamKerjaController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\TukarJadwalController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -88,9 +89,12 @@ Route::middleware(['auth:sanctum'])->group(function(){
     //presensi activity
     Route::post('/get-presensi-activity', [ActivityController::class, 'getpresensiactivity']);
 
-    Route::post('/get-statistik-cuti', [CutiCotroller::class, 'getstatistik']);
+    Route::get('/get-statistik-cuti', [CutiCotroller::class, 'getstatistik']);
 
     Route::post('/get-riwayat-cuti', [CutiCotroller::class, 'getriwayat']);
 
     Route::post('/store-cuti', [CutiCotroller::class, 'storecuti']);
+
+    Route::post('/get-pengajuan-swap', [TukarJadwalController::class, 'getpengajuan']);
+    Route::post('/get-permintaan-swap', [TukarJadwalController::class, 'getpermintaan']);
 });

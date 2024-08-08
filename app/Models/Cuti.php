@@ -10,5 +10,6 @@ class Cuti extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+
     
 }
