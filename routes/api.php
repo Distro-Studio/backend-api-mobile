@@ -8,6 +8,7 @@ use App\Http\Controllers\DataPersonalController;
 use App\Http\Controllers\GetListController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\JamKerjaController;
+use App\Http\Controllers\LemburController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PresensiController;
@@ -97,4 +98,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
 
     Route::post('/get-pengajuan-swap', [TukarJadwalController::class, 'getpengajuan']);
     Route::post('/get-permintaan-swap', [TukarJadwalController::class, 'getpermintaan']);
+
+    Route::get('/get-statistik-lembur', [LemburController::class, 'getstatistik']);
+    Route::post('/get-riwayat-lembur', [LemburController::class, 'getriwayat']);
 });
