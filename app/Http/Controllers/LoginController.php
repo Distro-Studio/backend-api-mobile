@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\Response;
 
+
 class LoginController extends Controller
 {
     public function login(Request $request)

@@ -107,7 +107,7 @@ class PresensiController extends Controller
 
             try{
                 // $presensisebelum = Presensi::where('user_id', Auth::user()->id)->where('jam_keluar', NULL)->update(['presensi' => 0]);
-                $dataupload = StorageFileHelper::uploadToServer($request, 'Check in '. Auth::user()->nama);
+                $dataupload = StorageFileHelper::uploadToServer($request, 'Check in '. Auth::user()->nama, 'foto');
 
                 $saveberkas = Berkas::create([
                     'user_id' => Auth::user()->id,
@@ -193,7 +193,7 @@ class PresensiController extends Controller
             try{
                 // $presensisebelum = Presensi::where('user_id', Auth::user()->id)->where('jam_keluar', NULL)->update(['presensi' => 0]);
 
-                $dataupload = StorageFileHelper::uploadToServer($request, 'Check out '. Auth::user()->nama);
+                $dataupload = StorageFileHelper::uploadToServer($request, 'Check out '. Auth::user()->nama, 'foto');
 
                 // $saveberkas = Berkas::create([
                 //     'user_id' => Auth::user()->id,

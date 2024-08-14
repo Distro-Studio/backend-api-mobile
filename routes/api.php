@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ActivityController;
+use App\Http\Controllers\BerkasController;
 use App\Http\Controllers\CobaController;
 use App\Http\Controllers\CountController;
 use App\Http\Controllers\CutiCotroller;
@@ -8,12 +9,14 @@ use App\Http\Controllers\DataPersonalController;
 use App\Http\Controllers\GetListController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\JamKerjaController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LemburController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\TukarJadwalController;
 use App\Http\Controllers\UserController;
+use App\Models\Berkas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -101,4 +104,11 @@ Route::middleware(['auth:sanctum'])->group(function(){
 
     Route::get('/get-statistik-lembur', [LemburController::class, 'getstatistik']);
     Route::post('/get-riwayat-lembur', [LemburController::class, 'getriwayat']);
+
+    Route::post('/store-berkas-karyawan', [BerkasController::class, 'storeberkas']);
+    Route::get('/get-all-berkas-karyawan', [BerkasController::class, 'getallberkas']);
+    Route::post('/rename-berkas-karyawan', [BerkasController::class, 'renameberkas']);
+    Route::post('/download-berkas-karyawan', [BerkasController::class, 'downloadberkas']);
+
+    Route::post('/store-laporan', [LaporanController::class, 'storelaporan']);
 });

@@ -8,19 +8,19 @@ use Illuminate\Http\Request;
 
 class StorageFileHelper
 {
-    public static function uploadToServer(Request $request, $filename='File Upload')
+    public static function uploadToServer(Request $request, $filename='File Upload', $filerequestname)
     {
-        $response = Http::asForm()->post('http://127.0.0.1:8001/api/login',[
+        $response = Http::asForm()->post(env('URL_STORAGE').'/api/login',[
             'username' => env('USERNAME_STORAGE'),
             'password' => env('PASSWORD_STORAGE')
         ]);
         $logininfo = $response->json();
         $token = $logininfo['data']['token'];
-        $file = $request->file('foto');
+        $file = $request->file($filerequestname);
 
         $responseupload = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->asMultipart()->post('http://127.0.0.1:8001/api/upload',[
+        ])->asMultipart()->post(env('URL_STORAGE').'/api/upload',[
             'filename' => $filename,
             'file' => fopen($file->getRealPath(), 'r'),
             'kategori' => 'Umum'
@@ -31,16 +31,14 @@ class StorageFileHelper
 
         $logout = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->post('http://127.0.0.1:8001/api/logout');
+        ])->post(env('URL_STORAGE').'/api/logout');
 
         return $dataupload;
     }
 
-    public static function downloadFromServer(Berkas $berkas){
-        // dd($berkas->ext);
-        // $berkasfile = Berkas::where('id', 5)->first();
-        $ext = explode('/', $berkas->ext);
-        $response = Http::asForm()->post('http://127.0.0.1:8001/api/login',[
+    public static function checkfile(Berkas $berkas)
+    {
+        $response = Http::asForm()->post(env('URL_STORAGE').'/api/login',[
             'username' => env('USERNAME_STORAGE'),
             'password' => env('PASSWORD_STORAGE')
         ]);
@@ -49,7 +47,32 @@ class StorageFileHelper
 
         $responseupload = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->asForm()->post('http://127.0.0.1:8001/api/get-file',[
+        ])->asForm()->post(env('URL_STORAGE').'/api/get-file',[
+            'id_file' => $berkas->file_id,
+        ]);
+
+
+        $logout = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->post(env('URL_STORAGE').'/api/logout');
+
+
+    }
+
+    public static function downloadFromServer(Berkas $berkas){
+        // dd($berkas->ext);
+        // $berkasfile = Berkas::where('id', 5)->first();
+        $ext = explode('/', $berkas->ext);
+        $response = Http::asForm()->post(env('URL_STORAGE').'/api/login',[
+            'username' => env('USERNAME_STORAGE'),
+            'password' => env('PASSWORD_STORAGE')
+        ]);
+        $logininfo = $response->json();
+        $token = $logininfo['data']['token'];
+
+        $responseupload = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->asForm()->post(env('URL_STORAGE').'/api/get-file',[
             'id_file' => $berkas->file_id,
         ]);
 
@@ -58,7 +81,7 @@ class StorageFileHelper
 
         $logout = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->post('http://127.0.0.1:8001/api/logout');
+        ])->post(env('URL_STORAGE').'/api/logout');
 
         if ($responseupload->successful()) {
             // Mengambil nama file dari header atau set default
@@ -89,7 +112,7 @@ class StorageFileHelper
         return 'downloaded_file';
     }
 
-    private static function getExtensionFromMimeType($mimeType)
+    public static function getExtensionFromMimeType($mimeType)
     {
         $mimeMap = [
             // Text files
