@@ -13,6 +13,7 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LemburController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\PerubahannDataController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\TukarJadwalController;
 use App\Http\Controllers\UserController;
@@ -111,4 +112,6 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/download-berkas-karyawan', [BerkasController::class, 'downloadberkas']);
 
     Route::post('/store-laporan', [LaporanController::class, 'storelaporan']);
+
+    Route::get('/get-data-karyawan-personal', [PerubahannDataController::class, 'getdatapersonal']);
 });

@@ -95,6 +95,7 @@ class DataPersonalController extends Controller
             $data->tinggi_badan = $request->tinggi_badan;
             $data->alamat = $request->alamat;
             $data->tahun_lulus = $request->tahun_lulus;
+            $data->data_completion_step = 2;
             $data->save();
 
             return response()->json(new DataResource(Response::HTTP_OK,'Data berhasil disimpan', $request->all()),Response::HTTP_OK);
@@ -130,6 +131,14 @@ class DataPersonalController extends Controller
             {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
             }
+
+            $data = [
+                'keluarga' => [
+                    '0'
+                ],[
+                    '1'
+                ]
+            ];
 
             $keluarga = DataKeluarga::create([
                 'data_karyawan_id' => $data->id,

@@ -6,6 +6,7 @@ use App\Helpers\StorageFileHelper;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\Berkas;
+use App\Models\Notifikasi;
 use App\Models\Pelaporan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,7 +60,14 @@ class LaporanController extends Controller
                 'upload_foto' => $saveberkas->id
             ]);
 
-            return response()->json(new DataResource(Response::HTTP_OK, 'Laporan berhasil disimpan', $laporan), Response::HTTP_OK);
+            $notifikasi = Notifikasi::create([
+                'kategori_notifikasi_id' => 8, //laporan
+                'user_id' => Auth::user()->id,
+                'message' => 'Pelaporan berhasil diajukan',
+                'is_read' => 0
+            ]);
+
+            return response()->json(new DataResource(Response::HTTP_OK, 'Laporan berhasil disimpan', $notifikasi), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wronng'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
