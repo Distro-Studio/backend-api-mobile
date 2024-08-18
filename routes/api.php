@@ -54,7 +54,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
 
     //data personal
     Route::post('/input-personal', [DataPersonalController::class, 'step1']);
-    Route::post('/input-data-keluarga', [DataPersonalController::class, 'storekeluarga']);
+    Route::post('/input-keluarga', [DataPersonalController::class, 'storekeluarga']);
     Route::get('/get-data-keluarga', [DataPersonalController::class, 'getkeluarga']);
     Route::post('/{dataKeluarga}/edit-data-keluarga', [DataPersonalController::class, 'updatekeluarga']);
     Route::post('/input-berkas', [DataPersonalController::class, 'step5']);

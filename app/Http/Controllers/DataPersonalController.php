@@ -127,15 +127,9 @@ class DataPersonalController extends Controller
     public function storekeluarga(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'nama_keluarga' => 'required',
-            'hubungan' => 'required',
-            'pendidikan_terakhir' => 'required',
-            'status_hidup' => 'required',
+            'keluarga' => 'required',
         ], [
-            'nama_keluarga.required' => 'Nama harus diisi',
-            'hubungan.required' => 'Hubungan keluarga harus diisi',
-            'pendidikan_terakhir.required' => 'Pendidikan terakhir harus diisi',
-            'status_hidup.required' => 'Status hidup harus diisi',
+            'nama_keluarga.required' => 'Keluarga harus di isi',
         ]);
 
         if ($validator->fails())
@@ -151,20 +145,28 @@ class DataPersonalController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
             }
 
-            $keluarga = DataKeluarga::create([
-                'data_karyawan_id' => $data->id,
-                'nama_keluarga' => $request->nama_keluarga,
-                'hubungan' => $request->hubungan,
-                'pendidikan_terakhir' => $request->pendidikan_terakhir,
-                'status_hidup' => $request->status_hidup,
-                'pekerjaan' => $request->pekerjaan,
-                'no_hp' => $request->no_hp,
-                'email' => $request->email,
-            ]);
+            $keluarga = json_encode($request->keluarga, JSON_UNESCAPED_SLASHES);
+            $datakeluarga = json_decode(stripslashes($keluarga), true);
+            foreach ($datakeluarga['keluarga'] as $k) {
+                $keluarga = DataKeluarga::create([
+                    'data_karyawan_id' => $data->id,
+                    'nama_keluarga' => $k['nama'],
+                    'hubungan' => $k['hubungan_keluarga']['value'],
+                    'pendidikan_terakhir' => 'ini pendidikan',
+                    'status_hidup' => $k['status_hidup']['value'],
+                    'pekerjaan' => $k['pekerjaan'],
+                    'no_hp' => $k['telepon'],
+                    'email' => $k['email'],
+                ]);
+                // return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $k), Response::HTTP_OK);
+
+            }
+
+            $user = User::where('id', Auth::user()->id)->update(['data_completion_step' => 3]);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'),Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong | ' . $e),Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
     }
