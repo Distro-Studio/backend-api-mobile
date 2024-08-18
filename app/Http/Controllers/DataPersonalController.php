@@ -84,24 +84,40 @@ class DataPersonalController extends Controller
                 $user->save();
             }
 
-            $data->tempat_lahir = $request->tempat_lahir;
-            $data->tgl_lahir = $request->tanggal_lahir;
-            $data->no_hp = $request->no_hp;
-            $data->jenis_kelamin = $request->jenis_kelamin;
-            $data->nik_ktp = $request->nik_ktp;
-            $data->no_kk = $request->no_kk;
-            $data->kategori_agama_id = $request->agama;
-            $data->kategori_darah_id = $request->golongan_darah;
-            $data->tinggi_badan = $request->tinggi_badan;
-            $data->alamat = $request->alamat;
-            $data->tahun_lulus = $request->tahun_lulus;
-            $data->save();
+            $dataKaryawan = DataKaryawan::where('user_id', Auth::user()->id)->update([
+                'tempat_lahir' => $request->tempat_lahir,
+                'tgl_lahir' => $request->tanggal_lahir,
+                'no_hp' => $request->no_hp,
+                'jenis_kelamin' => $request->jenis_kelamin,
+                'nik_ktp' => $request->nik_ktp,
+                'no_kk' => $request->no_kk,
+                'kategori_agama_id' => $request->agama,
+                'kategori_darah_id' => $request->golongan_darah,
+                'tinggi_badan' => $request->tinggi_badan,
+                'alamat' => $request->alamat,
+                'tahun_lulus' => $request->tahun_lulus,
+            ]);
 
-            $user->data_completion_step = 2;
-            $user->save();
+            // $data->tempat_lahir = $request->tempat_lahir;
+            // $data->tgl_lahir = $request->tanggal_lahir;
+            // $data->no_hp = $request->no_hp;
+            // $data->jenis_kelamin = $request->jenis_kelamin;
+            // $data->nik_ktp = $request->nik_ktp;
+            // $data->no_kk = $request->no_kk;
+            // $data->kategori_agama_id = $request->agama;
+            // $data->kategori_darah_id = $request->golongan_darah;
+            // $data->tinggi_badan = $request->tinggi_badan;
+            // $data->alamat = $request->alamat;
+            // $data->tahun_lulus = $request->tahun_lulus;
+            // $data->save();
+
+            // $user->data_completion_step = 2;
+            // $user->save();
+
+            // dd(DataKaryawan::where('user_id', Auth::user()->id)->first());
 
 
-            return response()->json(new DataResource(Response::HTTP_OK,'Data berhasil disimpan', $request->all()),Response::HTTP_OK);
+            return response()->json(new DataResource(Response::HTTP_OK,'Data berhasil disimpan', $dataKaryawan),Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e),Response::HTTP_INTERNAL_SERVER_ERROR);
         }
