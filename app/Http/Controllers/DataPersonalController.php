@@ -107,8 +107,8 @@ class DataPersonalController extends Controller
       $data->tahun_lulus = $request->tahun_lulus;
       $data->save();
 
-      // $user->data_completion_step = 2;
-      // $user->save();
+            $user->data_completion_step = 2;
+            $user->save();
 
       // dd(DataKaryawan::where('user_id', Auth::user()->id)->first());
 
