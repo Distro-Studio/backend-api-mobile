@@ -123,15 +123,9 @@ class DataPersonalController extends Controller
     public function storekeluarga(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'nama_keluarga' => 'required',
-            'hubungan' => 'required',
-            'pendidikan_terakhir' => 'required',
-            'status_hidup' => 'required',
+            'keluarga' => 'required',
         ], [
-            'nama_keluarga.required' => 'Nama harus diisi',
-            'hubungan.required' => 'Hubungan keluarga harus diisi',
-            'pendidikan_terakhir.required' => 'Pendidikan terakhir harus diisi',
-            'status_hidup.required' => 'Status hidup harus diisi',
+            'keluarga.required' => 'Keluarga harus diisi',
         ]);
 
     if ($validator->fails()) {
