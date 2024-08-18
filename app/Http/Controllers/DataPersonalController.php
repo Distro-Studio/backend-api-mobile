@@ -132,14 +132,6 @@ class DataPersonalController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'),Response::HTTP_NOT_FOUND);
             }
 
-            $data = [
-                'keluarga' => [
-                    '0'
-                ],[
-                    '1'
-                ]
-            ];
-
             $keluarga = DataKeluarga::create([
                 'data_karyawan_id' => $data->id,
                 'nama_keluarga' => $request->nama_keluarga,
