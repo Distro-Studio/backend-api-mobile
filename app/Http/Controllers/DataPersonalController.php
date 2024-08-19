@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\StorageFileHelper;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\Berkas;
@@ -272,41 +273,172 @@ class DataPersonalController extends Controller
   public function storepersonalfile(Request $request)
   {
     $validator = Validator::make($request->all(), [
-      'nama' => 'required',
+      'ktp' => 'required|file',
       // 'kategori' => 'in:Pribadi,Umum',
-      'file' => 'required|file',
+      'kk' => 'required|file',
+      'sip' => 'required|file',
+      'bpjs_kesehatan' => 'required|file',
+      'bpjs_ketenagakerjaan' => 'required|file',
+      'ijazah' => 'required|file',
+      'sertifikat' => 'required|file',
     ], [
-      'nama.required' => 'Judul harus diisi',
-      // 'kategori.in' => 'Kategori harus berisi Pribadi atau Umum',
-      'file.required' => 'File harus diisi',
-      'file.file' => 'File harus berupa file'
+      'ktp.required' => 'Ktp harus diisi',
+      'ktp.file' => 'Ktp harus berupa file',
+      'kk.required' => 'Kartu keluarga harus diisi',
+      'kk.file' => 'Kartu keluarga harus berupa file',
+      'sip.required' => 'SIP harus diisi',
+      'sip.file' => 'SIP harus berupa file',
+      'bpjs_kesehatan.required' => 'BPJS Kesehatan harus diisi',
+      'bpjs_kesehatan.file' => 'BPJS Kesehatan harus berupa file',
+      'bpjs_ketenagakerjaan.required' => 'BPJS Ketenagakerjaan harus diisi',
+      'bpjs_ketenagakerjaan.file' => 'BPJS Ketenagakerjaan harus berupa file',
+      'ijazah.required' => 'Ijazah harus diisi',
+      'ijazah.file' => 'Ijazah harus berupa file',
+      'sertifikat.required' => 'Sertifikat harus diisi',
+      'sertifikat.file' => 'Sertifikat harus berupa file',
     ]);
 
     if ($validator->fails()) {
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
     }
 
-    $file = $request->file('file');
-    $filename = $file->hashName();
-    $size = $this->formatBytes($file->getSize());
-    $file->move(public_path('storage/file'), $filename);
+    try {
+        //KTP
+        $uploadktp = StorageFileHelper::uploadToServer($request, 'KTP', 'ktp');
 
-    $berkas = Berkas::create([
-      'user_id' => Auth::user()->id,
-      'nama' => $request->nama,
-      'kategori' => 'Pribadi',
-      'path' => Storage::url('file/' . $filename),
-      'tgl_upload' => date('Y-m-d H:m:s'),
-      'nama_file' => $filename,
-      'ext' => $file->getExtension(),
-      'size' => $size,
-    ]);
+        $berkasktp = Berkas::create([
+            'user_id' => Auth::user()->id,
+            'file_id' => $uploadktp['id_file']['id'],
+            'nama' => 'KTP',
+            'kategori_berkas_id' => 1,
+            'path' => $uploadktp['path'],
+            'tgl_upload' => date('Y-m-d'),
+            'nama_file' => $uploadktp['nama_file'],
+            'ext' => $uploadktp['ext'],
+            'size' => $uploadktp['size'],
+        ]);
 
-    if (!$berkas) {
-      return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas gagal di upload'), Response::HTTP_BAD_REQUEST);
+        if (!$berkasktp) {
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas KTP gagal di upload'), Response::HTTP_BAD_REQUEST);
+        }
+
+
+        //KK
+        $uploadkk = StorageFileHelper::uploadToServer($request, 'KK', 'kk');
+
+        $berkaskk = Berkas::create([
+            'user_id' => Auth::user()->id,
+            'file_id' => $uploadkk['id_file']['id'],
+            'nama' => 'KK',
+            'kategori_berkas_id' => 1,
+            'path' => $uploadkk['path'],
+            'tgl_upload' => date('Y-m-d'),
+            'nama_file' => $uploadkk['nama_file'],
+            'ext' => $uploadkk['ext'],
+            'size' => $uploadkk['size'],
+        ]);
+
+        if (!$berkaskk) {
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas KK gagal di upload'), Response::HTTP_BAD_REQUEST);
+        }
+
+
+        //SIP
+        $uploadsip = StorageFileHelper::uploadToServer($request, 'SIP', 'sip');
+        $berkassip = Berkas::create([
+            'user_id' => Auth::user()->id,
+            'file_id' => $uploadsip['id_file']['id'],
+            'nama' => 'SIP',
+            'kategori_berkas_id' => 1,
+            'path' => $uploadsip['path'],
+            'tgl_upload' => date('Y-m-d'),
+            'nama_file' => $uploadsip['nama_file'],
+            'ext' => $uploadsip['ext'],
+            'size' => $uploadsip['size'],
+        ]);
+
+        if (!$berkassip) {
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas SIP gagal di upload'), Response::HTTP_BAD_REQUEST);
+        }
+
+
+        //BPJS Kesehatan
+        $uploadbpjs = StorageFileHelper::uploadToServer($request, 'BPJS Kesehatan', 'bpjs_kesehatan');
+        $berkasbpjs = Berkas::create([
+            'user_id' => Auth::user()->id,
+            'file_id' => $uploadbpjs['id_file']['id'],
+            'nama' => 'BPJS Kesehatan',
+            'kategori_berkas_id' => 1,
+            'path' => $uploadbpjs['path'],
+            'tgl_upload' => date('Y-m-d'),
+            'nama_file' => $uploadbpjs['nama_file'],
+            'ext' => $uploadbpjs['ext'],
+            'size' => $uploadbpjs['size'],
+        ]);
+
+        if (!$berkasbpjs) {
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas BPJS Kesehatan gagal di upload'), Response::HTTP_BAD_REQUEST);
+        }
+
+        //BPJS Ketenagakerjaan
+        $uploadbpjstk = StorageFileHelper::uploadToServer($request, 'BPJS Ketenagakerjaan', 'bpjs_ketenagakerjaan');
+        $berkasbpjstk = Berkas::create([
+            'user_id' => Auth::user()->id,
+            'file_id' => $uploadbpjstk['id_file']['id'],
+            'nama' => 'BPJS Ketenagakerjaan',
+            'kategori_berkas_id' => 1,
+            'path' => $uploadbpjstk['path'],
+            'tgl_upload' => date('Y-m-d'),
+            'nama_file' => $uploadbpjstk['nama_file'],
+            'ext' => $uploadbpjstk['ext'],
+            'size' => $uploadbpjstk['size'],
+        ]);
+
+        if (!$berkasbpjstk) {
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas BPJS Ketenagakerjaan gagal di upload'), Response::HTTP_BAD_REQUEST);
+        }
+
+        //Ijazah
+        $uploadijazah = StorageFileHelper::uploadToServer($request, 'Ijazah', 'ijazah');
+        $berkasijazah = Berkas::create([
+            'user_id' => Auth::user()->id,
+            'file_id' => $uploadijazah['id_file']['id'],
+            'nama' => 'Ijazah',
+            'kategori_berkas_id' => 1,
+            'path' => $uploadijazah['path'],
+            'tgl_upload' => date('Y-m-d'),
+            'nama_file' => $uploadijazah['nama_file'],
+            'ext' => $uploadijazah['ext'],
+            'size' => $uploadijazah['size'],
+        ]);
+
+        if (!$berkasijazah) {
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas Ijazah gagal di upload'), Response::HTTP_BAD_REQUEST);
+        }
+
+        //Sertifikat
+        $uploadsertifikat = StorageFileHelper::uploadToServer($request, 'Sertifikat', 'sertifikat');
+        $berkassertifikat = Berkas::create([
+            'user_id' => Auth::user()->id,
+            'file_id' => $uploadsertifikat['id_file']['id'],
+            'nama' => 'Sertifikat',
+            'kategori_berkas_id' => 1,
+            'path' => $uploadsertifikat['path'],
+            'tgl_upload' => date('Y-m-d'),
+            'nama_file' => $uploadsertifikat['nama_file'],
+            'ext' => $uploadsertifikat['ext'],
+            'size' => $uploadsertifikat['size'],
+        ]);
+
+        if (!$berkassertifikat) {
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas Sertifikat gagal di upload'), Response::HTTP_BAD_REQUEST);
+        }
+
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
-    return response()->json(new DataResource(Response::HTTP_OK, 'Berkas berhasil di upload', $berkas), Response::HTTP_OK);
+    // return response()->json(new DataResource(Response::HTTP_OK, 'Berkas berhasil di upload', $berkas), Response::HTTP_OK);
   }
 
   public function checkuseractive()
