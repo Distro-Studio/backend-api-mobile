@@ -252,6 +252,8 @@ class DataPersonalController extends Controller
     $data->no_bpjsktk = $request->no_bpjsktk;
     $data->save();
 
+    $user = User::where('id', Auth::user()->id)->update(['data_completion_step' => 5]);
+
     return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $request->all()), Response::HTTP_OK);
   }
 
@@ -433,6 +435,10 @@ class DataPersonalController extends Controller
         if (!$berkassertifikat) {
             return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas Sertifikat gagal di upload'), Response::HTTP_BAD_REQUEST);
         }
+
+        $user = User::where('id', Auth::user()->id)->update(['data_completion_step' => 5]);
+
+        return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berkas berhasil di upload'), Response::HTTP_OK);
 
     } catch (\Exception $e) {
         return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
