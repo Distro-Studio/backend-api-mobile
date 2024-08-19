@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
+use App\Models\DataKaryawan;
 use App\Models\Jadwal;
+use App\Models\NonShift;
 use App\Models\TukarJadwal;
 use App\Models\User;
 use Carbon\Carbon;
@@ -18,7 +20,35 @@ class JadwalController extends Controller
     public function gettodayjadwal()
     {
         try {
-            $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
+            $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
+            if($datakaryawan->unitkerja->jenis_karyawan == 1) {
+                $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
+            }else {
+                $nonshift = NonShift::where('id', 1)->first();
+                $jadwaln = [
+                    "id" => 0,
+                    "user_id" => $datakaryawan->user_id,
+                    "tgl_mulai" => date('Y-m-d'),
+                    "tgl_selesai" => date('Y-m-d'),
+                    "shift_id" => 0,
+                    "created_at" => null,
+                    "updated_at" => null,
+                    "shift" => [
+                        "id" => 0,
+                        "nama" => "Siang",
+                        "jam_from" => $nonshift->jam_from,
+                        "jam_to" => $nonshift->jam_to,
+                        "deleted_at" => null,
+                        "created_at" => null,
+                        "updated_at" => null
+                    ]
+                ];
+
+                $encode = json_encode($jadwaln);
+
+                $jadwal = json_decode($encode);
+            }
+
             if(!$jadwal){
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
             }

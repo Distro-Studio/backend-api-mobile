@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
+use App\Models\UnitKerja;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -50,11 +51,24 @@ class LoginController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email atau password salah'), Response::HTTP_UNAUTHORIZED);
             }
 
+            $cekuser = User::where('id', Auth::user()->id)->select('status_aktif')->first();
+
+            if ($cekuser->status_aktif != 2)
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda sedang tidak aktif'), Response::HTTP_UNAUTHORIZED);
+            }
+
             // Buat token atau lakukan tindakan lain setelah login berhasil
             $token = $user->createToken('TLogin')->plainTextToken;
             $users = User::where('id', Auth::user()->id)->with('roles')->first();
             $users->arrtoken = [
                 'token' => $token
+            ];
+
+            $dataKaryawan = DataKaryawan::select('unit_kerja_id')->where('user_id', Auth::user()->id)->with('unitkerja')->first();
+            $unitkerja = UnitKerja::where('id', $dataKaryawan->unit_kerja_id)->first();
+            $users->unit_kerja = [
+                $unitkerja,
             ];
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Login Berhasil', $users), Response::HTTP_OK);
