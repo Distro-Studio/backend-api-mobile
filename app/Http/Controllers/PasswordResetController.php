@@ -9,6 +9,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
@@ -132,13 +133,13 @@ class PasswordResetController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'token' => 'required',
-            'password' => 'required|confirmed|min:8|regex:/[a-z]/|regex:/[A-Z]/|regex:/[0-9]/|regex:/[@$!%*?&#]/'
+            'password' => 'required|confirmed|min:8'
         ], [
             'token.required' => 'Token harus diisi',
             'password.required' => 'Password harus diisi',
             'password.confirmed' => 'Password tidak sesuai',
             'password.min' => 'Password harus minimal 8 karakter.',
-            'password.regex' => 'Password harus mengandung huruf kecil, huruf besar, angka, dan simbol.'
+            // 'password.regex' => 'Password harus mengandung huruf kecil, huruf besar, angka, dan simbol.'
         ]);
 
         if ($validator->fails())
@@ -146,16 +147,18 @@ class PasswordResetController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
         }
 
-
-        $user = User::where('remember_token', $request->token)->first();
-        if (!$user)
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Token tidak valid'),Response::HTTP_NOT_FOUND);
-        }
+        // dd(Auth::user());
+        // $user = User::where('remember_token', $request->token)->first();
+        $user = User::where('id', Auth::user()->id)->first();
+        // if (!$user)
+        // {
+        //     return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Token tidak valid'),Response::HTTP_NOT_FOUND);
+        // }
 
         $data = DataKaryawan::where('user_id', $user->id)->first();
 
         $from = $user->updated_at;
+        $user->data_completion_step = 0;
         $to = date('Y-m-d H:i:s');
 
         $fromformat = Carbon::parse($from)->timezone('Asia/Jakarta');

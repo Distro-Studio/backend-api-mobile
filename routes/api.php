@@ -40,11 +40,11 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::get('/coba-face', [CobaController::class, 'compareFaces']);
 Route::post('/password-reset', [PasswordResetController::class, 'passreset']);
 Route::post('/check-password-reset', [PasswordResetController::class, 'checktoken']);
-Route::post('/change-password-reset', [PasswordResetController::class, 'changepass']);
 
 Route::get('/cobadownload', [CobaController::class, 'cobadownload']);
 
 Route::middleware(['auth:sanctum'])->group(function(){
+    Route::post('/change-password-reset', [PasswordResetController::class, 'changepass']);
     Route::post('/logout', [LoginController::class, 'logout']);
     Route::get('/getuserinfo', [UserController::class, 'checkuser']);
 
