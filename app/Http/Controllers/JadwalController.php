@@ -23,11 +23,15 @@ class JadwalController extends Controller
         try {
             $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
             $officeloc = LokasiKantor::where('id', 1)->first();
+            $aktivitas = false;
+
+            // $cekpresensi = PresensiController::where('user_id', Auth::user()->id)->whereDate('created_at', );
+
             if($datakaryawan->unitkerja->jenis_karyawan == 1) {
                 $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
-                $jadwal->office_lat = $officeloc->lat;
-                $jadwal->office_long = $officeloc->long;
-                $jadwal->radius = $officeloc->radius;
+                $jadwal->office_lat = $officeloc->lat ?? null;
+                $jadwal->office_long = $officeloc->long ?? null;
+                $jadwal->radius = $officeloc->radius ?? null;
             }else {
                 $nonshift = NonShift::where('id', 1)->first();
                 $jadwaln = [
@@ -47,9 +51,10 @@ class JadwalController extends Controller
                         "created_at" => null,
                         "updated_at" => null
                     ],
-                    "office_lat" => $officeloc->lat,
-                    "office_long" => $officeloc->long,
-                    "radius" => $officeloc->radius,
+                    "office_lat" => $officeloc->lat ?? null,
+                    "office_long" => $officeloc->long ?? null,
+                    "radius" => $officeloc->radius ?? null,
+                    "jadwal",
                 ];
 
                 $encode = json_encode($jadwaln);
