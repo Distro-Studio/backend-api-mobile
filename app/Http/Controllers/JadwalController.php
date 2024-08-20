@@ -6,6 +6,7 @@ use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
 use App\Models\Jadwal;
+use App\Models\LokasiKantor;
 use App\Models\NonShift;
 use App\Models\TukarJadwal;
 use App\Models\User;
@@ -21,8 +22,12 @@ class JadwalController extends Controller
     {
         try {
             $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
+            $officeloc = LokasiKantor::where('id', 1)->first();
             if($datakaryawan->unitkerja->jenis_karyawan == 1) {
                 $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
+                $jadwal->office_lat = $officeloc->lat;
+                $jadwal->office_long = $officeloc->long;
+                $jadwal->radius = $officeloc->radius;
             }else {
                 $nonshift = NonShift::where('id', 1)->first();
                 $jadwaln = [
@@ -41,7 +46,10 @@ class JadwalController extends Controller
                         "deleted_at" => null,
                         "created_at" => null,
                         "updated_at" => null
-                    ]
+                    ],
+                    "office_lat" => $officeloc->lat,
+                    "office_long" => $officeloc->long,
+                    "radius" => $officeloc->radius,
                 ];
 
                 $encode = json_encode($jadwaln);
