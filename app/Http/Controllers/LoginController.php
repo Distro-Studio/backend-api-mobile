@@ -53,7 +53,7 @@ class LoginController extends Controller
 
             $cekuser = User::where('id', Auth::user()->id)->select('status_aktif')->first();
 
-            if ($cekuser->status_aktif != 2)
+            if ($cekuser->status_aktif == 3)
             {
                 return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda sedang tidak aktif'), Response::HTTP_UNAUTHORIZED);
             }
