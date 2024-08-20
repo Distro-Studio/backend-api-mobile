@@ -8,6 +8,7 @@ use App\Models\DataKaryawan;
 use App\Models\Jadwal;
 use App\Models\LokasiKantor;
 use App\Models\NonShift;
+use App\Models\Presensi;
 use App\Models\TukarJadwal;
 use App\Models\User;
 use Carbon\Carbon;
@@ -25,7 +26,10 @@ class JadwalController extends Controller
             $officeloc = LokasiKantor::where('id', 1)->first();
             $aktivitas = false;
 
-            // $cekpresensi = PresensiController::where('user_id', Auth::user()->id)->whereDate('created_at', );
+            $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->first();
+            if ($cekpresensi) {
+                $aktivitas = true;
+            }
 
             if($datakaryawan->unitkerja->jenis_karyawan == 1) {
                 $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
@@ -33,6 +37,7 @@ class JadwalController extends Controller
                     $jadwal->office_lat = $officeloc->lat;
                     $jadwal->office_long = $officeloc->long;
                     $jadwal->radius = $officeloc->radius;
+                    $jadwal->aktivitas = $aktivitas;
                 }
             }else {
                 $nonshift = NonShift::where('id', 1)->first();
@@ -56,7 +61,7 @@ class JadwalController extends Controller
                     "office_lat" => $officeloc->lat,
                     "office_long" => $officeloc->long ?? null,
                     "radius" => $officeloc->radius ?? null,
-                    "jadwal",
+                    "aktivitas" => $aktivitas,
                 ];
 
                 $encode = json_encode($jadwaln);
