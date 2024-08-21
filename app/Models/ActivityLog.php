@@ -11,6 +11,15 @@ class ActivityLog extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
+    
+    protected $casts = [
+        'id' => 'integer',                     // Untuk kolom 'id'
+        'activity' => 'string',                // Untuk kolom 'activity'
+        'kategori_activity_id' => 'integer',   // Untuk kolom 'kategori_activity_id'
+        'user_id' => 'integer',                // Untuk kolom 'user_id'
+        'created_at' => 'datetime',            // Untuk kolom 'created_at'
+        'updated_at' => 'datetime',            // Untuk kolom 'updated_at'
+    ];
 
     public function user()
     {

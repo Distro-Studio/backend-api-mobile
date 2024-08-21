@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpFoundation\Response;
@@ -45,11 +46,14 @@ class LoginController extends Controller
 
             // Ambil user terkait
             $user = $dataKaryawan->user;
+            $datauser = User::where('id', $user->id)->first();
 
             // Cek password
-            if (!Auth::attempt(['id' => $user->id, 'password' => $request->password])) {
+            if (!Hash::check($request->password, $datauser->password)) {
                 return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email atau password salah'), Response::HTTP_UNAUTHORIZED);
             }
+
+            Auth::login($datauser);
 
             $cekuser = User::where('id', Auth::user()->id)->select('status_aktif')->first();
 
