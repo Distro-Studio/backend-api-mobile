@@ -46,7 +46,8 @@ class LemburController extends Controller
             $tgl_mulai = Carbon::now('Asia/Jakarta')->startOfMonth()->toDateString();
             $tgl_selesai = Carbon::now('Asia/Jakarta')->endOfMonth()->toDateString();
             $query = Lembur::query();
-            $query->where('user_id', Auth::user()->id)->where('status_lembur_id', 3)->whereBetween('tgl_pengajuan', [$tgl_mulai, $tgl_selesai]);
+            // $query->where('user_id', Auth::user()->id)->where('status_lembur_id', 3)->whereBetween('tgl_pengajuan', [$tgl_mulai, $tgl_selesai]);
+            $query->where('user_id', Auth::user()->id)->whereBetween('tgl_pengajuan', [$tgl_mulai, $tgl_selesai]);
 
             $data = $query->with('user')->paginate($offset);
 

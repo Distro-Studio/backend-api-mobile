@@ -81,19 +81,19 @@ class DataPersonalController extends Controller
         $user->save();
       }
 
-      $dataKaryawan = DataKaryawan::where('user_id', Auth::user()->id)->update([
-        'tempat_lahir' => $request->tempat_lahir,
-        'tgl_lahir' => $request->tanggal_lahir,
-        'no_hp' => $request->no_hp,
-        'jenis_kelamin' => $request->jenis_kelamin,
-        'nik_ktp' => $request->nik_ktp,
-        'no_kk' => $request->no_kk,
-        'kategori_agama_id' => $request->agama,
-        'kategori_darah_id' => $request->golongan_darah,
-        'tinggi_badan' => $request->tinggi_badan,
-        'alamat' => $request->alamat,
-        'tahun_lulus' => $request->tahun_lulus,
-      ]);
+    //   $dataKaryawan = DataKaryawan::where('user_id', Auth::user()->id)->update([
+    //     'tempat_lahir' => $request->tempat_lahir,
+    //     'tgl_lahir' => $request->tanggal_lahir,
+    //     'no_hp' => $request->no_hp,
+    //     'jenis_kelamin' => $request->jenis_kelamin,
+    //     'nik_ktp' => $request->nik_ktp,
+    //     'no_kk' => $request->no_kk,
+    //     'kategori_agama_id' => $request->agama,
+    //     'kategori_darah_id' => $request->golongan_darah,
+    //     'tinggi_badan' => $request->tinggi_badan,
+    //     'alamat' => $request->alamat,
+    //     'tahun_lulus' => $request->tahun_lulus,
+    //   ]);
 
       $data->tempat_lahir = $request->tempat_lahir;
       $data->tgl_lahir = $request->tanggal_lahir;
@@ -105,11 +105,12 @@ class DataPersonalController extends Controller
       $data->kategori_darah_id = $request->golongan_darah;
       $data->tinggi_badan = $request->tinggi_badan;
       $data->alamat = $request->alamat;
+      $data->no_ijazah = $request->no_ijazah;
       $data->tahun_lulus = $request->tahun_lulus;
       $data->save();
 
-            $user->data_completion_step = 2;
-            $user->save();
+        $user->data_completion_step = 2;
+        $user->save();
 
       // dd(DataKaryawan::where('user_id', Auth::user()->id)->first());
 
