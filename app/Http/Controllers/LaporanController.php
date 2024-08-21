@@ -19,14 +19,14 @@ class LaporanController extends Controller
     public function storelaporan(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'pelaku_id' => 'required|exists:users,id',
+            'pelaku' => 'required|exists:users,id',
             'tgl_kejadian' => 'required',
             'lokasi' => 'required',
             'kronologi' => 'required',
             'foto' => 'required',
         ], [
-            'pelaku_id.required' => 'Pelaku harus dipilih',
-            'pelaku_id.exists' => 'Pelaku tidak ditemukan',
+            'pelaku.required' => 'Pelaku harus dipilih',
+            'pelaku.exists' => 'Pelaku tidak ditemukan',
             'tgl_kejadian.required' => 'Tgl kejadian harus diisi',
             'lokasi.required' => 'Lokasi harus diisi',
             'kronologi.required' => 'Kronologi harus diisi',
@@ -53,7 +53,7 @@ class LaporanController extends Controller
 
             $laporan = Pelaporan::create([
                 'pelapor' => Auth::user()->id,
-                'pelaku' => $request->pelaku_id,
+                'pelaku' => $request->pelaku,
                 'tgl_kejadian' => $request->tgl_kejadian,
                 'lokasi' => $request->lokasi,
                 'kronologi' => $request->kronologi,

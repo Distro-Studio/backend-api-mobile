@@ -11,5 +11,10 @@ class Cuti extends Model
 
     protected $guarded = ['id'];
 
-    
+    public function tipeCuti()
+    {
+        return $this->belongsTo(TipeCuti::class, 'tipe_cuti_id', 'id');
+    }
+
+
 }

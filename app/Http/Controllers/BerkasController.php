@@ -54,6 +54,11 @@ class BerkasController extends Controller
         try {
             $berkas = Berkas::where('user_id', Auth::user()->id)->where('kategori_berkas_id', 1)->get();
 
+            if ($berkas->isEmpty())
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Berkas tidak ditemukan'), Response::HTTP_NOT_FOUND);
+            }
+
             $data = $berkas->map(function($i){
                 $ext = StorageFileHelper::getExtensionFromMimeType($i->ext);
                 return [

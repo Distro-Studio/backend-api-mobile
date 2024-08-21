@@ -83,7 +83,7 @@ class CutiCotroller extends Controller
             if ($request->filled('offset')){
                 $offset = $request->offset;
             }
-
+            $query->with('tipeCuti');
             $cutis = $query->paginate($offset);
             // dd($query->toSql(), $query->getBindings());
             // dd($tgl_mulai);
