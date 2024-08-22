@@ -53,14 +53,22 @@ class LoginController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email atau password salah'), Response::HTTP_UNAUTHORIZED);
             }
 
-            Auth::login($datauser);
+            // $cekuser = User::where('id', Auth::user()->id)->select('status_aktif')->first();
 
-            $cekuser = User::where('id', Auth::user()->id)->select('status_aktif')->first();
 
-            if ($cekuser->status_aktif == 3)
+            if ($datauser->status_aktif == 1 && $datauser->data_completion_step == 0)
             {
-                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda sedang tidak aktif'), Response::HTTP_UNAUTHORIZED);
+                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda tidak valid'), Response::HTTP_UNAUTHORIZED);
             }
+
+            if ($datauser->status_aktif == 2 && $datauser->data_completion_step != 0)
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda tidak valid'), Response::HTTP_UNAUTHORIZED);
+            }
+
+
+
+            Auth::login($datauser);
 
             // Buat token atau lakukan tindakan lain setelah login berhasil
             $token = $user->createToken('TLogin')->plainTextToken;
