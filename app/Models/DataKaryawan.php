@@ -39,4 +39,9 @@ class DataKaryawan extends Model
     {
         return $this->hasMany(Jadwal::class, 'user_id', 'user_id');
     }
+
+    public function statusKaryawan()
+    {
+        return $this->belongsTo(StatusKaryawan::class, 'status_karyawan_id', 'id');
+    }
 }

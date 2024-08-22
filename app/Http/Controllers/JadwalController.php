@@ -142,8 +142,16 @@ class JadwalController extends Controller
             if(!$jadwal){
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
             }
-            $getuser = Jadwal::where('tgl_mulai', $jadwal->tgl_mulai)->where('shift_id', $jadwal->shift_id)->where('user_id', '!=', $jadwal->user_id)->select('user_id')->with('user')->get();
-            return response()->json(new DataResource(Response::HTTP_OK, 'Karyawan lain dengan jadwal yang sama berhasil di dapatkan', $getuser), Response::HTTP_OK);
+            $getuser = Jadwal::where('tgl_mulai', $jadwal->tgl_mulai)->where('shift_id', $jadwal->shift_id)->where('user_id', '!=', $jadwal->user_id)->select('user_id')->with('user')->with(['user.dataKaryawan.kompetensi', 'user.dataKaryawan.statusKaryawan'])->get();
+            $data = $getuser->map(function($item) {
+                return [
+                    'user_id' => $item->user_id,
+                    'user' => $item->user,
+                    'kompetensi' => $item->user->dataKaryawan->kompetensi,
+                    'status_karyawan' => $item->user->dataKaryawan->statusKaryawan, // Mengambil data kompetensi
+                ];
+            });
+            return response()->json(new DataResource(Response::HTTP_OK, 'Karyawan lain dengan jadwal yang sama berhasil di dapatkan', $data), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
