@@ -30,6 +30,7 @@ class DataPersonalController extends Controller
       'agama' => 'required',
       'golongan_darah' => 'required',
       'tinggi_badan' => 'required|integer',
+      'berat_badan' => 'required',
       'alamat' => 'required',
       'tahun_lulus' => 'required|numeric',
       'no_ijazah' => 'required',
@@ -53,6 +54,7 @@ class DataPersonalController extends Controller
       'golongan_darah.required' => 'Golongan darah harus diisi',
       'tinggi_badan.required' => 'Tinggi badan harus diisi',
       'tinggi_badan.integer' => 'Tinggi badan harus berupa angka',
+      'berat_badan.required' => 'Berat badan harus diisi',
       'alamat.required' => 'Alamat harus diisi',
       'tahun_lulus.required' => 'Tahun lulus harus diisi',
       'tahun_lulus.numeric' => 'Tahun lulus harus berupa angka',
@@ -104,6 +106,8 @@ class DataPersonalController extends Controller
       $data->kategori_agama_id = $request->agama;
       $data->kategori_darah_id = $request->golongan_darah;
       $data->tinggi_badan = $request->tinggi_badan;
+      $data->berat_badan = $request->berat_badan;
+    //   $data->gelar_depan = $request->gelar_depan;
       $data->alamat = $request->alamat;
       $data->no_ijazah = $request->no_ijazah;
       $data->tahun_lulus = $request->tahun_lulus;
@@ -225,14 +229,16 @@ class DataPersonalController extends Controller
       'no_sip' => 'required',
       'masa_berlaku_sip' => 'required',
       'no_bpjsksh' => 'required',
-      'no_bpjsktk' => 'required'
+      'no_bpjsktk' => 'required',
+    //   'npwp' => 'required'
     ], [
       'no_str.required' => 'Nomor STR harus diisi',
       'masa_berlaku_str.required' => 'Masa berlaku STR harus diisi',
       'no_sip.required' => 'Nomor SIP harus diisi',
       'masa_berlaku_sip.required' => 'Masa berlaku SIP harus diisi',
       'no_bpjsksh.required' => 'Nomor BPJS Kesehatan harus diisi',
-      'no_bpjsktk.required' => 'Nomor BPJS Ketenagakerjaan harus diisi'
+      'no_bpjsktk.required' => 'Nomor BPJS Ketenagakerjaan harus diisi',
+    //   'npwp.required' => 'NPWP harus diisi'
     ]);
 
     if ($validator->fails()) {
@@ -245,12 +251,15 @@ class DataPersonalController extends Controller
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'), Response::HTTP_NOT_FOUND);
     }
 
+    // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan', $request->all()), Response::HTTP_NOT_FOUND);
+
     $data->no_str = $request->no_str;
     $data->masa_berlaku_str = $request->masa_berlaku_str;
     $data->no_sip = $request->no_sip;
     $data->masa_berlaku_sip = $request->masa_berlaku_sip;
     $data->no_bpjsksh = $request->no_bpjsksh;
     $data->no_bpjsktk = $request->no_bpjsktk;
+    // $data->npwp = $request->npwp;
     $data->save();
 
     $user = User::where('id', Auth::user()->id)->update(['data_completion_step' => 5]);
