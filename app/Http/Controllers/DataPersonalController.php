@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Str;
 
 class DataPersonalController extends Controller
 {
@@ -126,7 +127,7 @@ class DataPersonalController extends Controller
 
   }
 
-    public function storekeluarga(Request $request)
+  public function storekeluarga(Request $request)
     {
         $validator = Validator::make($request->all(),[
             'keluarga' => 'required',
@@ -314,8 +315,11 @@ class DataPersonalController extends Controller
     }
 
     try {
+        $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
         //KTP
-        $uploadktp = StorageFileHelper::uploadToServer($request, 'KTP', 'ktp');
+        $uploadktp = StorageFileHelper::uploadToServer($request, Str::random(8), 'ktp');
+
+        $cekberkasktp = Berkas::where('nama', 'KTP')->where('user_id',Auth::user()->id)->delete();
 
         $berkasktp = Berkas::create([
             'user_id' => Auth::user()->id,
@@ -335,8 +339,12 @@ class DataPersonalController extends Controller
         }
 
 
+
+
         //KK
-        $uploadkk = StorageFileHelper::uploadToServer($request, 'KK', 'kk');
+        $uploadkk = StorageFileHelper::uploadToServer($request, Str::random(8), 'kk');
+
+        $cekberkaskk = Berkas::where('nama', 'KK')->where('user_id',Auth::user()->id)->delete();
 
         $berkaskk = Berkas::create([
             'user_id' => Auth::user()->id,
@@ -357,7 +365,10 @@ class DataPersonalController extends Controller
 
 
         //SIP
-        $uploadsip = StorageFileHelper::uploadToServer($request, 'SIP', 'sip');
+        $uploadsip = StorageFileHelper::uploadToServer($request, Str::random(8), 'sip');
+
+        $cekberkasktp = Berkas::where('nama', 'SIP')->where('user_id',Auth::user()->id)->delete();
+
         $berkassip = Berkas::create([
             'user_id' => Auth::user()->id,
             'file_id' => $uploadsip['id_file']['id'],
@@ -377,7 +388,10 @@ class DataPersonalController extends Controller
 
 
         //BPJS Kesehatan
-        $uploadbpjs = StorageFileHelper::uploadToServer($request, 'BPJS Kesehatan', 'bpjs_kesehatan');
+        $uploadbpjs = StorageFileHelper::uploadToServer($request, Str::random(8), 'bpjs_kesehatan');
+
+        $cekberkasktp = Berkas::where('nama', 'BPJS Kesehatan')->where('user_id',Auth::user()->id)->delete();
+
         $berkasbpjs = Berkas::create([
             'user_id' => Auth::user()->id,
             'file_id' => $uploadbpjs['id_file']['id'],
@@ -396,7 +410,10 @@ class DataPersonalController extends Controller
         }
 
         //BPJS Ketenagakerjaan
-        $uploadbpjstk = StorageFileHelper::uploadToServer($request, 'BPJS Ketenagakerjaan', 'bpjs_ketenagakerjaan');
+        $uploadbpjstk = StorageFileHelper::uploadToServer($request, Str::random(8), 'bpjs_ketenagakerjaan');
+
+        $cekberkasktp = Berkas::where('nama', 'BPJS Ketenagakerjaan')->where('user_id',Auth::user()->id)->delete();
+
         $berkasbpjstk = Berkas::create([
             'user_id' => Auth::user()->id,
             'file_id' => $uploadbpjstk['id_file']['id'],
@@ -415,7 +432,10 @@ class DataPersonalController extends Controller
         }
 
         //Ijazah
-        $uploadijazah = StorageFileHelper::uploadToServer($request, 'Ijazah', 'ijazah');
+        $uploadijazah = StorageFileHelper::uploadToServer($request, Str::random(8), 'ijazah');
+
+        $cekberkasktp = Berkas::where('nama', 'Ijazah')->where('user_id',Auth::user()->id)->delete();
+
         $berkasijazah = Berkas::create([
             'user_id' => Auth::user()->id,
             'file_id' => $uploadijazah['id_file']['id'],
@@ -434,7 +454,10 @@ class DataPersonalController extends Controller
         }
 
         //Sertifikat
-        $uploadsertifikat = StorageFileHelper::uploadToServer($request, 'Sertifikat', 'sertifikat');
+        $uploadsertifikat = StorageFileHelper::uploadToServer($request, Str::random(8), 'sertifikat');
+
+        $cekberkasktp = Berkas::where('nama', 'Sertifikat')->where('user_id',Auth::user()->id)->delete();
+
         $berkassertifikat = Berkas::create([
             'user_id' => Auth::user()->id,
             'file_id' => $uploadsertifikat['id_file']['id'],
