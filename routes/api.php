@@ -114,4 +114,6 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/store-laporan', [LaporanController::class, 'storelaporan']);
 
     Route::get('/get-data-karyawan-personal', [PerubahannDataController::class, 'getdatapersonal']);
+
+    Route::get('/get-detail-karyawan', [DataPersonalController::class, 'getdetailkaryawan']);
 });

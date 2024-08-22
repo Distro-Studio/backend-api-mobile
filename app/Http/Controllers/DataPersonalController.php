@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class DataPersonalController extends Controller
 {
@@ -501,5 +502,142 @@ class DataPersonalController extends Controller
     if ($user->data_completion_step == 1) {
       return response()->json(new DataResource(Response::HTTP_OK, 'Akun anda sedang tidak aktif', ['data_completion_step' => true]), Response::HTTP_FORBIDDEN);
     }
+  }
+
+  public function getdetailkaryawan()
+  {
+    $user = User::find(Auth::user()->id);
+
+    if (!$user) {
+      return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Akun karyawan tidak ditemukan.'), Response::HTTP_NOT_FOUND);
+    }
+
+    // Get data_karyawan_id from user
+    $data_karyawan_id = $user->dataKaryawan;
+
+    // Find karyawan by data_karyawan_id
+    $karyawan = DataKaryawan::where('email', '!=', 'super_admin@admin.rski')->find($data_karyawan_id);
+
+    if (!$karyawan) {
+      return response()->json([
+        'status' => Response::HTTP_OK,
+        'message' => 'Data karyawan tidak ditemukan.',
+        'data' => []
+      ], Response::HTTP_OK);
+    }
+
+    // $role = $karyawan->user->roles->first();
+    $role = $karyawan->user->first()->roles->first();
+
+    // Retrieve the associated files (berkas)
+    $berkasFields = [
+      'file_ktp' => $karyawan->nik_ktp,
+      'file_kk' => $karyawan->no_kk,
+      'file_sip' => $karyawan->no_sip,
+      'file_bpjs_kesehatan' => $karyawan->no_bpjsksh,
+      'file_bpjs_ketenagakerjaan' => $karyawan->no_bpjsktk,
+      'file_ijazah' => $karyawan->no_ijazah,
+      'file_sertifikat' => $karyawan->no_str,
+    ];
+
+    $baseUrl = env('STORAGE_SERVER_DOMAIN'); // Replace with your actual storage server URL
+
+    $formattedPaths = [];
+    foreach ($berkasFields as $field => $berkasId) {
+      $berkas = Berkas::where('id', $berkasId)->first();
+      if ($berkas) {
+        $extension = StorageFileHelper::getExtensionFromMimeType($berkas->ext);
+        $formattedPaths[$field] = $baseUrl . $berkas->path . '.' . $extension;
+      } else {
+        $formattedPaths[$field] = null;
+      }
+    }
+
+    // Format the karyawan data
+    $formattedData = array_merge([
+      'id' => $karyawan->id,
+      'user' => [
+        'id' => $karyawan->users->id,
+        'nama' => $karyawan->users->nama,
+        'email_verified_at' => $karyawan->users->email_verified_at,
+        'data_karyawan_id' => $karyawan->users->data_karyawan_id,
+        'foto_profil' => $karyawan->users->foto_profil,
+        'data_completion_step' => $karyawan->users->data_completion_step,
+        'status_aktif' => $karyawan->users->status_aktif,
+        'created_at' => $karyawan->users->created_at,
+        'updated_at' => $karyawan->users->updated_at
+      ],
+      'role' => [
+        'id' => $role->id,
+        'name' => $role->name,
+        'deskripsi' => $role->deskripsi,
+        'created_at' => $role->created_at,
+        'updated_at' => $role->updated_at
+      ],
+      'potongan_gaji' => DB::table('pengurang_gajis')
+        ->join('premis', 'pengurang_gajis.premi_id', '=', 'premis.id')
+        ->where('pengurang_gajis.data_karyawan_id', $karyawan->id)
+        ->select(
+          'premis.id',
+          'premis.nama_premi',
+          'premis.kategori_potongan_id',
+          'premis.jenis_premi',
+          'premis.besaran_premi',
+          'premis.minimal_rate',
+          'premis.maksimal_rate',
+          'premis.created_at',
+          'premis.updated_at'
+        )
+        ->get(),
+      'nik' => $karyawan->nik,
+      'email' => $karyawan->email,
+      'no_rm' => $karyawan->no_rm,
+      'no_sip' => $karyawan->no_sip,
+      'no_manulife' => $karyawan->no_manulife,
+      'tgl_masuk' => $karyawan->tgl_masuk,
+      'unit_kerja' => $karyawan->unit_kerjas,
+      'jabatan' => $karyawan->jabatans,
+      'kompetensi' => $karyawan->kompetensis,
+      'nik_ktp' => $karyawan->nik_ktp,
+      'status_karyawan' => $karyawan->status_karyawans,
+      'tempat_lahir' => $karyawan->tempat_lahir,
+      'tgl_lahir' => $karyawan->tgl_lahir,
+      'kelompok_gaji' => $karyawan->kelompok_gajis,
+      'no_rekening' => $karyawan->no_rekening,
+      'tunjangan_jabatan' => $karyawan->tunjangan_jabatan,
+      'tunjangan_fungsional' => $karyawan->tunjangan_fungsional,
+      'tunjangan_khusus' => $karyawan->tunjangan_khusus,
+      'tunjangan_lainnya' => $karyawan->tunjangan_lainnya,
+      'uang_lembur' => $karyawan->uang_lembur,
+      'uang_makan' => $karyawan->uang_makan,
+      'ptkp' => $karyawan->ptkps,
+      'tgl_keluar' => $karyawan->tgl_keluar,
+      'no_kk' => $karyawan->no_kk,
+      'alamat' => $karyawan->alamat,
+      'gelar_depan' => $karyawan->gelar_depan,
+      'no_hp' => $karyawan->no_hp,
+      'no_bpjsksh' => $karyawan->no_bpjsksh,
+      'no_bpjsktk' => $karyawan->no_bpjsktk,
+      'tgl_diangkat' => $karyawan->tgl_diangkat,
+      'masa_kerja' => $karyawan->masa_kerja,
+      'npwp' => $karyawan->npwp,
+      'jenis_kelamin' => $karyawan->jenis_kelamin,
+      'agama' => $karyawan->kategori_agamas,
+      'golongan_darah' => $karyawan->kategori_darahs,
+      'pendidikan_terakhir' => $karyawan->kategori_pendidikans,
+      'tinggi_badan' => $karyawan->tinggi_badan,
+      'berat_badan' => $karyawan->berat_badan,
+      'no_ijazah' => $karyawan->no_ijazah,
+      'tahun_lulus' => $karyawan->tahun_lulus,
+      'no_str' => $karyawan->no_str,
+      'masa_berlaku_str' => $karyawan->masa_berlaku_str,
+      'masa_berlaku_sip' => $karyawan->masa_berlaku_sip,
+      'tgl_berakhir_pks' => $karyawan->tgl_berakhir_pks,
+      'masa_diklat' => $karyawan->masa_diklat,
+      'created_at' => $karyawan->created_at,
+      'updated_at' => $karyawan->updated_at
+    ], $formattedPaths);
+
+    return response()->json(new DataResource(Response::HTTP_OK, 'Detail karyawan berhasil didapatkan', $formattedData), Response::HTTP_OK);
   }
 }
