@@ -15,16 +15,18 @@ class PerubahannDataController extends Controller
     public function getdatapersonal()
     {
         try {
-            $personal = DataKaryawan::where('user_id', Auth::user()->id)->with('kompetensi')->first();
+            $personal = DataKaryawan::where('user_id', Auth::user()->id)->with('kompetensi', 'golonganDarah', 'pendidikanTerakhir')->first();
 
             if (!$personal) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data personal tidak ditemukan'), Response::HTTP_NOT_FOUND);
             }
 
-            $foto = Berkas::where('id', Auth::user()->foto_profil)->first();
-
+            // $foto = Berkas::where('id', Auth::user()->foto_profil)->first();
+            // if (!$foto) {
+            //     $foto = null;
+            // }
             $data = [
-                'foto_profil' => env('URL_STORAGE') . $foto->path,
+                // 'foto_profil' => env('URL_STORAGE') . $foto->path,
                 'nama' => Auth::user()->nama,
                 'kompetensi' => $personal->kompetensi->nama_kompetensi,
                 'tempat_lahir' => $personal->tempat_lahir,
@@ -35,10 +37,19 @@ class PerubahannDataController extends Controller
                 'no_kk' => $personal->no_kk,
                 'agama' => $personal->kategori_agama_id,
                 'tinggi_badan' => $personal->tinggi_badan,
-                // 'alamat' =>
+                'alamat' => $personal->alamat,
+                'no_telp' => $personal->no_hp,
+                // 'tinggi_badan' => $personal->tinggi_badan,
+                'berat_badan' => $personal->berat_badan,
+                'no_ijasah' => $personal->no_ijazah,
+                'tahun_lulus' => $personal->tahun_lulus,
+                'pendidikan_terakhir' => $personal->pendidikan_terakhir,
+                'gelar_depan' => $personal->gelar_depan,
             ];
+
+            return response()->json(new DataResource(Response::HTTP_OK, 'Data personal ditemukan', $data), Response::HTTP_OK);
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

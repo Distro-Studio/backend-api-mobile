@@ -45,4 +45,14 @@ class DataKaryawan extends Model
     {
         return $this->belongsTo(StatusKaryawan::class, 'status_karyawan_id', 'id');
     }
+
+    public function golonganDarah()
+    {
+        return $this->belongsTo(KategoriDarah::class, 'kategori_darah_id', 'id');
+    }
+
+    public function pendidikanTerakhir()
+    {
+        return $this->belongsTo(KategoriPendidikan::class, 'pendidikan_terakhir', 'id');
+    }
 }

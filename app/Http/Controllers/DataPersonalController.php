@@ -27,8 +27,8 @@ class DataPersonalController extends Controller
       'tanggal_lahir' => 'required|date',
       'no_hp' => 'required|numeric',
       'jenis_kelamin' => 'required|in:0,1,2',
-      'nik_ktp' => 'required|integer|digits:16',
-      'no_kk' => 'required|integer|digits:16',
+      'nik_ktp' => 'required',
+      'no_kk' => 'required',
       'agama' => 'required',
       'golongan_darah' => 'required',
       'tinggi_badan' => 'required|integer',
@@ -36,6 +36,7 @@ class DataPersonalController extends Controller
       'alamat' => 'required',
       'tahun_lulus' => 'required|numeric',
       'no_ijazah' => 'required',
+      'pendidikan_terakhir' => 'required'
     ], [
       // 'nama.required' => 'Nama harus diisi',
       'nama.max' => 'Maksimal 255 kata',
@@ -47,11 +48,11 @@ class DataPersonalController extends Controller
       'jenis_kelamin.required' => 'Jenis kelamin harus diisi',
       'jenis_kelamin.in' => 'Jenis kelamin harus Pria atau Wanita',
       'nik_ktp.required' => 'Nomor Induk Kependudukan harus diisi',
-      'nik_ktp.integer' => 'Nomor Induk Kependudukan harus berupa angka',
-      'nik_ktp.digits' => 'Nomor Induk Kependudukan harus terdiri dari 16 digit',
+    //   'nik_ktp.integer' => 'Nomor Induk Kependudukan harus berupa angka',
+    //   'nik_ktp.digits' => 'Nomor Induk Kependudukan harus terdiri dari 16 digit',
       'no_kk.required' => 'Nomor Kartu Keluarga harus di isi',
-      'no_kk.integer' => 'Nomor Kartu Keluarga harus berupa angka',
-      'no_kk.digits' => 'Nomor Kartu Keluarga harus terdiri dari 16 digit',
+    //   'no_kk.integer' => 'Nomor Kartu Keluarga harus berupa angka',
+    //   'no_kk.digits' => 'Nomor Kartu Keluarga harus terdiri dari 16 digit',
       'agama.required' => 'Agama harus diisi',
       'golongan_darah.required' => 'Golongan darah harus diisi',
       'tinggi_badan.required' => 'Tinggi badan harus diisi',
@@ -61,6 +62,7 @@ class DataPersonalController extends Controller
       'tahun_lulus.required' => 'Tahun lulus harus diisi',
       'tahun_lulus.numeric' => 'Tahun lulus harus berupa angka',
       'no_ijazah.required' => 'Nomor ijazah harus diisi',
+      'pendidikan_terakhir.required' => 'Pendidikan terakhir harus diisi',
     ]);
 
     if ($validator->fails()) {
@@ -109,10 +111,11 @@ class DataPersonalController extends Controller
       $data->kategori_darah_id = $request->golongan_darah;
       $data->tinggi_badan = $request->tinggi_badan;
       $data->berat_badan = $request->berat_badan;
-    //   $data->gelar_depan = $request->gelar_depan;
+      $data->gelar_depan = $request->gelar_depan;
       $data->alamat = $request->alamat;
       $data->no_ijazah = $request->no_ijazah;
       $data->tahun_lulus = $request->tahun_lulus;
+      $data->pendidikan_terakhir = $request->pendidikan_terakhir;
       $data->save();
 
         $user->data_completion_step = 2;
@@ -183,7 +186,9 @@ class DataPersonalController extends Controller
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
 
-      return response()->json(new DataResource(Response::HTTP_OK, 'Data keluarga ' . Auth::user()->name, $data), Response::HTTP_OK);
+      $keluarga = $data->toArray();
+
+      return response()->json(new DataResource(Response::HTTP_OK, 'Data keluarga ' . Auth::user()->name, $keluarga), Response::HTTP_OK);
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
@@ -227,20 +232,20 @@ class DataPersonalController extends Controller
   {
     $validator = Validator::make($request->all(), [
       'no_str' => 'required',
-      'masa_berlaku_str' => 'required',
+    //   'masa_berlaku_str' => 'required',
       'no_sip' => 'required',
-      'masa_berlaku_sip' => 'required',
+    //   'masa_berlaku_sip' => 'required',
       'no_bpjsksh' => 'required',
       'no_bpjsktk' => 'required',
-    //   'npwp' => 'required'
+      'npwp' => 'required'
     ], [
       'no_str.required' => 'Nomor STR harus diisi',
-      'masa_berlaku_str.required' => 'Masa berlaku STR harus diisi',
+    //   'masa_berlaku_str.required' => 'Masa berlaku STR harus diisi',
       'no_sip.required' => 'Nomor SIP harus diisi',
-      'masa_berlaku_sip.required' => 'Masa berlaku SIP harus diisi',
+    //   'masa_berlaku_sip.required' => 'Masa berlaku SIP harus diisi',
       'no_bpjsksh.required' => 'Nomor BPJS Kesehatan harus diisi',
       'no_bpjsktk.required' => 'Nomor BPJS Ketenagakerjaan harus diisi',
-    //   'npwp.required' => 'NPWP harus diisi'
+      'npwp.required' => 'NPWP harus diisi'
     ]);
 
     if ($validator->fails()) {
@@ -261,7 +266,7 @@ class DataPersonalController extends Controller
     $data->masa_berlaku_sip = $request->masa_berlaku_sip;
     $data->no_bpjsksh = $request->no_bpjsksh;
     $data->no_bpjsktk = $request->no_bpjsktk;
-    // $data->npwp = $request->npwp;
+    $data->npwp = $request->npwp;
     $data->save();
 
     $user = User::where('id', Auth::user()->id)->update(['data_completion_step' => 5]);
@@ -506,138 +511,36 @@ class DataPersonalController extends Controller
 
   public function getdetailkaryawan()
   {
-    $user = User::find(Auth::user()->id);
-
-    if (!$user) {
-      return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Akun karyawan tidak ditemukan.'), Response::HTTP_NOT_FOUND);
-    }
-
-    // Get data_karyawan_id from user
-    $data_karyawan_id = $user->dataKaryawan;
-
-    // Find karyawan by data_karyawan_id
-    $karyawan = DataKaryawan::where('email', '!=', 'super_admin@admin.rski')->find($data_karyawan_id);
-
-    if (!$karyawan) {
-      return response()->json([
-        'status' => Response::HTTP_OK,
-        'message' => 'Data karyawan tidak ditemukan.',
-        'data' => []
-      ], Response::HTTP_OK);
-    }
-
-    // $role = $karyawan->user->roles->first();
-    $role = $karyawan->user->first()->roles->first();
-
-    // Retrieve the associated files (berkas)
-    $berkasFields = [
-      'file_ktp' => $karyawan->nik_ktp,
-      'file_kk' => $karyawan->no_kk,
-      'file_sip' => $karyawan->no_sip,
-      'file_bpjs_kesehatan' => $karyawan->no_bpjsksh,
-      'file_bpjs_ketenagakerjaan' => $karyawan->no_bpjsktk,
-      'file_ijazah' => $karyawan->no_ijazah,
-      'file_sertifikat' => $karyawan->no_str,
+    $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+    $data = [
+        'tempat_lahir' => $datakaryawan->tempat_lahir,
+        'tgl_lahir' => $datakaryawan->tgl_lahir,
+        'no_hp' => $datakaryawan->no_hp,
+        'jenis_kelamin' => $datakaryawan->jenis_kelamin,
+        'nik_ktp' => $datakaryawan->nik_ktp,
+        'no_kk' => $datakaryawan->no_kk
     ];
+  }
 
-    $baseUrl = env('STORAGE_SERVER_DOMAIN'); // Replace with your actual storage server URL
+  public function getberkaspersonal()
+  {
+    $berkas = Berkas::where('nama', 'KTP')
+    ->orWhere('nama', 'KK')
+    ->orWhere('nama', 'SIP')
+    ->orWhere('nama', 'BPJS Kesehatan')
+    ->orWhere('nama', 'BPJS Ketenagakerjaan')
+    ->orWhere('nama', 'Ijazah')
+    ->orWhere('nama', 'Sertifikat')
+    ->where('user_id', Auth::user()->id)
+    ->get();
 
-    $formattedPaths = [];
-    foreach ($berkasFields as $field => $berkasId) {
-      $berkas = Berkas::where('id', $berkasId)->first();
-      if ($berkas) {
-        $extension = StorageFileHelper::getExtensionFromMimeType($berkas->ext);
-        $formattedPaths[$field] = $baseUrl . $berkas->path . '.' . $extension;
-      } else {
-        $formattedPaths[$field] = null;
-      }
-    }
-
-    // Format the karyawan data
-    $formattedData = array_merge([
-      'id' => $karyawan->id,
-      'user' => [
-        'id' => $karyawan->users->id,
-        'nama' => $karyawan->users->nama,
-        'email_verified_at' => $karyawan->users->email_verified_at,
-        'data_karyawan_id' => $karyawan->users->data_karyawan_id,
-        'foto_profil' => $karyawan->users->foto_profil,
-        'data_completion_step' => $karyawan->users->data_completion_step,
-        'status_aktif' => $karyawan->users->status_aktif,
-        'created_at' => $karyawan->users->created_at,
-        'updated_at' => $karyawan->users->updated_at
-      ],
-      'role' => [
-        'id' => $role->id,
-        'name' => $role->name,
-        'deskripsi' => $role->deskripsi,
-        'created_at' => $role->created_at,
-        'updated_at' => $role->updated_at
-      ],
-      'potongan_gaji' => DB::table('pengurang_gajis')
-        ->join('premis', 'pengurang_gajis.premi_id', '=', 'premis.id')
-        ->where('pengurang_gajis.data_karyawan_id', $karyawan->id)
-        ->select(
-          'premis.id',
-          'premis.nama_premi',
-          'premis.kategori_potongan_id',
-          'premis.jenis_premi',
-          'premis.besaran_premi',
-          'premis.minimal_rate',
-          'premis.maksimal_rate',
-          'premis.created_at',
-          'premis.updated_at'
-        )
-        ->get(),
-      'nik' => $karyawan->nik,
-      'email' => $karyawan->email,
-      'no_rm' => $karyawan->no_rm,
-      'no_sip' => $karyawan->no_sip,
-      'no_manulife' => $karyawan->no_manulife,
-      'tgl_masuk' => $karyawan->tgl_masuk,
-      'unit_kerja' => $karyawan->unit_kerjas,
-      'jabatan' => $karyawan->jabatans,
-      'kompetensi' => $karyawan->kompetensis,
-      'nik_ktp' => $karyawan->nik_ktp,
-      'status_karyawan' => $karyawan->status_karyawans,
-      'tempat_lahir' => $karyawan->tempat_lahir,
-      'tgl_lahir' => $karyawan->tgl_lahir,
-      'kelompok_gaji' => $karyawan->kelompok_gajis,
-      'no_rekening' => $karyawan->no_rekening,
-      'tunjangan_jabatan' => $karyawan->tunjangan_jabatan,
-      'tunjangan_fungsional' => $karyawan->tunjangan_fungsional,
-      'tunjangan_khusus' => $karyawan->tunjangan_khusus,
-      'tunjangan_lainnya' => $karyawan->tunjangan_lainnya,
-      'uang_lembur' => $karyawan->uang_lembur,
-      'uang_makan' => $karyawan->uang_makan,
-      'ptkp' => $karyawan->ptkps,
-      'tgl_keluar' => $karyawan->tgl_keluar,
-      'no_kk' => $karyawan->no_kk,
-      'alamat' => $karyawan->alamat,
-      'gelar_depan' => $karyawan->gelar_depan,
-      'no_hp' => $karyawan->no_hp,
-      'no_bpjsksh' => $karyawan->no_bpjsksh,
-      'no_bpjsktk' => $karyawan->no_bpjsktk,
-      'tgl_diangkat' => $karyawan->tgl_diangkat,
-      'masa_kerja' => $karyawan->masa_kerja,
-      'npwp' => $karyawan->npwp,
-      'jenis_kelamin' => $karyawan->jenis_kelamin,
-      'agama' => $karyawan->kategori_agamas,
-      'golongan_darah' => $karyawan->kategori_darahs,
-      'pendidikan_terakhir' => $karyawan->kategori_pendidikans,
-      'tinggi_badan' => $karyawan->tinggi_badan,
-      'berat_badan' => $karyawan->berat_badan,
-      'no_ijazah' => $karyawan->no_ijazah,
-      'tahun_lulus' => $karyawan->tahun_lulus,
-      'no_str' => $karyawan->no_str,
-      'masa_berlaku_str' => $karyawan->masa_berlaku_str,
-      'masa_berlaku_sip' => $karyawan->masa_berlaku_sip,
-      'tgl_berakhir_pks' => $karyawan->tgl_berakhir_pks,
-      'masa_diklat' => $karyawan->masa_diklat,
-      'created_at' => $karyawan->created_at,
-      'updated_at' => $karyawan->updated_at
-    ], $formattedPaths);
-
-    return response()->json(new DataResource(Response::HTTP_OK, 'Detail karyawan berhasil didapatkan', $formattedData), Response::HTTP_OK);
+    $data = $berkas->map(function($i){
+        return [
+            'url' => env('URL_STORAGE').$i->path,
+            'name' => $i->nama,
+            'ext' => StorageFileHelper::getExtensionFromMimeType($i->ext),
+        ];
+    });
+    return response()->json(new DataResource(Response::HTTP_OK, 'Berkas berhasil di ambil', $data), Response::HTTP_OK);
   }
 }
