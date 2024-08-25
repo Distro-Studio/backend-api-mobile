@@ -12,6 +12,18 @@ class TipeCuti extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'id' => 'integer',
+        'nama' => 'string',
+        'kuota' => 'integer',
+        'is_need_requirement' => 'boolean',
+        'keterangan' => 'string',
+        'cuti_administratif' => 'boolean',
+        'deleted_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     // Akses nilai 'used' dengan default range (tanpa filter)
     // public function getUsedAttribute()
     // {

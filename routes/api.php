@@ -118,4 +118,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/get-detail-karyawan', [DataPersonalController::class, 'getdetailkaryawan']);
 
     Route::get('/get-berkas-karyawan-personal', [DataPersonalController::class, 'getberkaspersonal']);
+
+    Route::post('/cek-password', [DataPersonalController::class, 'cekpassword']);
+    Route::get('/get-detail-password', [DataPersonalController::class, 'getdetailpass']);
 });

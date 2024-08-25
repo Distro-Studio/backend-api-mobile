@@ -11,6 +11,16 @@ class Jadwal extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'id' => 'integer',
+        'nama_jabatan' => 'string',
+        'is_struktural' => 'boolean',
+        'tunjangan_jabatan' => 'integer',
+        'deleted_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function shift()
     {
         return $this->belongsTo(Shift::class);

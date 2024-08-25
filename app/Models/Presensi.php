@@ -11,6 +11,26 @@ class Presensi extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'id' => 'integer',
+        'user_id' => 'integer',
+        'data_karyawan_id' => 'integer',
+        'jadwal_id' => 'integer',
+        'jam_masuk' => 'string',
+        'jam_keluar' => 'string',
+        'durasi' => 'integer',
+        'lat' => 'string',
+        'long' => 'string',
+        'latkeluar' => 'string',
+        'longkeluar' => 'string',
+        'foto_masuk' => 'integer',
+        'foto_keluar' => 'integer',
+        'kategori_presensi_id' => 'integer',
+        'note' => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');

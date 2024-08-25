@@ -8,6 +8,7 @@ use App\Http\Resources\WithoutDataResource;
 use App\Models\Berkas;
 use App\Models\DataKaryawan;
 use App\Models\DataKeluarga;
+use App\Models\Penggajian;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DataPersonalController extends Controller
 {
@@ -542,5 +544,76 @@ class DataPersonalController extends Controller
         ];
     });
     return response()->json(new DataResource(Response::HTTP_OK, 'Berkas berhasil di ambil', $data), Response::HTTP_OK);
+  }
+
+  public function cekpassword(Request $request)
+  {
+    $user = User::where('id', Auth::user()->id)->first();
+    if (!Hash::check($request->password, $user->password)) {
+        return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email atau password salah'), Response::HTTP_UNAUTHORIZED);
+    }
+
+    $user->makeHidden('password');
+
+    return response()->json(new DataResource(Response::HTTP_OK, 'Password berhasil terkonfirmasi', $user));
+  }
+
+  public function getdetailpass()
+  {
+    $user = User::where('id', Auth::user()->id)->with('dataKaryawan')->first();
+    $penggajian = Penggajian::with([
+        'detail_gajis',
+        'data_karyawans.user',
+        'data_karyawans.unitkerja',
+        'data_karyawans.kelompok_gaji',
+        'data_karyawans.ptkp'
+    ])
+        ->where('data_karyawan_id', $user->dataKaryawan->id)
+        ->first();
+
+    if (!$penggajian) {
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data penggajian tidak ditemukan.'), Response::HTTP_NOT_FOUND);
+    }
+
+    $dataKaryawan = $penggajian->data_karyawans;
+    $user = $dataKaryawan->user;
+    $unitKerja = $dataKaryawan->unitkerja;
+    $kelompokGaji = $dataKaryawan->kelompok_gaji;
+    $ptkp = $dataKaryawan->ptkp;
+
+    $detailGajis = $penggajian->detail_gajis->map(function ($detail) {
+        return [
+            'kategori_gaji' => $detail->kategori_gajis,
+            'nama_detail' => $detail->nama_detail,
+            'besaran' => $detail->besaran,
+            'created_at' => $detail->created_at,
+            'updated_at' => $detail->updated_at
+        ];
+    });
+
+    $formattedData = [
+        'user' => [
+            'id' => $user->id,
+            'nama' => $user->nama,
+            'email_verified_at' => $user->email_verified_at,
+            'data_karyawan_id' => $user->data_karyawan_id,
+            'foto_profil' => $user->foto_profil,
+            'data_completion_step' => $user->data_completion_step,
+            'status_aktif' => $user->status_aktif,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at
+        ],
+        'unit_kerja' => $unitKerja,
+        'kelompok_gaji' => $kelompokGaji,
+        'ptkp' => $ptkp,
+        'detail_gaji' => $detailGajis,
+        'take_home_pay' => $penggajian->take_home_pay,
+    ];
+
+    return response()->json([
+        'status' => Response::HTTP_OK,
+        'message' => "Detail gaji karyawan '{$user->nama}' berhasil ditampilkan.",
+        'data' => $formattedData
+    ], Response::HTTP_OK);
   }
 }

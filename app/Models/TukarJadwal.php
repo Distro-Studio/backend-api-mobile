@@ -11,6 +11,19 @@ class TukarJadwal extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'id' => 'integer',
+        'user_pengajuan' => 'integer',
+        'jadwal_pengajuan' => 'integer',
+        'user_ditukar' => 'integer',
+        'jadwal_ditukar' => 'integer',
+        'status_penukaran_id' => 'integer',
+        'kategori_penukaran_id' => 'integer',
+        'deleted_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function userPengajuan()
     {
         return $this->belongsTo(User::class, 'user_pengajuan', 'id');

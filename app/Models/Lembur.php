@@ -11,6 +11,18 @@ class Lembur extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'id' => 'integer',
+        'user_id' => 'integer',
+        'jadwal_id' => 'integer',
+        'tgl_pengajuan' => 'string',
+        'durasi' => 'string',
+        'catatan' => 'string',
+        'status_lembur_id' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -66,7 +66,7 @@ class LoginController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda tidak valid'), Response::HTTP_UNAUTHORIZED);
             }
 
-
+            $datauser->makeHidden('password');
 
             Auth::login($datauser);
 
@@ -82,6 +82,8 @@ class LoginController extends Controller
             $users->unit_kerja = [
                 $unitkerja,
             ];
+
+            $users->makeHidden('password');
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Login Berhasil', $users), Response::HTTP_OK);
 

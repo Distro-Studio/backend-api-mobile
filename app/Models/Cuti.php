@@ -11,10 +11,24 @@ class Cuti extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'id' => 'integer',
+        'user_id' => 'integer',
+        'tipe_cuti_id' => 'integer',
+        'tgl_from' => 'string',
+        'tgl_to' => 'string',
+        'catatan' => 'string',
+        'durasi' => 'integer',
+        'status_cuti_id' => 'integer',
+        'verifikator_1' => 'integer',
+        'verifikator_2' => 'integer',
+        'alasan' => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     public function tipeCuti()
     {
         return $this->belongsTo(TipeCuti::class, 'tipe_cuti_id', 'id');
     }
-
-
 }
