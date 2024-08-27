@@ -307,10 +307,10 @@ class PresensiController extends Controller
             // });
 
             // return response()->json(new DataResource(Response::HTTP_OK, 'Data activity log', $formattedActivity), Response::HTTP_OK);
-            $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
-            $presensiBulanIni = Presensi::where('data_karyawan_id', $datakaryawan->id)
-                ->whereYear('jam_masuk', Carbon::now()->year)
-                ->whereMonth('jam_masuk', Carbon::now()->month)
+            $starofweek = Carbon::now()->startOfMonth();
+            $endofweek = Carbon::now()->endOfMonth();
+            $presensiBulanIni = Presensi::where('user_id', Auth::user()->id)
+                ->whereBetween('created_at',[$starofweek, $endofweek])
                 ->orderBy('jam_masuk')
                 ->get();
 
@@ -331,6 +331,8 @@ class PresensiController extends Controller
                     ];
                   }
                 }
+
+            return response()->json(new DataResource(Response::HTTP_OK, 'Aktivitas berhasil didapatkan', $aktivitasPresensi), Response::HTTP_OK);
 
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);

@@ -31,4 +31,9 @@ class Cuti extends Model
     {
         return $this->belongsTo(TipeCuti::class, 'tipe_cuti_id', 'id');
     }
+
+    public function statuscuti()
+    {
+        return $this->belongsTo(StatusCuti::class, 'status_cuti_id', 'id');
+    }
 }
