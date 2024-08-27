@@ -28,7 +28,11 @@ class JadwalController extends Controller
 
             $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->first();
             if ($cekpresensi) {
-                $aktivitas = true;
+                if ($cekpresensi->jam_keluar == null){
+                    $aktivitas = true;
+                }else {
+                    return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Presensi sudah dilakukan'), Response::HTTP_NOT_FOUND);
+                }
             }
 
             if($datakaryawan->unitkerja->jenis_karyawan == 1) {
@@ -41,6 +45,12 @@ class JadwalController extends Controller
                 }
             }else {
                 $nonshift = NonShift::where('id', 1)->first();
+                $jamMasuk = Carbon::parse($nonshift->jam_from);
+                $jamKeluar = Carbon::parse($nonshift->jam_to);
+                $waktuSekarang = Carbon::now();
+                if (!$waktuSekarang->between($jamMasuk, $jamKeluar)) {
+                    return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+                }
                 $jadwaln = [
                     "id" => 0,
                     "user_id" => $datakaryawan->user_id,

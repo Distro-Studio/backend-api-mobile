@@ -13,6 +13,7 @@ use App\Models\Berkas;
 use App\Models\DataKaryawan;
 use App\Models\Jadwal;
 use App\Models\LokasiKantor;
+use App\Models\NonShift;
 use App\Models\Presensi;
 use App\Models\User;
 use Carbon\Carbon;
@@ -22,6 +23,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Str;
 
 
 class PresensiController extends Controller
@@ -40,19 +42,36 @@ class PresensiController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
         }
 
-        $checkuser = UserActiveHelper::checkActive(User::where('id', Auth::user()->id)->first());
-        if (!$checkuser) {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'User belum aktif'), Response::HTTP_NOT_ACCEPTABLE);
 
-        }
+        // $checkuser = UserActiveHelper::checkActive(User::where('id', Auth::user()->id)->first());
+        // if (!$checkuser) {
+        //     return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'User belum aktif'), Response::HTTP_NOT_ACCEPTABLE);
 
-        $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
-        $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
-        if (!$jadwal) {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+        // }
+
+        $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
+        if ($datakaryawan->unitkerja->jenis_karyawan == 1) {
+            $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
+            if (!$jadwal) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+            }
+            $jadwalid = $jadwal->id;
+            $start = Carbon::createFromFormat('H:i:s', $jadwal->shift->jam_from, 'Asia/Jakarta');
+        }else{
+            $nonshift = NonShift::where('id', 1)->first();
+            $jamMasuk = Carbon::parse($nonshift->jam_from);
+            $jamKeluar = Carbon::parse($nonshift->jam_to);
+            $waktuSekarang = Carbon::now();
+            if (!$waktuSekarang->between($jamMasuk, $jamKeluar)) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+
+            }
+
+            $jadwalid = null;
+            $start = Carbon::createFromFormat('H:i:s', $nonshift->jam_from, 'Asia/Jakarta');
         }
         // $start = Carbon::createFromTimeString($jadwal->shift->jam_from, 'Asia/Jakarta');
-        $start = Carbon::createFromFormat('H:i:s', $jadwal->shift->jam_from, 'Asia/Jakarta');
+        // $start = Carbon::createFromFormat('H:i:s', $jadwal->shift->jam_from, 'Asia/Jakarta');
         // $end = Carbon::createFromTimeString(date('H:i:s'), 'Asia/Jakarta');
         $end = Carbon::now();
         // $start->locale('id');
@@ -81,7 +100,7 @@ class PresensiController extends Controller
             $status = 3; //ABSEN
         }
 
-
+        // return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'sdad'), Response::HTTP_NOT_FOUND);
         //cek lokasi user
         $lokasi = LokasiKantor::where('id', 1)->first();
         $latoffice = $lokasi->lat;
@@ -89,6 +108,8 @@ class PresensiController extends Controller
         $latuser = $request->lat;
         $longuser = $request->long;
         $radius = $lokasi->radius;
+
+
 
         $distance = LocationHelper::haversineGreatCircleDistance(
             $latoffice,
@@ -102,18 +123,19 @@ class PresensiController extends Controller
             $checkpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->where('jam_keluar', NULL)->first();
 
             if($checkpresensi){
-                return response()->json(new DataResource(Response::HTTP_IM_USED, 'Presennsi sudah dilakukan sebelumnya', $checkpresensi), Response::HTTP_IM_USED);
+                return response()->json(new DataResource(Response::HTTP_BAD_REQUEST, 'Presennsi sudah dilakukan sebelumnya', $checkpresensi), Response::HTTP_BAD_REQUEST);
             }
 
             try{
                 // $presensisebelum = Presensi::where('user_id', Auth::user()->id)->where('jam_keluar', NULL)->update(['presensi' => 0]);
-                $dataupload = StorageFileHelper::uploadToServer($request, 'Check in '. Auth::user()->nama, 'foto');
+                $dataupload = StorageFileHelper::uploadToServer($request, Str::random(12), 'foto');
 
                 $saveberkas = Berkas::create([
                     'user_id' => Auth::user()->id,
                     'file_id' => $dataupload['id_file']['id'],
                     'nama' => Auth::user()->nama,
                     'kategori_berkas_id' => 3,
+                    'status_berkas_id' => 2,
                     'path' => $dataupload['path'],
                     'tgl_upload' => date('Y-m-d'),
                     'nama_file' => $dataupload['nama_file'],
@@ -126,7 +148,7 @@ class PresensiController extends Controller
                 $presensi = Presensi::create([
                     'user_id' => Auth::user()->id,
                     'data_karyawan_id' => $datakaryawan->id,
-                    'jadwal_id' => $jadwal->id,
+                    'jadwal_id' => $jadwalid,
                     'jam_masuk' => date('Y-m-d H:i:s'),
                     'lat' => $request->lat,
                     'long' => $request->long,
@@ -211,6 +233,7 @@ class PresensiController extends Controller
                     'file_id' => $dataupload['id_file']['id'],
                     'nama' => Auth::user()->nama,
                     'kategori_berkas_id' => 3,
+                    'status_berkas_id' => 2,
                     'path' => $dataupload['path'],
                     'tgl_upload' => date('Y-m-d'),
                     'nama_file' => $dataupload['nama_file'],
@@ -238,7 +261,7 @@ class PresensiController extends Controller
 
 
                 $checkpresensi->jam_keluar = $time;
-                $checkpresensi->durasi = $duration->h . ' jam ' . $duration->i . ' menit';
+                $checkpresensi->durasi = $duration->s;
                 $checkpresensi->latkeluar = $request->lat;
                 $checkpresensi->longkeluar = $request->long;
                 // $checkpresensi->presensi = 1;
@@ -248,12 +271,12 @@ class PresensiController extends Controller
                 $activity = ActivityLog::create([
                     'activity' => 'Keluar',
                     'user_id' => Auth::user()->id,
-                    'kategori' => 'Presensi'
+                    'kategori_activity_id' => 1
                 ]);
 
                 return response()->json(new DataResource(Response::HTTP_OK, 'Presensi berhasil dilakukan', $checkpresensi), Response::HTTP_OK);
             } catch (\Exception $e){
-                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } else {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda diluar radius kantor'), Response::HTTP_NOT_ACCEPTABLE);
