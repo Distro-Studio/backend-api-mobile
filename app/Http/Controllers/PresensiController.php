@@ -288,25 +288,49 @@ class PresensiController extends Controller
     {
         try {
             //code...
-            $activity = ActivityLog::where('user_id', Auth::user()->id)
-                ->where('kategori', 'Presensi')
-                ->select('activity', 'created_at')
+            // $activity = ActivityLog::where('user_id', Auth::user()->id)
+            //     ->where('kategori', 'Presensi')
+            //     ->select('activity', 'created_at')
+            //     ->get();
+
+            // if ($activity->isEmpty()) {
+            //     return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data activity log tidak ditemukan'), Response::HTTP_NOT_FOUND);
+            // }
+
+            // // Pisahkan tanggal dan jam
+            // $formattedActivity = $activity->map(function ($item) {
+            //     return [
+            //         'activity' => $item->activity,
+            //         'tanggal' => $item->tanggal,
+            //         'jam' => $item->jam,
+            //     ];
+            // });
+
+            // return response()->json(new DataResource(Response::HTTP_OK, 'Data activity log', $formattedActivity), Response::HTTP_OK);
+            $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+            $presensiBulanIni = Presensi::where('data_karyawan_id', $datakaryawan->id)
+                ->whereYear('jam_masuk', Carbon::now()->year)
+                ->whereMonth('jam_masuk', Carbon::now()->month)
+                ->orderBy('jam_masuk')
                 ->get();
 
-            if ($activity->isEmpty()) {
-                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data activity log tidak ditemukan'), Response::HTTP_NOT_FOUND);
-            }
-
-            // Pisahkan tanggal dan jam
-            $formattedActivity = $activity->map(function ($item) {
-                return [
-                    'activity' => $item->activity,
-                    'tanggal' => $item->tanggal,
-                    'jam' => $item->jam,
-                ];
-            });
-
-            return response()->json(new DataResource(Response::HTTP_OK, 'Data activity log', $formattedActivity), Response::HTTP_OK);
+                $aktivitasPresensi = [];
+                foreach ($presensiBulanIni as $presensi) {
+                  if ($presensi->jam_masuk) {
+                    $aktivitasPresensi[] = [
+                      'presensi' => 'Masuk',
+                      'tanggal' => Carbon::parse($presensi->jam_masuk)->format('Y-m-d'),
+                      'jam' =>  Carbon::parse($presensi->jam_masuk)->format('H:i:s'),
+                    ];
+                  }
+                  if ($presensi->jam_keluar) {
+                    $aktivitasPresensi[] = [
+                      'presensi' => 'Keluar',
+                      'tanggal' => Carbon::parse($presensi->jam_keluar)->format('Y-m-d'),
+                      'jam' =>  Carbon::parse($presensi->jam_keluar)->format('H:i:s'),
+                    ];
+                  }
+                }
 
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);

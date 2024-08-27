@@ -11,7 +11,7 @@ class ActivityLog extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
-    
+
     protected $casts = [
         'id' => 'integer',                     // Untuk kolom 'id'
         'activity' => 'string',                // Untuk kolom 'activity'
@@ -35,5 +35,10 @@ class ActivityLog extends Model
     public function getJamAttribute()
     {
         return Carbon::parse($this->attributes['created_at'])->toTimeString();
+    }
+
+    public function kategoriActivy()
+    {
+        return $this->belongsTo(KategoriActivityLog::class, 'kategori_activity_id');
     }
 }
