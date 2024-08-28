@@ -15,6 +15,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PerubahannDataController;
 use App\Http\Controllers\PresensiController;
+use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TukarJadwalController;
 use App\Http\Controllers\UserController;
 use App\Models\Berkas;
@@ -120,5 +121,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::get('/get-berkas-karyawan-personal', [DataPersonalController::class, 'getberkaspersonal']);
 
     Route::post('/cek-password', [DataPersonalController::class, 'cekpassword']);
-    Route::get('/get-detail-password', [DataPersonalController::class, 'getdetailpass']);
+    Route::post('/get-detail-gaji', [DataPersonalController::class, 'getdetailpass']);
+
+    Route::get('/get-all-status-karyawan', [StatusController::class, 'getallstatuskaryawan']);
 });

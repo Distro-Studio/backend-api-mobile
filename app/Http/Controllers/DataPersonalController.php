@@ -10,6 +10,7 @@ use App\Models\DataKaryawan;
 use App\Models\DataKeluarga;
 use App\Models\Penggajian;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -558,7 +559,7 @@ class DataPersonalController extends Controller
     return response()->json(new DataResource(Response::HTTP_OK, 'Password berhasil terkonfirmasi', $user));
   }
 
-  public function getdetailpass()
+  public function getdetailpass(Request $request)
   {
     $user = User::where('id', Auth::user()->id)->with('dataKaryawan')->first();
     $penggajian = Penggajian::with([
@@ -569,6 +570,8 @@ class DataPersonalController extends Controller
         'data_karyawans.ptkp'
     ])
         ->where('data_karyawan_id', $user->dataKaryawan->id)
+        ->whereMonth('created_at', $request->bulan)
+        ->whereYear('created_at', $request->tahun)
         ->first();
 
     if (!$penggajian) {
