@@ -162,7 +162,7 @@ class DataPersonalController extends Controller
                 $keluarga = DataKeluarga::create([
                     'data_karyawan_id' => $data->id,
                     'nama_keluarga' => $k['nama'],
-                    'hubungan' => $k['hubungan_keluarga']['value'],
+                    'hubungan' => $k['hubungan_keluarga'],
                     'pendidikan_terakhir' => 'ini pendidikan',
                     'status_hidup' => $k['status_hidup']['value'],
                     'pekerjaan' => $k['pekerjaan'],
