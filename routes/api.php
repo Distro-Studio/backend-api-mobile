@@ -124,4 +124,8 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/get-detail-gaji', [DataPersonalController::class, 'getdetailpass']);
 
     Route::get('/get-all-status-karyawan', [StatusController::class, 'getallstatuskaryawan']);
+
+    Route::post('/update-data-personal', [DataPersonalController::class, 'updatedatapersonal']);
+
+    Route::post('/update-data-keluarga', [DataPersonalController::class, 'updatedatakeluarga']);
 });

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DetailGaji extends Model
 {
@@ -21,4 +22,19 @@ class DetailGaji extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function penggajians(): BelongsTo
+    {
+        return $this->belongsTo(Penggajian::class, 'penggajian_id', 'id');
+    }
+
+    /**
+     * Get the kategori_gajis that owns the DetailGaji
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function kategori_gajis(): BelongsTo
+    {
+        return $this->belongsTo(KategoriGaji::class, 'kategori_gaji_id', 'id');
+    }
 }

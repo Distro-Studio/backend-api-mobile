@@ -9,6 +9,8 @@ use App\Models\Berkas;
 use App\Models\DataKaryawan;
 use App\Models\DataKeluarga;
 use App\Models\Penggajian;
+use App\Models\PerubahanKeluarga;
+use App\Models\RiwayatPerubahan;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -155,6 +157,7 @@ class DataPersonalController extends Controller
 
             $keluarga = json_encode($request->keluarga, JSON_UNESCAPED_SLASHES);
             $datakeluarga = json_decode(stripslashes($keluarga), true);
+
             foreach ($datakeluarga['keluarga'] as $k) {
                 $keluarga = DataKeluarga::create([
                     'data_karyawan_id' => $data->id,
@@ -551,7 +554,7 @@ class DataPersonalController extends Controller
   {
     $user = User::where('id', Auth::user()->id)->first();
     if (!Hash::check($request->password, $user->password)) {
-        return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email atau password salah'), Response::HTTP_UNAUTHORIZED);
+        return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Email atau password salah'), Response::HTTP_BAD_REQUEST);
     }
 
     $user->makeHidden('password');
@@ -618,5 +621,126 @@ class DataPersonalController extends Controller
         'message' => "Detail gaji karyawan '{$user->nama}' berhasil ditampilkan.",
         'data' => $formattedData
     ], Response::HTTP_OK);
+  }
+
+  public function updatedatapersonal(Request $request)
+  {
+    $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+
+    if (!$datakaryawan) {
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data karyawan tidak ditemukan.'), Response::HTTP_NOT_FOUND);
+    }
+
+    try {
+        $originaldata = null;
+
+        if ($request->kolom_diubah == 'tempat_lahir') {
+            $originaldata = $datakaryawan->tempat_lahir;
+        }
+
+        if ($request->kolom_diubah == 'tgl_lahir') {
+            $originaldata = $datakaryawan->tgl_lahir;
+        }
+
+        if ($request->kolom_diubah == 'no_hp') {
+            $originaldata = $datakaryawan->no_hp;
+        }
+
+        if ($request->kolom_diubah == 'jenis_kelamin') {
+            $originaldata = $datakaryawan->jenis_kelamin;
+        }
+
+        if ($request->kolom_diubah == 'nik_ktp') {
+            $originaldata = $datakaryawan->nik_ktp;
+        }
+
+        if ($request->kolom_diubah == 'no_kk') {
+            $originaldata = $datakaryawan->no_kk;
+        }
+
+        if ($request->kolom_diubah == 'kategori_agama_id') {
+            $originaldata = $datakaryawan->kategori_agama_id;
+        }
+
+        if ($request->kolom_diubah == 'kategori_darah_id') {
+            $originaldata = $datakaryawan->kategori_darah_id;
+        }
+
+        if ($request->kolom_diubah == 'tinggi_badan') {
+            $originaldata = $datakaryawan->tinggi_badan;
+        }
+
+        if ($request->kolom_diubah == 'berat_badan') {
+            $originaldata = $datakaryawan->berat_badan;
+        }
+
+        if ($request->kolom_diubah == 'alamat') {
+            $originaldata = $datakaryawan->alamat;
+        }
+
+        if ($request->kolom_diubah == 'no_ijasah') {
+            $originaldata = $datakaryawan->no_ijasah;
+        }
+
+        if ($request->kolom_diubah == 'tahun_lulus') {
+            $originaldata = $datakaryawan->tahun_lulus;
+        }
+
+        if ($request->kolom_diubah == 'pendidikan_terakhir') {
+            $originaldata = $datakaryawan->pendidikan_terakhir;
+        }
+
+        if ($request->kolom_diubah == 'gelar_depan') {
+            $originaldata = $datakaryawan->gelar_depan;
+        }
+
+
+        $datadiubah = RiwayatPerubahan::create([
+            'data_karyawan_id' => $datakaryawan->id,
+            'jenis_perubahan' => 'Personal',
+            'kolom' => $request->kolom_diubah,
+            'original_data' => $originaldata,
+            'updated_data' => $request->value_diubah,
+            'status_perubahan_id' => 1,
+        ]);
+
+        return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public function updatedatakeluarga(Request $request)
+  {
+    $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+    $datakeluargori = DataKeluarga::where('data_karyawan_id', $datakaryawan->id)->get();
+    // $keluarga = json_encode($request->keluarga, JSON_UNESCAPED_SLASHES);
+    // $datakeluarga = json_decode(stripslashes($keluarga), true);
+    // $keluarga = json_encode($request->keluarga);
+    $datakeluarga = json_decode($request->keluarga);
+
+    $datadiubah = RiwayatPerubahan::create([
+        'data_karyawan_id' => $datakaryawan->id,
+        'jenis_perubahan' => 'Keluarga',
+        'kolom' => 'Data Keluarga',
+        'original_data' => 'dsadad',
+        'updated_data' => $datakeluarga,
+        'status_perubahan_id' => 1,
+    ]);
+
+    foreach ($datakeluarga['keluarga'] as $k) {
+        $keluarga = PerubahanKeluarga::create([
+            'data_karyawan_id' => $datakaryawan->id,
+            'nama_keluarga' => $k['nama'],
+            'hubungan' => $k['hubungan_keluarga']['value'],
+            'pendidikan_terakhir' => 'ini pendidikan',
+            'status_hidup' => $k['status_hidup']['value'],
+            'pekerjaan' => $k['pekerjaan'],
+            'no_hp' => $k['telepon'],
+            'email' => $k['email'],
+        ]);
+    }
+
+    return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
   }
 }
