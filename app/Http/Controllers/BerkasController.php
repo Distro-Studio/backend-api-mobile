@@ -34,6 +34,7 @@ class BerkasController extends Controller
                 'file_id' => $dataupload['id_file']['id'],
                 'nama' => $request->label,
                 'kategori_berkas_id' => 1, //pribadi
+                'status_berkas_id' => 1,
                 'path' => $dataupload['path'],
                 'tgl_upload' => date('Y-m-d'),
                 'nama_file' => $dataupload['nama_file'],
@@ -45,7 +46,7 @@ class BerkasController extends Controller
 
 
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wronng'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

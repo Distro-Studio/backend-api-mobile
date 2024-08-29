@@ -158,4 +158,14 @@ class CutiCotroller extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function getalltipecuti()
+    {
+        try {
+            $tipecuti = TipeCuti::all();
+            return response()->json(new DataResource(Response::HTTP_OK, 'List tipe cuti berhasil didapatkan', $tipecuti), Response::HTTP_OK);
+        }catch(\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

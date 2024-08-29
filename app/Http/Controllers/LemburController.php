@@ -18,7 +18,7 @@ class LemburController extends Controller
             $tgl_mulai = Carbon::now('Asia/Jakarta')->startOfMonth()->toDateString();
             $tgl_selesai = Carbon::now('Asia/Jakarta')->endOfMonth()->toDateString();
             $query = Lembur::query();
-            $query->where('user_id', Auth::user()->id)->where('status_lembur_id', 3)->whereBetween('tgl_pengajuan', [$tgl_mulai, $tgl_selesai]);
+            $query->where('user_id', Auth::user()->id)->whereBetween('created_at', [$tgl_mulai, $tgl_selesai]);
 
             $totallembur = $query->count();
             $totalwaktu = $query->sum('durasi');
@@ -31,7 +31,7 @@ class LemburController extends Controller
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Statistik lembur berhasil didapatkan', $data), Response::HTTP_OK);
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -47,14 +47,14 @@ class LemburController extends Controller
             $tgl_selesai = Carbon::now('Asia/Jakarta')->endOfMonth()->toDateString();
             $query = Lembur::query();
             // $query->where('user_id', Auth::user()->id)->where('status_lembur_id', 3)->whereBetween('tgl_pengajuan', [$tgl_mulai, $tgl_selesai]);
-            $query->where('user_id', Auth::user()->id)->whereBetween('tgl_pengajuan', [$tgl_mulai, $tgl_selesai]);
+            $query->where('user_id', Auth::user()->id)->whereBetween('created_at', [$tgl_mulai, $tgl_selesai]);
 
             $data = $query->with('user')->paginate($offset);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Riwayat lembur berhasil didapatkan', $data), Response::HTTP_OK);
 
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wronng'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

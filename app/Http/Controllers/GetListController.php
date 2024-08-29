@@ -33,7 +33,7 @@ class GetListController extends Controller
         }
     }
 
-    public function getkaryawanunitkerja(){
+    public function getkaryawanunitkerja(Request $request){
         try {
             $startDate = Carbon::now()->startOfWeek()->format('Y-m-d');
             $endDate = Carbon::now()->endOfWeek()->format('Y-m-d');
@@ -52,6 +52,17 @@ class GetListController extends Controller
                         $query->whereBetween('tgl_mulai', [$startDate, $endDate]);
                     }
                 }]);
+            $filters = $request->all();
+            if (isset($filters['status_karyawan'])) {
+                $statusKaryawan = $filters['status_karyawan'];
+                $query->whereHas('status_karyawans', function ($karyawan) use ($statusKaryawan) {
+                  if (is_array($statusKaryawan)) {
+                    $karyawan->whereIn('id', $statusKaryawan);
+                  } else {
+                    $karyawan->where('id', '=', $statusKaryawan);
+                  }
+                });
+              }
             $users = $query->get();
 
             // $user->is_libur = false;

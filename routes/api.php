@@ -87,7 +87,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/change-schedule', [JadwalController::class, 'changeschedule']);
 
     //get another karyawan with same unit kerja
-    Route::get('/user-unit-kerja', [GetListController::class, 'getkaryawanunitkerja']);
+    Route::post('/user-unit-kerja', [GetListController::class, 'getkaryawanunitkerja']);
 
     //get jadwal yang akan ditukar
     Route::get('/get-jadwal/{jadwal}/ditukar', [JadwalController::class, 'getjadwalditukar']);
@@ -128,4 +128,8 @@ Route::middleware(['auth:sanctum'])->group(function(){
     Route::post('/update-data-personal', [DataPersonalController::class, 'updatedatapersonal']);
 
     Route::post('/update-data-keluarga', [DataPersonalController::class, 'updatedatakeluarga']);
+
+    Route::get('/get-list-tipecuti', [CutiCotroller::class, 'getalltipecuti']);
+
+    // Route::get('/data-karyawan', []);
 });
