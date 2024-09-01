@@ -117,4 +117,9 @@ class DataKaryawan extends Model
     {
         return $this->belongsTo(KategoriPendidikan::class, 'pendidikan_terakhir', 'id');
     }
+
+    public function riwayatperubahan()
+    {
+        return $this->hasMany(DataKaryawan::class, 'data_karyawan_id', 'id');
+    }
 }

@@ -53,6 +53,11 @@ class JadwalController extends Controller
         if (!$waktuSekarang->between($jamMasuk, $jamKeluar)) {
           return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }
+
+        if (Carbon::now()->isSunday()) {
+          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+        }
+
         $jadwaln = [
           "id" => 0,
           "user_id" => $datakaryawan->user_id,

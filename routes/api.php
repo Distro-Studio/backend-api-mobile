@@ -133,5 +133,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   Route::post('/get-pengumuman', [GetListController::class, 'getpengumuman']);
 
+  Route::get('/get-data-karyawan', [DataPersonalController::class, 'getdatakaryawandetail']);
+
+  Route::get('/get-notifikasi', [GetListController::class, 'getlistnotifikasi']);
+
+  Route::get('/get-riwayat-perubahan', [GetListController::class, 'getriwayatperubahan']);
+
   // Route::get('/data-karyawan', []);
 });
