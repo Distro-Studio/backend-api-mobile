@@ -13,7 +13,7 @@ class UnitKerja extends Model
     protected $casts = [
         'id' => 'integer',
         'nama_unit' => 'string',
-        'jenis_karyawan' => 'boolean',
+        'jenis_karyawan' => 'integer',
         'deleted_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

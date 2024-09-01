@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
+use App\Models\HariLibur;
 use App\Models\Jadwal;
 use App\Models\LokasiKantor;
 use App\Models\NonShift;
@@ -105,42 +106,123 @@ class JadwalController extends Controller
         // }
 
         try {
-            if ($request->tgl_mulai == null || $request->tgl_selesai == null) {
-                // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', 'ini kalo kosong'), Response::HTTP_OK);
-                $startOfWeek = now()->startOfWeek()->format('Y-m-d');
-                $endOfWeek = now()->endOfWeek()->format('Y-m-d');
+            $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
+            $harilibur = HariLibur::all()->pluck('tanggal')->toArray();
+            $nonshift = NonShift::where('id', 1)->first();
+            // if ($request->tgl_mulai == null || $request->tgl_selesai == null) {
+            //     // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', 'ini kalo kosong'), Response::HTTP_OK);
 
-                $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$startOfWeek, $endOfWeek])->with('shift')->get();
-                if($jadwal->isEmpty()){
-                    return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
-                }
+            //     $start = Carbon::now()->startOfWeek();
+            //     $end = Carbon::now()->endOfWeek();
+            //     $startOfWeek = Carbon::createFromFormat('Y-m-d', $start);
+            //     $endOfWeek = Carbon::createFromFormat('Y-m-d', $end);
 
-                return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
 
-            } else if($request->tgl_mulai == '' || $request->tgl_selesai == '') {
-                // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', 'ini kalo kosong'), Response::HTTP_OK);
-                $startOfWeek = now()->startOfWeek()->format('Y-m-d');
-                $endOfWeek = now()->endOfWeek()->format('Y-m-d');
+            //     if($datakaryawan->unitkerja->jenis_karyawan == 0) {
+            //         $jadwal = [];
+            //         for ($date = $start; $date <= $end; $date->addDay()) {
+            //             // Format tanggal ke Y-m-d
+            //             $formattedDate = $date->format('Y-m-d');
 
-                $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$startOfWeek, $endOfWeek])->with('shift')->get();
-                if($jadwal->isEmpty()){
-                    return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
-                }
+            //             // Cek apakah tanggal ini adalah hari libur
+            //             if (in_array($formattedDate, $harilibur)) {
+            //                 $jadwal = [
+            //                     'id' => null,
+            //                     "tgl" => $formattedDate,
+            //                     "jam_from" => null,
+            //                     "jam_to" => null,
+            //                 ];
+            //             } else {
+            //                 $jadwal = [
+            //                     'id' => 1,
+            //                     "tgl" => $formattedDate,
+            //                     "jam_from" => $nonshift->jam_from,
+            //                     "jam_to" => $nonshift->jam_to,
+            //                 ];
+            //             }
+            //         }
 
-                return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
+            //         // return response()->json(new WithoutDataResource(Response::HTTP_OK, $startDate->diffInDays($endDate) + 1), Response::HTTP_OK);
+            //     }else {
+            //         $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$startOfWeek, $endOfWeek])->with('shift')->get();
+            //         if($jadwal->isEmpty()){
+            //             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+            //         }
+            //     }
 
-            } else {
-                // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', 'ini kalo gak kosong'), Response::HTTP_OK);
-                $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$request->tgl_mulai, $request->tgl_selesai])->with('shift')->get();
-                if($jadwal->isEmpty()){
-                    return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
-                }
 
-                return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
-            }
+            //     return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
 
+            // } else if($request->tgl_mulai == '' || $request->tgl_selesai == '') {
+            //     // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', 'ini kalo kosong'), Response::HTTP_OK);
+            //     $startOfWeek = Carbon::now()->startOfWeek()->format('Y-m-d');
+            //     $endOfWeek = Carbon::now()->endOfWeek()->format('Y-m-d');
+            //     if($datakaryawan->unitkerja->jenis_karyawan == 0) {
+            //         // $jadwal = [
+            //         //     'id' => 0,
+            //         //     "user_id" => 8,
+            //         //     "tgl_mulai" => "2024-07-12",
+            //         //     "tgl_selesai" => "2024-07-12",
+            //         //     "shift_id" => 3,
+            //         //     "created_at" => null,
+            //         //     "updated_at" => null,
+            //         // ];
+
+            //         return response()->json(new WithoutDataResource(Response::HTTP_OK, $startOfWeek), Response::HTTP_OK);
+            //     }
+            //     $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$startOfWeek, $endOfWeek])->with('shift')->get();
+            //     if($jadwal->isEmpty()){
+            //         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+            //     }
+
+            //     return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
+
+            // } else {
+            //     // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', 'ini kalo gak kosong'), Response::HTTP_OK);
+            //     // $start = Carbon::now()->startOfWeek();
+            //     // $end = Carbon::now()->endOfWeek();
+            //     $startOfWeek = Carbon::createFromFormat('Y-m-d', $request->tgl_mulai);
+            //     $endOfWeek = Carbon::createFromFormat('Y-m-d', $request->tgl_selesai);
+
+
+            //     if($datakaryawan->unitkerja->jenis_karyawan == 0) {
+            //         $jadwal = [];
+            //         for ($date = $startOfWeek; $date <= $endOfWeek; $date->addDay()) {
+            //             // Format tanggal ke Y-m-d
+            //             $formattedDate = $date->format('Y-m-d');
+
+            //             // Cek apakah tanggal ini adalah hari libur
+            //             if (in_array($formattedDate, $harilibur)) {
+            //                 $jadwal = [
+            //                     'id' => null,
+            //                     "tgl" => $formattedDate,
+            //                     "jam_from" => null,
+            //                     "jam_to" => null,
+            //                 ];
+            //             } else {
+            //                 $jadwal = [
+            //                     'id' => 1,
+            //                     "tgl" => $formattedDate,
+            //                     "jam_from" => $nonshift->jam_from,
+            //                     "jam_to" => $nonshift->jam_to,
+            //                 ];
+            //             }
+            //         }
+
+            //         // return response()->json(new WithoutDataResource(Response::HTTP_OK, $startDate->diffInDays($endDate) + 1), Response::HTTP_OK);
+            //     }else {
+            //         $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('shift_id', '!=', null)->whereBetween('tgl_mulai', [$request->tgl_mulai, $request->tgl_selesai])->with('shift')->get();
+            //         if($jadwal->isEmpty()){
+            //             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+            //         }
+            //     }
+
+            //     return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
+            // }
+
+            
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
     }

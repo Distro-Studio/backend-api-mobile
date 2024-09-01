@@ -131,5 +131,7 @@ Route::middleware(['auth:sanctum'])->group(function(){
 
     Route::get('/get-list-tipecuti', [CutiCotroller::class, 'getalltipecuti']);
 
+    Route::post('/get-pengumuman', [GetListController::class, 'getpengumuman']);
+
     // Route::get('/data-karyawan', []);
 });

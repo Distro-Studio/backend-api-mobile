@@ -7,6 +7,7 @@ use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
 use App\Models\KategoriAgama;
 use App\Models\KategoriDarah;
+use App\Models\Pengumuman;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -80,6 +81,26 @@ class GetListController extends Controller
 
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function getpengumuman(Request $request)
+    {
+        try {
+            if($request->limit == 0) {
+                $pengumuman = Pengumuman::all();
+            }else {
+                $pengumuman = Pengumuman::take($request->limit)->get();
+            }
+
+            if ($pengumuman->isEmpty())
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pengumuman tidak ditemukan'), Response::HTTP_NOT_FOUND);
+            }
+
+            return response()->json(new DataResource(Response::HTTP_OK, 'Pengumuman berhasil didapatkan', $pengumuman),Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
