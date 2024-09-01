@@ -72,7 +72,7 @@ class LemburController extends Controller
       }
       $query->where('user_id', Auth::user()->id)->whereBetween('created_at', [$tgl_mulai, $tgl_selesai]);
 
-      $datasementara = $query->with('user')->paginate($offset);
+      $datasementara = $query->with('user')->get();
 
       if ($datakaryawan->unitkerja->jenis_karyawan == 1) {
         $data = $datasementara->map(function ($item) {
