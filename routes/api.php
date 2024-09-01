@@ -44,94 +44,94 @@ Route::post('/check-password-reset', [PasswordResetController::class, 'checktoke
 
 Route::get('/cobadownload', [CobaController::class, 'cobadownload']);
 
-Route::middleware(['auth:sanctum'])->group(function(){
-    Route::post('/change-password-reset', [PasswordResetController::class, 'changepass']);
-    Route::post('/logout', [LoginController::class, 'logout']);
-    Route::get('/getuserinfo', [UserController::class, 'checkuser']);
+Route::middleware(['auth:sanctum'])->group(function () {
+  Route::post('/change-password-reset', [PasswordResetController::class, 'changepass']);
+  Route::post('/logout', [LoginController::class, 'logout']);
+  Route::get('/getuserinfo', [UserController::class, 'checkuser']);
 
-    //global request
-    Route::get('get-list-agama', [GetListController::class, 'getlistagama']);
-    Route::get('/get-list-goldar', [GetListController::class, 'getlistgoldar']);
+  //global request
+  Route::get('get-list-agama', [GetListController::class, 'getlistagama']);
+  Route::get('/get-list-goldar', [GetListController::class, 'getlistgoldar']);
 
-    //data personal
-    Route::post('/input-personal', [DataPersonalController::class, 'step1']);
-    Route::post('/input-keluarga', [DataPersonalController::class, 'storekeluarga']);
-    Route::get('/get-data-keluarga', [DataPersonalController::class, 'getkeluarga']);
-    Route::post('/{dataKeluarga}/edit-data-keluarga', [DataPersonalController::class, 'updatekeluarga']);
-    Route::post('/input-berkas', [DataPersonalController::class, 'step5']);
-    Route::post('/input-personal-file', [DataPersonalController::class, 'storepersonalfile']);
+  //data personal
+  Route::post('/input-personal', [DataPersonalController::class, 'step1']);
+  Route::post('/input-keluarga', [DataPersonalController::class, 'storekeluarga']);
+  Route::get('/get-data-keluarga', [DataPersonalController::class, 'getkeluarga']);
+  Route::post('/{dataKeluarga}/edit-data-keluarga', [DataPersonalController::class, 'updatekeluarga']);
+  Route::post('/input-berkas', [DataPersonalController::class, 'step5']);
+  Route::post('/input-personal-file', [DataPersonalController::class, 'storepersonalfile']);
 
-    //check user active
-    Route::get('/active-user-check', [DataPersonalController::class, 'checkuseractive']);
-    // Route::post('/logout', [LoginController::class, 'logout']);
+  //check user active
+  Route::get('/active-user-check', [DataPersonalController::class, 'checkuseractive']);
+  // Route::post('/logout', [LoginController::class, 'logout']);
 
-    //presensi
-    Route::post('/check-in-presensi', [PresensiController::class, 'store']);
-    Route::post('/check-out-presensi', [PresensiController::class, 'checkoutpresensi']);
+  //presensi
+  Route::post('/check-in-presensi', [PresensiController::class, 'store']);
+  Route::post('/check-out-presensi', [PresensiController::class, 'checkoutpresensi']);
 
-    //get jadwal
-    Route::get('/get-today-jadwal', [JadwalController::class, 'gettodayjadwal']);
-    Route::post('/get-jadwal', [JadwalController::class, 'getalljadwal']);
+  //get jadwal
+  Route::get('/get-today-jadwal', [JadwalController::class, 'gettodayjadwal']);
+  Route::post('/get-jadwal', [JadwalController::class, 'getalljadwal']);
 
-    //activity presensi
-    Route::get('/get-activity-presensi', [PresensiController::class, 'getactivity']);
+  //activity presensi
+  Route::get('/get-activity-presensi', [PresensiController::class, 'getactivity']);
 
-    //counting
-    Route::get('/count-pending', [CountController::class, 'countTukarandLembur']);
+  //counting
+  Route::get('/count-pending', [CountController::class, 'countTukarandLembur']);
 
-    //get latest pengumuman
+  //get latest pengumuman
 
-    //get another karyawan with same schedule
-    Route::get('/{jadwal}/get-karyawan-same-jadwal',[JadwalController::class, 'getanotherkaryawan']);
-    Route::get('/{user}/get-jadwal-karyawan', [JadwalController::class, 'getuserjadwal']);
-    Route::post('/change-schedule', [JadwalController::class, 'changeschedule']);
+  //get another karyawan with same schedule
+  Route::get('/{jadwals}/get-karyawan-same-jadwal', [JadwalController::class, 'getanotherkaryawan']);
+  Route::get('/{user}/get-jadwal-karyawan', [JadwalController::class, 'getuserjadwal']);
+  Route::post('/change-schedule', [JadwalController::class, 'changeschedule']);
 
-    //get another karyawan with same unit kerja
-    Route::post('/user-unit-kerja', [GetListController::class, 'getkaryawanunitkerja']);
+  //get another karyawan with same unit kerja
+  Route::post('/user-unit-kerja', [GetListController::class, 'getkaryawanunitkerja']);
 
-    //get jadwal yang akan ditukar
-    Route::get('/get-jadwal/{jadwal}/ditukar', [JadwalController::class, 'getjadwalditukar']);
+  //get jadwal yang akan ditukar
+  Route::get('/get-jadwal/{jadwal}/ditukar', [JadwalController::class, 'getjadwalditukar']);
 
-    //presensi activity
-    Route::post('/get-presensi-activity', [ActivityController::class, 'getpresensiactivity']);
+  //presensi activity
+  Route::post('/get-presensi-activity', [ActivityController::class, 'getpresensiactivity']);
 
-    Route::get('/get-statistik-cuti', [CutiCotroller::class, 'getstatistik']);
+  Route::get('/get-statistik-cuti', [CutiCotroller::class, 'getstatistik']);
 
-    Route::post('/get-riwayat-cuti', [CutiCotroller::class, 'getriwayat']);
+  Route::post('/get-riwayat-cuti', [CutiCotroller::class, 'getriwayat']);
 
-    Route::post('/store-cuti', [CutiCotroller::class, 'storecuti']);
+  Route::post('/store-cuti', [CutiCotroller::class, 'storecuti']);
 
-    Route::post('/get-pengajuan-swap', [TukarJadwalController::class, 'getpengajuan']);
-    Route::post('/get-permintaan-swap', [TukarJadwalController::class, 'getpermintaan']);
+  Route::post('/get-pengajuan-swap', [TukarJadwalController::class, 'getpengajuan']);
+  Route::post('/get-permintaan-swap', [TukarJadwalController::class, 'getpermintaan']);
 
-    Route::get('/get-statistik-lembur', [LemburController::class, 'getstatistik']);
-    Route::post('/get-riwayat-lembur', [LemburController::class, 'getriwayat']);
+  Route::get('/get-statistik-lembur', [LemburController::class, 'getstatistik']);
+  Route::post('/get-riwayat-lembur', [LemburController::class, 'getriwayat']);
 
-    Route::post('/store-berkas-karyawan', [BerkasController::class, 'storeberkas']);
-    Route::get('/get-all-berkas-karyawan', [BerkasController::class, 'getallberkas']);
-    Route::post('/rename-berkas-karyawan', [BerkasController::class, 'renameberkas']);
-    Route::post('/download-berkas-karyawan', [BerkasController::class, 'downloadberkas']);
+  Route::post('/store-berkas-karyawan', [BerkasController::class, 'storeberkas']);
+  Route::get('/get-all-berkas-karyawan', [BerkasController::class, 'getallberkas']);
+  Route::post('/rename-berkas-karyawan', [BerkasController::class, 'renameberkas']);
+  Route::post('/download-berkas-karyawan', [BerkasController::class, 'downloadberkas']);
 
-    Route::post('/store-laporan', [LaporanController::class, 'storelaporan']);
+  Route::post('/store-laporan', [LaporanController::class, 'storelaporan']);
 
-    Route::get('/get-data-karyawan-personal', [PerubahannDataController::class, 'getdatapersonal']);
+  Route::get('/get-data-karyawan-personal', [PerubahannDataController::class, 'getdatapersonal']);
 
-    Route::get('/get-detail-karyawan', [DataPersonalController::class, 'getdetailkaryawan']);
+  Route::get('/get-detail-karyawan', [DataPersonalController::class, 'getdetailkaryawan']);
 
-    Route::get('/get-berkas-karyawan-personal', [DataPersonalController::class, 'getberkaspersonal']);
+  Route::get('/get-berkas-karyawan-personal', [DataPersonalController::class, 'getberkaspersonal']);
 
-    Route::post('/cek-password', [DataPersonalController::class, 'cekpassword']);
-    Route::post('/get-detail-gaji', [DataPersonalController::class, 'getdetailpass']);
+  Route::post('/cek-password', [DataPersonalController::class, 'cekpassword']);
+  Route::post('/get-detail-gaji', [DataPersonalController::class, 'getdetailpass']);
 
-    Route::get('/get-all-status-karyawan', [StatusController::class, 'getallstatuskaryawan']);
+  Route::get('/get-all-status-karyawan', [StatusController::class, 'getallstatuskaryawan']);
 
-    Route::post('/update-data-personal', [DataPersonalController::class, 'updatedatapersonal']);
+  Route::post('/update-data-personal', [DataPersonalController::class, 'updatedatapersonal']);
 
-    Route::post('/update-data-keluarga', [DataPersonalController::class, 'updatedatakeluarga']);
+  Route::post('/update-data-keluarga', [DataPersonalController::class, 'updatedatakeluarga']);
 
-    Route::get('/get-list-tipecuti', [CutiCotroller::class, 'getalltipecuti']);
+  Route::get('/get-list-tipecuti', [CutiCotroller::class, 'getalltipecuti']);
 
-    Route::post('/get-pengumuman', [GetListController::class, 'getpengumuman']);
+  Route::post('/get-pengumuman', [GetListController::class, 'getpengumuman']);
 
-    // Route::get('/data-karyawan', []);
+  // Route::get('/data-karyawan', []);
 });
