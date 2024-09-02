@@ -7,6 +7,7 @@ use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
 use App\Models\KategoriAgama;
 use App\Models\KategoriDarah;
+use App\Models\Notifikasi;
 use App\Models\Pengumuman;
 use App\Models\RiwayatPerubahan;
 use Carbon\Carbon;
