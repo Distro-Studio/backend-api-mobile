@@ -360,9 +360,103 @@ class JadwalController extends Controller
   public function getuserjadwal(User $user)
   {
     try {
-      $jadwal = Jadwal::where('user_id', $user->id)->where('tgl_mulai', '>', Carbon::today())->with('shift')->get();
+    //   $datakaryawan = DataKaryawan::where('user_id', $user->id)->with('unitkerja')->first();
 
-      return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
+    //   if($datakaryawan->unitkerja->jenis_karyawan == 0) {
+
+    //   }else {
+    //       $jadwal = Jadwal::where('user_id', $user->id)->where('tgl_mulai', '>', Carbon::today())->with('shift')->get();
+    //   }
+
+    //   return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
+      $datakaryawan = DataKaryawan::where('user_id', $user->id)->with('unitkerja')->first();
+      $hariLibur = HariLibur::all()->pluck('tanggal')->toArray();
+      $nonShift = NonShift::where('id', 1)->first();
+      // $start = Carbon::now()->startOfWeek();
+      // $end = Carbon::now()->endOfWeek();
+      // $startDate = Carbon::createFromFormat('Y-m-d', $start);
+      // $endDate = Carbon::createFromFormat('Y-m-d', $end);
+      // $startDate = Carbon::now('Asia/Jakarta')->startOfWeek();
+      // $endDate = Carbon::now('Asia/Jakarta')->endOfWeek();
+      $startDate = Carbon::now('Asia/Jakarta')->startOfWeek();
+      $endDate = Carbon::now('Asia/Jakarta')->endOfWeek();
+
+      // if($request->filled('tgl_mulai')) {
+      //     $startDate = Carbon::createFromFormat('Y-m-d', $request->tgl_mulai, 'Asia/Jakarta');
+      // }
+
+      // if($request->filled('tgl_selesai')) {
+      //     $endDate = Carbon::createFromFormat('Y-m-d', $request->tgl_selesai);
+      // }
+
+      // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Jadwal berhasil didapatkan', $startDate), Response::HTTP_NOT_FOUND);
+
+
+      if ($datakaryawan->unitkerja->jenis_karyawan == 0) {
+        $date_range = $this->generateDateRange($startDate, $endDate);
+        foreach ($date_range as $date) {
+          $day_of_week = Carbon::createFromFormat('Y-m-d', $date)->dayOfWeek;
+
+          if ($day_of_week == Carbon::SUNDAY) {
+            // Libur pada hari Minggu
+            // $user_schedule_array[$date] = [
+            //     "id" => 0,
+            //     "user_id" => Auth::user()->id,
+            //     "tgl_mulai" => $day_of_week,
+            //     "tgl_selesai" => $day_of_week,
+            //     "shift_id" => 0,
+            //     "created_at" => $day_of_week,
+            //     "updated_at" => $day_of_week,
+            //     "shift" => [
+            //         "id" => 0,
+            //         "nama" => "Libur Minggu",
+            //         "jam_from" => "06:00:00",
+            //         "jam_to" => "16:00:00",
+            //         "deleted_at" => null,
+            //         "created_at" => "2024-08-28T07:12:54.000000Z",
+            //         "updated_at" => "2024-08-28T07:12:54.000000Z"
+            //     ]
+            // ];
+          } elseif (isset($hariLibur[$date])) {
+            $user_schedule_array[$date] = [
+              'id' => $hariLibur[$date]->id,
+              'nama' => $hariLibur[$date]->nama,
+              'jam_from' => null,
+              'jam_to' => null,
+              'status' => 3 // libur besar
+            ];
+          } else if ($nonShift) {
+            $user_schedule_array[$date] = [
+              "id" => 0,
+              "user_id" => Auth::user()->id,
+              "tgl_mulai" => $date,
+              "tgl_selesai" => $date,
+              "shift_id" => 0,
+              "created_at" => $date,
+              "updated_at" => $date,
+              "shift" => [
+                "id" => 0,
+                "nama" => "Jam Kerja",
+                "jam_from" => $nonShift->jam_from,
+                "jam_to" => $nonShift->jam_to,
+                "deleted_at" => null,
+                "created_at" => null,
+                "updated_at" => null
+              ]
+            ];
+          }
+        }
+
+        $result = array_values($user_schedule_array);
+      } else {
+        $result = Jadwal::where('user_id', $user->id)->whereBetween('tgl_mulai', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])->with('shift')->get();
+        // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $startDate->format('Y-m-d') . ' ' . $endDate->format('Y-m-d')), Response::HTTP_OK);
+        if ($result->isEmpty()) {
+          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+        }
+      }
+
+      return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $result), Response::HTTP_OK);
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
     }

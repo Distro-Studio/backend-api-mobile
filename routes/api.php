@@ -6,6 +6,7 @@ use App\Http\Controllers\CobaController;
 use App\Http\Controllers\CountController;
 use App\Http\Controllers\CutiCotroller;
 use App\Http\Controllers\DataPersonalController;
+use App\Http\Controllers\DiklatController;
 use App\Http\Controllers\GetListController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\JamKerjaController;
@@ -140,4 +141,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/get-riwayat-perubahan', [GetListController::class, 'getriwayatperubahan']);
 
   // Route::get('/data-karyawan', []);
+
+  Route::get('/get-all-diklat', [GetListController::class, 'getalldiklat']);
+
+  Route::get('/{diklat}/get-detail-diklat', [DiklatController::class, 'getdetail']);
+
+  Route::post('/join-diklat', [DiklatController::class, 'joindiklat']);
 });

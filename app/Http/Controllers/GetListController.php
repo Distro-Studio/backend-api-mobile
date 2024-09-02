@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
+use App\Models\Diklat;
 use App\Models\KategoriAgama;
 use App\Models\KategoriDarah;
 use App\Models\Notifikasi;
@@ -150,5 +151,19 @@ class GetListController extends Controller
     }
 
     return response()->json(new DataResource(Response::HTTP_OK, 'Riwayat perubahan ditemukan', $riwayat), Response::HTTP_OK);
+  }
+
+  public function getalldiklat()
+  {
+    try {
+        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->where('tgl_selesai', '>=', Carbon::now()->format('Y-m-d'))->get();
+
+        if($diklat->isEmpty()) {
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'List diklat tidak ditemukan'), Response::HTTP_NOT_FOUND);
+        }
+        return response()->json(new DataResource(Response::HTTP_OK, 'List diklat berhasil didapatkan', $diklat), Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
   }
 }

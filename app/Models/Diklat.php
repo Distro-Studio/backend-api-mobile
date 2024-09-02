@@ -24,4 +24,9 @@ class Diklat extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function image()
+    {
+        return $this->belongsTo(Berkas::class, 'gambar', 'id');
+    }
 }
