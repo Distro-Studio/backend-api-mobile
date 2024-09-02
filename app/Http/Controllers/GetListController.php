@@ -106,7 +106,7 @@ class GetListController extends Controller
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Pengumuman berhasil didapatkan', $pengumuman), Response::HTTP_OK);
     } catch (\Exception $e) {
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
