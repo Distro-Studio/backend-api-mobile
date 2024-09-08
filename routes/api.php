@@ -8,6 +8,7 @@ use App\Http\Controllers\CutiCotroller;
 use App\Http\Controllers\DataPersonalController;
 use App\Http\Controllers\DiklatController;
 use App\Http\Controllers\GetListController;
+use App\Http\Controllers\IzinController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\JamKerjaController;
 use App\Http\Controllers\LaporanController;
@@ -147,4 +148,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/{diklat}/get-detail-diklat', [DiklatController::class, 'getdetail']);
 
   Route::post('/join-diklat', [DiklatController::class, 'joindiklat']);
+
+  Route::post('/get-riwayat-izin', [IzinController::class, 'getriwayat']);
+
+  Route::post('/store-izin', [IzinController::class, 'store']);
+  Route::post('/get-izin', [IzinController::class, 'getriwayat']);
 });
