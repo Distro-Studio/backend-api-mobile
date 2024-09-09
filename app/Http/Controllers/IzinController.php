@@ -16,21 +16,22 @@ class IzinController extends Controller
     public function getriwayat(Request $request)
     {
         try {
+
             $query = RiwayatIzin::query();
             $query->where('user_id', Auth::id());
 
-            $startDate = Carbon::now()->startOfYear()->format('Y-m-d');
-            $endDate = Carbon::now()->endOfYear()->format('Y-m-d');
+            $tahunnow = Carbon::now()->format('Y');
+            // $endDate = Carbon::now()->endOfYear()->format('Y-m-d');
 
-            if($request->filled('tgl_mulai')) {
-                $startDate = Carbon::parse($request->tgl_mulai);
+            if($request->filled('tahun')) {
+                $tahunnow = $request->tahun;
             }
 
-            if($request->filled('tgl_selesai')) {
-                $endDate = Carbon::parse($request->tgl_selesai);
-            }
+            // if($request->filled('tgl_selesai')) {
+            //     $endDate = Carbon::parse($request->tgl_selesai);
+            // }
 
-            $query->whereBetween('tgl_izin', [$startDate, $endDate]);
+            $query->whereYear('tgl_izin', $tahunnow);
 
             if($request->filled('status')){
                 $query->where('status_izin_id', $request->status);
