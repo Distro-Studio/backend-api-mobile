@@ -36,6 +36,7 @@ class IzinController extends Controller
             if($request->filled('status')){
                 $query->where('status_izin_id', $request->status);
             }
+            $query->with('statusizin');
 
             $data = $query->get();
 
@@ -72,6 +73,8 @@ class IzinController extends Controller
         if($validator->fails()) {
             return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, $validator->errors()), Response::HTTP_BAD_REQUEST);
         }
+
+        // if()
 
         try {
             $cekkuotabulan = RiwayatIzin::where('user_id', Auth::user()->id)->whereMonth('tgl_izin', Carbon::parse($request->tgl_izin)->month)->get();
