@@ -21,10 +21,10 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'email' => 'required|email',
+            'email' => 'required',
             'password' => 'required',
         ], [
-            'email.required' => 'Email harus diisi',
+            'email.required' => 'Email atau username harus diisi',
             'email.email' => 'Format email tidak sesuai',
             'password.required' => 'Password harus diisi',
         ]);
@@ -41,7 +41,12 @@ class LoginController extends Controller
             if (!$dataKaryawan) {
                 // return response()->json(['error' => 'Email tidak ditemukan.'], 404);
                 // $authenticate = false;
-                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email atau password salah'), Response::HTTP_UNAUTHORIZED);
+                $usercek = User::where('username', $request->email)->first();
+                if (!$usercek) {
+                    return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email/username atau password salah'), Response::HTTP_UNAUTHORIZED);
+                }else {
+                    $dataKaryawan = DataKaryawan::where('user_id', $usercek->id)->first();
+                }
             }
 
             // Ambil user terkait
@@ -50,7 +55,7 @@ class LoginController extends Controller
 
             // Cek password
             if (!Hash::check($request->password, $datauser->password)) {
-                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email atau password salah'), Response::HTTP_UNAUTHORIZED);
+                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email/username atau password salah'), Response::HTTP_UNAUTHORIZED);
             }
 
             // $cekuser = User::where('id', Auth::user()->id)->select('status_aktif')->first();

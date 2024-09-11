@@ -46,6 +46,8 @@ Route::post('/check-password-reset', [PasswordResetController::class, 'checktoke
 
 Route::get('/cobadownload', [CobaController::class, 'cobadownload']);
 
+Route::get('/export-slip-gaji', [GetListController::class, 'exportslip']);
+
 Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('/change-password-reset', [PasswordResetController::class, 'changepass']);
   Route::post('/logout', [LoginController::class, 'logout']);

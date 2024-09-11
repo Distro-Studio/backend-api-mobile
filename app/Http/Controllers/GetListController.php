@@ -11,6 +11,7 @@ use App\Models\KategoriDarah;
 use App\Models\Notifikasi;
 use App\Models\Pengumuman;
 use App\Models\RiwayatPerubahan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -165,5 +166,11 @@ class GetListController extends Controller
     } catch (\Exception $e) {
         return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+  }
+
+  public function exportslip()
+  {
+    $pdf = Pdf::loadView('slipgaji')->setPaper('f4');
+    return $pdf->stream('contoh-pdf.pdf');
   }
 }
