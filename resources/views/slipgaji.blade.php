@@ -1,3 +1,6 @@
+@php
+    use Carbon\Carbon;
+@endphp
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -215,12 +218,12 @@
 
         <div class="mb2">
           <p class="ib label">Tanggal Gaji</p>
-          <p class="ib">1 Januari 2024</p>
+          <p class="ib">{{Carbon::parse($gaji->tgl_penggajian)->format('d F Y')}}</p>
         </div>
 
         <div class="mb2">
           <p class="ib label">Periode</p>
-          <p class="ib">Januari 2024</p>
+          <p class="ib">{{Carbon::parse($gaji->tgl_penggajian)->format('F Y')}}</p>
         </div>
 
         <img src="{{public_path('style/logo.png')}}" class="logo" />
