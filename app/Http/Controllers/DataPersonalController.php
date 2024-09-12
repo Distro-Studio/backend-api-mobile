@@ -160,14 +160,14 @@ class DataPersonalController extends Controller
 
       foreach ($datakeluarga['keluarga'] as $k) {
         $keluarga = DataKeluarga::create([
-          'data_karyawan_id' => $data->id,
-          'nama_keluarga' => $k['nama'],
-          'hubungan' => $k['hubungan_keluarga'],
-          'pendidikan_terakhir' => $k['pendidikan_terakhir'],
-          'status_hidup' => $k['status_hidup']['value'],
-          'pekerjaan' => $k['pekerjaan'],
-          'no_hp' => $k['telepon'],
-          'email' => $k['email'],
+            'data_karyawan_id' => $data->id,
+            'nama_keluarga' => $k['nama_keluarga'],
+            'hubungan' => $k['hubungan']['value'],
+            'pendidikan_terakhir' => $k['pendidikan_terakhir'],
+            'status_hidup' => $k['status_hidup']['value'],
+            'pekerjaan' => $k['pekerjaan'],
+            'no_hp' => $k['no_hp'],
+            'email' => $k['email'],
         ]);
         // return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $k), Response::HTTP_OK);
 
@@ -759,7 +759,7 @@ class DataPersonalController extends Controller
     $data_karyawan_id = $user->data_karyawan_id;
 
     // Find karyawan by data_karyawan_id
-    $karyawan = DataKaryawan::where('email', '!=', 'super_admin@admin.rski')->find($data_karyawan_id);
+    $karyawan = DataKaryawan::where('id',$data_karyawan_id)->first();
 
     if (!$karyawan) {
       return response()->json([

@@ -128,6 +128,7 @@ class GetListController extends Controller
     }
 
     $formattedData = $notifikasi->map(function ($item) {
+        $item->users->makeHidden('password');
       return [
         'id' => $item->id,
         'kategori_notifikasi' => $item->kategori_notifikasis,
