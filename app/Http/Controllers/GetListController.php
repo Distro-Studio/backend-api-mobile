@@ -5,12 +5,15 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
+use App\Models\DetailGaji;
 use App\Models\Diklat;
 use App\Models\KategoriAgama;
 use App\Models\KategoriDarah;
 use App\Models\Notifikasi;
+use App\Models\Penggajian;
 use App\Models\Pengumuman;
 use App\Models\RiwayatPerubahan;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -170,7 +173,16 @@ class GetListController extends Controller
 
   public function exportslip()
   {
-    $pdf = Pdf::loadView('slipgaji')->setPaper('f4');
-    return $pdf->stream('contoh-pdf.pdf');
+    $user = User::where('id', Auth::user()->id)->first();
+    $data = DataKaryawan::where('user_id', $user->id)->with('unitkerja', 'kelompok_gaji', 'ptkp', 'jabatan', 'statusKaryawan')->first();
+    $datagaji = Penggajian::where('data_karyawan_id', $data->id)->with('detail_gajis')->first();
+    $pdf = Pdf::loadView('slipgaji', ['data' => $data, 'user' => $user, 'gaji' => $datagaji])->setPaper('a4', 'portrait');
+    // return $pdf->stream('contoh-pdf.pdf');
+
+    $response = new WithoutDataResource(Response::HTTP_OK, 'Berhasil download slip gaji');
+    return response()->json($response, Response::HTTP_OK)->withHeaders([
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'inline; filename="slipgaji.pdf"'
+    ])->setContent($pdf->stream('slipgaji.pdf'));
   }
 }
