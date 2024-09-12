@@ -71,6 +71,11 @@ class LoginController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda tidak valid'), Response::HTTP_UNAUTHORIZED);
             }
 
+            if ($datauser->status_aktif == 3)
+            {
+                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda tidak aktif'), Response::HTTP_UNAUTHORIZED);
+            }
+
             $datauser->makeHidden('password');
 
             Auth::login($datauser);
