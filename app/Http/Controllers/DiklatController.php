@@ -140,4 +140,27 @@ class DiklatController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function getriwayat()
+    {
+        try {
+
+            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat')->get();
+            if($peserta->isEmpty()) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada riwayat diklat'), Response::HTTP_NOT_FOUND);
+            }
+            $peserta->map(function($item){
+                unset($item->id);
+                unset($item->diklat_id);
+                unset($item->peserta);
+                unset($item->created_at);
+                unset($item->updated_at);
+            });
+
+            return response()->json(new DataResource(Response::HTTP_OK, 'Riwayat diklat berhasil didapatkan', $peserta), Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

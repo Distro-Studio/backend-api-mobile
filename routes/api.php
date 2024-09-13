@@ -162,5 +162,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
    * file, nama_acara
    */
 
-Route::post('/store-diklat', [DiklatController::class, 'storediklat']);
+  Route::post('/store-diklat', [DiklatController::class, 'storediklat']);
+  Route::get('/get-riwayat-diklat', [DiklatController::class, 'getriwayat']);
+
 });
