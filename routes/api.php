@@ -156,4 +156,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('/store-izin', [IzinController::class, 'store']);
   Route::post('/get-izin', [IzinController::class, 'getriwayat']);
   Route::get('/export-slip-gaji', [GetListController::class, 'exportslip']);
+
+  /**
+   * diklat :
+   * file, nama_acara
+   */
+
+Route::post('/store-diklat', [DiklatController::class, 'storediklat']);
 });

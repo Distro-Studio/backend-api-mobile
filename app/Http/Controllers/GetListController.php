@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\StorageFileHelper;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
@@ -161,8 +162,12 @@ class GetListController extends Controller
   public function getalldiklat()
   {
     try {
-        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->where('tgl_selesai', '>=', Carbon::now()->format('Y-m-d'))->get();
-
+        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->where('tgl_selesai', '<=', Carbon::now()->format('Y-m-d'))->with('image')->get();
+        $diklat->map(function($item){
+            $item->path = env('URL_STORAGE') . $item->image->path;
+            $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
+            unset($item->image);
+        });
         if($diklat->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'List diklat tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }

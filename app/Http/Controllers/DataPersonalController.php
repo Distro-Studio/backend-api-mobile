@@ -92,6 +92,24 @@ class DataPersonalController extends Controller
         $user->save();
       }
 
+      // Mengambil berat dan tinggi dari input form
+      $weight = $request->berat_badan;
+      $height = $request->tinggi_badan / 100; // Konversi cm ke meter
+
+      // Rumus BMI
+      $bmi = $weight / ($height * $height);
+
+      // Menentukan kategori BMI berdasarkan hasil perhitungan
+      if ($bmi < 18.5) {
+          $category = 'Berat badan kurang';
+      } elseif ($bmi >= 18.5 && $bmi <= 24.9) {
+          $category = 'Berat badan normal';
+      } elseif ($bmi >= 25 && $bmi <= 29.9) {
+          $category = 'Berat badan berlebih (overweight)';
+      } else {
+          $category = 'Obesitas';
+      }
+
       //   $dataKaryawan = DataKaryawan::where('user_id', Auth::user()->id)->update([
       //     'tempat_lahir' => $request->tempat_lahir,
       //     'tgl_lahir' => $request->tanggal_lahir,
@@ -117,6 +135,8 @@ class DataPersonalController extends Controller
       $data->tinggi_badan = $request->tinggi_badan;
       $data->berat_badan = $request->berat_badan;
       $data->gelar_depan = $request->gelar_depan;
+      $data->bmi_value = $bmi;
+      $data->bmi_ket = $category;
       $data->alamat = $request->alamat;
       $data->no_ijazah = $request->no_ijazah;
       $data->tahun_lulus = $request->tahun_lulus;
@@ -168,6 +188,9 @@ class DataPersonalController extends Controller
             'pekerjaan' => $k['pekerjaan'],
             'no_hp' => $k['no_hp'],
             'email' => $k['email'],
+            'is_bpjs' => $k['is_bpjs'],
+            'status_keluarga_id' => 1,
+            'verifikator_1' => null,
         ]);
         // return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $k), Response::HTTP_OK);
 
@@ -694,6 +717,14 @@ class DataPersonalController extends Controller
         $originaldata = $datakaryawan->gelar_depan;
       }
 
+      if($request->asal_sekolah == 'asal_sekolah') {
+        $originaldata = $datakaryawan->asal_sekolah;
+      }
+
+      if($request->gelar_belakang == 'gelar_belakang') {
+        $originaldata = $datakaryawan->gelar_belakang;
+      }
+
 
       $datadiubah = RiwayatPerubahan::create([
         'data_karyawan_id' => $datakaryawan->id,
@@ -871,6 +902,8 @@ class DataPersonalController extends Controller
       'no_ijazah' => $karyawan->no_ijazah,
       'tahun_lulus' => $karyawan->tahun_lulus,
       'no_str' => $karyawan->no_str,
+      'asal_sekolah' => $karyawan->asal_sekolah,
+      'gelar_belakang' => $karyawan->gelar_belakang,
       'masa_berlaku_str' => $karyawan->masa_berlaku_str,
       'masa_berlaku_sip' => $karyawan->masa_berlaku_sip,
       'tgl_berakhir_pks' => $karyawan->tgl_berakhir_pks,
