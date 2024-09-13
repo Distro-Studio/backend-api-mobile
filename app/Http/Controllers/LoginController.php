@@ -63,7 +63,7 @@ class LoginController extends Controller
 
             if ($datauser->status_aktif == 1 && $datauser->data_completion_step == 0)
             {
-                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda tidak valid'), Response::HTTP_UNAUTHORIZED);
+                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Akun anda belum aktif'), Response::HTTP_UNAUTHORIZED);
             }
 
             if ($datauser->status_aktif == 2 && $datauser->data_completion_step != 0)
