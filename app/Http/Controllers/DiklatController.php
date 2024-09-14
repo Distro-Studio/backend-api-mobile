@@ -146,7 +146,7 @@ class DiklatController extends Controller
     {
         try {
 
-            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat')->get();
+            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat', 'kategori', 'status')->get();
             if($peserta->isEmpty()) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada riwayat diklat'), Response::HTTP_NOT_FOUND);
             }

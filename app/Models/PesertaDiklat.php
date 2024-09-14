@@ -28,4 +28,14 @@ class PesertaDiklat extends Model
     {
         return $this->belongsTo(User::class, 'peserta', 'id');
     }
+
+    public function kategori()
+    {
+        return $this->belongsTo(KategoriDiklat::class, 'kategori_diklat_id', 'id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(StatusDiklat::class, 'status_diklat_id', 'id');
+    }
 }
