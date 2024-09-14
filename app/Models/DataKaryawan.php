@@ -44,7 +44,7 @@ class DataKaryawan extends Model
         'kategori_darah_id' => 'integer',
         'tinggi_badan' => 'integer',
         'berat_badan' => 'integer',
-        'pendidikan_terakhir' => 'integer',
+        'pendidikan_terakhir' => 'string',
         'no_ijazah' => 'string',
         'tahun_lulus' => 'integer',
         'no_kk' => 'string',

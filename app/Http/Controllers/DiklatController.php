@@ -128,6 +128,7 @@ class DiklatController extends Controller
                 'jam_selesai' => $request->jam_selesai,
                 'durasi' => $durasi,
                 'lokasi' => $request->lokasi,
+                'skp' => $request->skp
             ]);
 
             $peserta = PesertaDiklat::create([

@@ -791,6 +791,7 @@ class DataPersonalController extends Controller
 
     // Find karyawan by data_karyawan_id
     $karyawan = DataKaryawan::where('id',$data_karyawan_id)->first();
+    // $karyawan->pendidikan_terakhir = $karyawan->pendidikan_terakhir->label;
 
     if (!$karyawan) {
       return response()->json([
@@ -896,7 +897,7 @@ class DataPersonalController extends Controller
       'jenis_kelamin' => $karyawan->jenis_kelamin,
       'agama' => $karyawan->kategoriagama,
       'golongan_darah' => $karyawan->golonganDarah,
-      'pendidikan_terakhir' => $karyawan->pendidikanTerakhir,
+      'pendidikan_terakhir' => $karyawan->pendidikan_terakhir,
       'tinggi_badan' => $karyawan->tinggi_badan,
       'berat_badan' => $karyawan->berat_badan,
       'no_ijazah' => $karyawan->no_ijazah,
