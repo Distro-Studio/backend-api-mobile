@@ -67,9 +67,9 @@ class GetListController extends Controller
           }
         ]);
       $filters = $request->all();
-      if (isset($filters['status_karyawan'])) {
-        $statusKaryawan = $filters['status_karyawan'];
-        $query->whereHas('status_karyawans', function ($karyawan) use ($statusKaryawan) {
+      if (isset($filters['status'])) {
+        $statusKaryawan = $filters['status'];
+        $query->whereHas('statusKaryawan', function ($karyawan) use ($statusKaryawan) {
           if (is_array($statusKaryawan)) {
             $karyawan->whereIn('id', $statusKaryawan);
           } else {
@@ -162,7 +162,7 @@ class GetListController extends Controller
   public function getalldiklat()
   {
     try {
-        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->where('tgl_selesai', '<=', Carbon::now()->format('Y-m-d'))->with('image')->get();
+        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->where('tgl_mulai', '>', Carbon::now()->format('Y-m-d'))->with('image')->get();
         $diklat->map(function($item){
             $item->path = env('URL_STORAGE') . $item->image->path;
             $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
@@ -190,5 +190,22 @@ class GetListController extends Controller
         'Content-Type' => 'application/pdf',
         'Content-Disposition' => 'inline; filename="slipgaji.pdf"'
     ])->setContent($pdf->stream('slipgaji.pdf'));
+  }
+
+  public function readnotifiaksi(Request $request)
+  {
+    try {
+        // $notifikasi = json_decode($request->notifikasi_id);
+        // if (is_string($request->notifikasi_id)) {
+        //     $notifikasi_id = explode(',', $request->notifikasi_id); // Ubah string menjadi array
+        // }
+        $notifikasi = Notifikasi::whereIn('id', json_decode($request->notifikasi_id))->where('user_id', Auth::user()->id)->update(['is_read' => 1]);
+
+        // $notifikasi->is_read = 1;
+        // $notifikasi->save();
+        return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Notifkasi berhasil dibaca'), Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
   }
 }

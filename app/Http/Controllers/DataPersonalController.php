@@ -260,20 +260,20 @@ class DataPersonalController extends Controller
   public function step5(Request $request)
   {
     $validator = Validator::make($request->all(), [
-      'no_str' => 'required',
+    //   'no_str' => 'required',
       //   'masa_berlaku_str' => 'required',
-      'no_sip' => 'required',
+    //   'no_sip' => 'required',
       //   'masa_berlaku_sip' => 'required',
-      'no_bpjsksh' => 'required',
-      'no_bpjsktk' => 'required',
+    //   'no_bpjsksh' => 'required',
+    //   'no_bpjsktk' => 'required',
       'npwp' => 'required'
     ], [
-      'no_str.required' => 'Nomor STR harus diisi',
+    //   'no_str.required' => 'Nomor STR harus diisi',
       //   'masa_berlaku_str.required' => 'Masa berlaku STR harus diisi',
-      'no_sip.required' => 'Nomor SIP harus diisi',
+    //   'no_sip.required' => 'Nomor SIP harus diisi',
       //   'masa_berlaku_sip.required' => 'Masa berlaku SIP harus diisi',
-      'no_bpjsksh.required' => 'Nomor BPJS Kesehatan harus diisi',
-      'no_bpjsktk.required' => 'Nomor BPJS Ketenagakerjaan harus diisi',
+    //   'no_bpjsksh.required' => 'Nomor BPJS Kesehatan harus diisi',
+    //   'no_bpjsktk.required' => 'Nomor BPJS Ketenagakerjaan harus diisi',
       'npwp.required' => 'NPWP harus diisi'
     ]);
 
@@ -656,6 +656,7 @@ class DataPersonalController extends Controller
 
     try {
       $originaldata = null;
+      $updateddata = $request->value_diubah;
 
       if ($request->kolom_diubah == 'tempat_lahir') {
         $originaldata = $datakaryawan->tempat_lahir;
@@ -671,6 +672,7 @@ class DataPersonalController extends Controller
 
       if ($request->kolom_diubah == 'jenis_kelamin') {
         $originaldata = $datakaryawan->jenis_kelamin;
+        $updateddata = $request->value_diubah['value'];
       }
 
       if ($request->kolom_diubah == 'nik_ktp') {
@@ -683,6 +685,7 @@ class DataPersonalController extends Controller
 
       if ($request->kolom_diubah == 'kategori_agama_id') {
         $originaldata = $datakaryawan->kategori_agama_id;
+        $updateddata = $request->value_diubah['value'];
       }
 
       if ($request->kolom_diubah == 'kategori_darah_id') {
@@ -731,13 +734,16 @@ class DataPersonalController extends Controller
         'jenis_perubahan' => 'Personal',
         'kolom' => $request->kolom_diubah,
         'original_data' => $originaldata,
-        'updated_data' => $request->value_diubah,
+        'updated_data' => $updateddata,
         'status_perubahan_id' => 1,
+        'updated_at' => null
       ]);
 
+
       return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
+    //   return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $request->value_diubah['value']), Response::HTTP_OK);
     } catch (\Exception $e) {
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 

@@ -29,4 +29,14 @@ class Diklat extends Model
     {
         return $this->belongsTo(Berkas::class, 'gambar', 'id');
     }
+
+    public function kategori()
+    {
+        return $this->belongsTo(KategoriDiklat::class, 'kategori_diklat_id', 'id');
+    }
+
+    public function status()
+    {
+        return $this->belongsTo(StatusDiklat::class, 'status_diklat_id', 'id');
+    }
 }

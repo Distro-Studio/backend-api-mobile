@@ -14,6 +14,8 @@ class PesertaDiklat extends Model
     protected $casts = [
         'id' => 'integer',
         'diklat_id' => 'integer',
+        'kategori_diklat_id' => 'integer',
+        'status_diklat_id' => 'integer',
         'peserta' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

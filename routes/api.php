@@ -141,6 +141,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   Route::get('/get-notifikasi', [GetListController::class, 'getlistnotifikasi']);
 
+  Route::post('/read-notification', [GetListController::class, 'readnotifiaksi']);
+
   Route::get('/get-riwayat-perubahan', [GetListController::class, 'getriwayatperubahan']);
 
   // Route::get('/data-karyawan', []);

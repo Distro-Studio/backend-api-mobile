@@ -157,23 +157,26 @@ class PasswordResetController extends Controller
 
         $data = DataKaryawan::where('user_id', $user->id)->first();
 
-        $from = $user->updated_at;
+        // $from = $user->updated_at;
         $user->data_completion_step = 0;
-        $to = date('Y-m-d H:i:s');
+        // $to = date('Y-m-d H:i:s');
 
-        $fromformat = Carbon::parse($from)->timezone('Asia/Jakarta');
-        $toformat = Carbon::parse($to)->timezone('Asia/Jakarta');
-        // $message = 30 - $fromformat->diffInMinutes($toformat) . ' Menit sebelum token expired';
-        if($fromformat->diffInMinutes($toformat) > 30)
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Token telah expired'),Response::HTTP_NOT_ACCEPTABLE);
-        }
+        // $fromformat = Carbon::parse($from)->timezone('Asia/Jakarta');
+        // $toformat = Carbon::parse($to)->timezone('Asia/Jakarta');
+        // // $message = 30 - $fromformat->diffInMinutes($toformat) . ' Menit sebelum token expired';
+        // if($fromformat->diffInMinutes($toformat) > 30)
+        // {
+        //     return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Token telah expired'),Response::HTTP_NOT_ACCEPTABLE);
+        // }
 
 
         try{
             $user->password = Hash::make($request->password);
             $user->remember_token = null;
             if($user->save()){
+                $token = $request->user()->currentAccessToken()->delete();
+                $user->makeHidden('password');
+
                 return response()->json(new DataResource(Response::HTTP_OK, 'Berhasil menyimpan password baru', $user), Response::HTTP_OK);
             } else{
                 return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Gagal menyimpan password baru'), Response::HTTP_INTERNAL_SERVER_ERROR);

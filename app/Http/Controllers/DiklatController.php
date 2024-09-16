@@ -113,6 +113,11 @@ class DiklatController extends Controller
             $startTime = Carbon::createFromFormat('H:i:s', $startTimeInput);
             $endTime = Carbon::createFromFormat('H:i:s', $endTimeInput);
 
+            $startDay = Carbon::createFromFormat('Y-m-d', $request->tgl_mulai);
+            $endDay = Carbon::createFromFormat('Y-m-d', $request->tgl_selesai);
+
+            $dayDiff = $endDay->diffInDays() + 1;
+
             $durasi = $endTime->diffInSeconds($startTime);
 
             $diklat = Diklat::create([
@@ -126,7 +131,7 @@ class DiklatController extends Controller
                 'tgl_selesai' => $request->tgl_selesai,
                 'jam_mulai' => $request->jam_mulai,
                 'jam_selesai' => $request->jam_selesai,
-                'durasi' => $durasi,
+                'durasi' => $durasi * $dayDiff,
                 'lokasi' => $request->lokasi,
                 'skp' => $request->skp
             ]);
@@ -146,11 +151,13 @@ class DiklatController extends Controller
     {
         try {
 
-            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat', 'kategori', 'status')->get();
+            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat')->get();
             if($peserta->isEmpty()) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada riwayat diklat'), Response::HTTP_NOT_FOUND);
             }
             $peserta->map(function($item){
+                $item->diklat->status;
+                $item->diklat->kategori;
                 unset($item->id);
                 unset($item->diklat_id);
                 unset($item->peserta);
