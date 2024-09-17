@@ -167,4 +167,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('/store-diklat', [DiklatController::class, 'storediklat']);
   Route::get('/get-riwayat-diklat', [DiklatController::class, 'getriwayat']);
 
+  Route::post('/delete-read-notifikasi', [GetListController::class, 'deletereadnotif']);
+  Route::get('/get-list-pendidikan', [GetListController::class, 'getallpendidikan']);;
 });

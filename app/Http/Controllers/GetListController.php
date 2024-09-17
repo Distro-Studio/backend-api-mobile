@@ -10,6 +10,7 @@ use App\Models\DetailGaji;
 use App\Models\Diklat;
 use App\Models\KategoriAgama;
 use App\Models\KategoriDarah;
+use App\Models\KategoriPendidikan;
 use App\Models\Notifikasi;
 use App\Models\Penggajian;
 use App\Models\Pengumuman;
@@ -207,5 +208,32 @@ class GetListController extends Controller
     } catch (\Exception $e) {
         return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
+  }
+
+  public function deletereadnotif(Request $request)
+  {
+    try {
+        //
+
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public function getallpendidikan()
+  {
+    $kategori_pendidikan = KategoriPendidikan::all();
+    if ($kategori_pendidikan->isEmpty()) {
+      return response()->json([
+        'status' => Response::HTTP_NOT_FOUND,
+        'message' => 'Data pendidikan tidak ditemukan.',
+      ], Response::HTTP_NOT_FOUND);
+    }
+
+    return response()->json([
+      'status' => Response::HTTP_OK,
+      'message' => 'Retrieving all pendidikan for dropdown',
+      'data' => $kategori_pendidikan
+    ], Response::HTTP_OK);
   }
 }
