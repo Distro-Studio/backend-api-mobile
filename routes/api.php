@@ -168,5 +168,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/get-riwayat-diklat', [DiklatController::class, 'getriwayat']);
 
   Route::post('/delete-read-notifikasi', [GetListController::class, 'deletereadnotif']);
-  Route::get('/get-list-pendidikan', [GetListController::class, 'getallpendidikan']);;
+  Route::get('/get-list-pendidikan', [GetListController::class, 'getallpendidikan']);
+  Route::delete('/destroy-read-notification', [GetListController::class, 'destroyreadnotif']);
 });

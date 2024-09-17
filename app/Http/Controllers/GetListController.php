@@ -102,7 +102,7 @@ class GetListController extends Controller
   {
     try {
       if ($request->limit == 0) {
-        $pengumuman = Pengumuman::all();
+        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->get();
       } else {
         $pengumuman = Pengumuman::take($request->limit)->get();
       }
@@ -235,5 +235,20 @@ class GetListController extends Controller
       'message' => 'Retrieving all pendidikan for dropdown',
       'data' => $kategori_pendidikan
     ], Response::HTTP_OK);
+  }
+
+  public function destroyreadnotif()
+  {
+    try {
+        $notif = Notifikasi::where('user_id', Auth::user()->id)->get();
+
+        if($notif->isEmpty()) {
+            return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Notifikasi tidak ditemukan'), Response::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Notifkasi berhasil dihapus'), Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
   }
 }

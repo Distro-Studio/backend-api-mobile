@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
+use App\Models\Cuti;
 use App\Models\DataKaryawan;
 use App\Models\HariLibur;
 use App\Models\Jadwal;
@@ -17,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
+use Carbon\CarbonPeriod;
 // use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class JadwalController extends Controller
@@ -133,13 +135,26 @@ class JadwalController extends Controller
       // }
 
       // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Jadwal berhasil didapatkan', $startDate), Response::HTTP_NOT_FOUND);
+      $cuti = Cuti::where('user_id', Auth::user()->id)->where('status_cuti_id', 4)->get();
+
+      $listtglcuti = [];
+
+      foreach($cuti as $c) {
+        $tglfrom = Carbon::parse($c->tgl_from)->addDay();
+        $tglto = Carbon::parse($c->tgl_to)->addDay();
+        $period = CarbonPeriod::create($tglfrom->format('Y-m-d'), $tglto->format('Y-m-d'));
+
+        foreach ($period as $dt) {
+            $listtglcuti[] = $dt->format('Y-m-d');
+        }
+      }
 
 
       if ($datakaryawan->unitkerja->jenis_karyawan == 0) {
         $date_range = $this->generateDateRange($startDate, $endDate);
         foreach ($date_range as $date) {
           $day_of_week = Carbon::createFromFormat('Y-m-d', $date)->dayOfWeek;
-
+          $harilibur = HariLibur::whereDate('tanggal', $date)->first();
           if ($day_of_week == Carbon::SUNDAY) {
             // Libur pada hari Minggu
             // $user_schedule_array[$date] = [
@@ -160,33 +175,35 @@ class JadwalController extends Controller
             //         "updated_at" => "2024-08-28T07:12:54.000000Z"
             //     ]
             // ];
-          } elseif (isset($hariLibur[$date])) {
-            $user_schedule_array[$date] = [
-              'id' => $hariLibur[$date]->id,
-              'nama' => $hariLibur[$date]->nama,
-              'jam_from' => null,
-              'jam_to' => null,
-              'status' => 3 // libur besar
-            ];
+          } else if ($harilibur) {
+            // $user_schedule_array[$date] = [
+            //   'id' => $hariLibur[$date]->id,
+            //   'nama' => $hariLibur[$date]->nama,
+            //   'jam_from' => null,
+            //   'jam_to' => null,
+            //   'status' => 3 // libur besar
+            // ];
+          } else if (in_array($date, $listtglcuti)) {
+
           } else if ($nonShift) {
-            $user_schedule_array[$date] = [
-              "id" => 0,
-              "user_id" => Auth::user()->id,
-              "tgl_mulai" => $date,
-              "tgl_selesai" => $date,
-              "shift_id" => 0,
-              "created_at" => $date,
-              "updated_at" => $date,
-              "shift" => [
+              $user_schedule_array[$date] = [
                 "id" => 0,
-                "nama" => "Jam Kerja",
-                "jam_from" => $nonShift->jam_from,
-                "jam_to" => $nonShift->jam_to,
-                "deleted_at" => null,
-                "created_at" => null,
-                "updated_at" => null
-              ]
-            ];
+                "user_id" => Auth::user()->id,
+                "tgl_mulai" => $date,
+                "tgl_selesai" => $date,
+                "shift_id" => 0,
+                "created_at" => $date,
+                "updated_at" => $date,
+                "shift" => [
+                  "id" => 0,
+                  "nama" => "Jam Kerja",
+                  "jam_from" => $nonShift->jam_from,
+                  "jam_to" => $nonShift->jam_to,
+                  "deleted_at" => null,
+                  "created_at" => null,
+                  "updated_at" => null
+                ]
+              ];
           }
         }
 
@@ -200,6 +217,7 @@ class JadwalController extends Controller
       }
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $result), Response::HTTP_OK);
+    //   return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $listtglcuti), Response::HTTP_OK);
 
       // if ($request->tgl_mulai == null || $request->tgl_selesai == null) {
       //     // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', 'ini kalo kosong'), Response::HTTP_OK);
