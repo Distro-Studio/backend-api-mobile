@@ -240,7 +240,7 @@ class GetListController extends Controller
   public function destroyreadnotif()
   {
     try {
-        $notif = Notifikasi::where('user_id', Auth::user()->id)->get();
+        $notif = Notifikasi::where('user_id', Auth::user()->id)->where('is_read', 1)->get();
 
         if($notif->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Notifikasi tidak ditemukan'), Response::HTTP_BAD_REQUEST);

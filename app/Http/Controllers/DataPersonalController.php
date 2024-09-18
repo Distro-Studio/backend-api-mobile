@@ -750,38 +750,103 @@ class DataPersonalController extends Controller
   public function updatedatakeluarga(Request $request)
   {
     $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
-    $datakeluargori = DataKeluarga::where('data_karyawan_id', $datakaryawan->id)->get();
+    $datakeluargori = DataKeluarga::where('data_karyawan_id', $datakaryawan->id)->with('pendidikanTerakhir')->get();
     // $keluarga = json_encode($request->keluarga, JSON_UNESCAPED_SLASHES);
     // $datakeluarga = json_decode(stripslashes($keluarga), true);
     // $keluarga = json_encode($request->keluarga);
-    $datakeluarga = json_decode($request->value_diubah);
+    $datakeluarga = json_decode($request->value_diubah, true);
+    $formatedData = [];
+    $updated_data = [];
+    if(!$datakeluargori->isEmpty()){
+        $formatedData = $datakeluargori->map(function($item){
+            $labelstatus = 'Hidup';
+            if ($item->status_hidup == 0) {
+                $labelstatus = 'Meninggal';
+            }
+            return[
+                'data_keluarga_id' => $item->id,
+                'hubungan' => $item->hubungan,
+                'nama_keluarga' => $item->nama_keluarga,
+                'status_hidup' => $item->status_hidup,
+                'pendidikan_terakhir' => $item->pendidikanTerakhir->id,
+                'pekerjaan' => $item->pekerjaan,
+                'no_hp' => $item->no_hp,
+                'email' => $item->email,
+                'is_bpjs' => $item->is_bpjs,
+                'id' => $item->id
+            ];
+        });
+    }
 
+    if (!empty($datakeluarga)) {
+      foreach ($datakeluarga as $keluargaItem) {
+          $statushidup = 1;
+          $isbpjs = 1;
+          if($keluargaItem['status_hidup']['value']){
+            $statushidup = 1;
+          }else {
+            $statushidup = 0;
+          }
+
+          if($keluargaItem['is_bpjs']){
+            $isbpjs = 1;
+          }else {
+            $isbpjs = 0;
+          }
+          $updated_data[] = [
+              'data_keluarga_id' => $keluargaItem['data_keluarga_id'] ?? null,
+              'hubungan' => $keluargaItem['hubungan']['value'],
+              'nama_keluarga' => $keluargaItem['nama_keluarga'],
+              'status_hidup' => $statushidup,
+              'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['value'],
+              'pekerjaan' => $keluargaItem['pekerjaan'],
+              'no_hp' => $keluargaItem['no_hp'],
+              'email' => $keluargaItem['email'],
+              'is_bpjs' => $isbpjs,
+              'id' => $keluargaItem['id'] ?? null
+          ];
+      }
+  }
+
+  if($formatedData == null) {
+      $original = null;
+  } else {
+      $original = json_encode($formatedData);
+  }
+
+  if($updated_data == null) {
+      $update = null;
+  } else {
+      $update = json_encode($updated_data);
+  }
     $datadiubah = RiwayatPerubahan::create([
       'data_karyawan_id' => $datakaryawan->id,
       'jenis_perubahan' => 'Keluarga',
       'kolom' => 'Data Keluarga',
-      'original_data' => 'dsadad',
-      'updated_data' => $request->value_diubah,
+      'original_data' => $original,
+      'updated_data' => $update,
       'status_perubahan_id' => 1,
     ]);
+
+    // return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Erorr', $datakeluarga), Response::HTTP_INTERNAL_SERVER_ERROR);
 
     foreach ($datakeluarga as $k) {
       // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Perubahan berhasil disimpan', $k->data_karyawan_id), Response::HTTP_NOT_FOUND);
       $keluarga = PerubahanKeluarga::create([
         'riwayat_perubahan_id' => $datadiubah->id,
-        'data_karyawan_id' => $k->data_karyawan_id,
-        'nama_keluarga' => $k->nama_keluarga,
-        'hubungan' => $k->hubungan,
-        'pendidikan_terakhir' => $k->pendidikan_terakhir,
-        'status_hidup' => $k->status_hidup,
-        'pekerjaan' => $k->pekerjaan,
-        'no_hp' => $k->no_hp,
-        'email' => $k->email,
+        'data_keluarga_id' => $k['data_keluarga_id'] ?? null, // Akses dengan notasi array
+        'nama_keluarga' => $k['nama_keluarga'], // Akses dengan notasi array
+        'hubungan' => $k['hubungan']['label'], // Akses dengan notasi array
+        'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'], // Akses dengan notasi array
+        'status_hidup' => $k['status_hidup']['value'], // Akses dengan notasi array
+        'pekerjaan' => $k['pekerjaan'], // Akses dengan notasi array
+        'no_hp' => $k['no_hp'], // Akses dengan notasi array
+        'email' => $k['email'], // Akses dengan notasi array
       ]);
     }
 
-    // return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
-    return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Perubahan berhasil disimpan', $datakeluarga), Response::HTTP_NOT_FOUND);
+    return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
+    // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Perubahan berhasil disimpan', $datakeluarga), Response::HTTP_NOT_FOUND);
   }
 
   public function getdatakaryawandetail()

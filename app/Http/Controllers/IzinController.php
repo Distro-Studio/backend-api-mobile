@@ -59,7 +59,7 @@ class IzinController extends Controller
         [
             'tgl_izin' => 'required|date',
             'waktu_izin' => 'required',
-            'durasi' => 'required|max:7200',
+            'durasi' => 'required|max:7201',
             'keterangan' => 'required',
         ], [
             'tgl_izin.required' => 'Tanggal Izin Wajib Diisi',
