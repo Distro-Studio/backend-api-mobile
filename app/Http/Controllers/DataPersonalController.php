@@ -8,6 +8,7 @@ use App\Http\Resources\WithoutDataResource;
 use App\Models\Berkas;
 use App\Models\DataKaryawan;
 use App\Models\DataKeluarga;
+use App\Models\Notifikasi;
 use App\Models\Penggajian;
 use App\Models\PerubahanKeluarga;
 use App\Models\RiwayatPerubahan;
@@ -739,6 +740,14 @@ class DataPersonalController extends Controller
         'updated_at' => null
       ]);
 
+      $notifikasi = Notifikasi::create([
+        'kategori_notifikasi_id' => 6,
+        'user_id' => Auth::user()->id,
+        'message' => 'Pengajuan perubahan data ' . Auth::user()->nama,
+        'is_read' => 0,
+        'is_ verifikasi' => 1,
+      ]);
+
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
     //   return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $request->value_diubah['value']), Response::HTTP_OK);
@@ -844,6 +853,14 @@ class DataPersonalController extends Controller
         'email' => $k['email'], // Akses dengan notasi array
       ]);
     }
+
+    $notifikasi = Notifikasi::create([
+        'kategori_notifikasi_id' => 6,
+        'user_id' => Auth::user()->id,
+        'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->nama,
+        'is_read' => 0,
+        'is_ verifikasi' => 1,
+      ]);
 
     return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
     // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Perubahan berhasil disimpan', $datakeluarga), Response::HTTP_NOT_FOUND);

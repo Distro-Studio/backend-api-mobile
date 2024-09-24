@@ -7,6 +7,7 @@ use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\Berkas;
 use App\Models\Diklat;
+use App\Models\Notifikasi;
 use App\Models\PesertaDiklat;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -140,6 +141,14 @@ class DiklatController extends Controller
                 'diklat_id' => $diklat->id,
                 'peserta' => Auth::user()->id,
             ]);
+
+            $notifikasi = Notifikasi::create([
+                'kategori_notifikasi_id' => 4,
+                'user_id' => Auth::user()->id,
+                'message' => 'Pengajuan diklat eksternal ' . Auth::user()->nama,
+                'is_read' => 0,
+                'is_ verifikasi' => 1,
+              ]);
 
             return response()->json(new DataResource(Response::HTTP_OK,'Diklat berhasil diajukan', $diklat), Response::HTTP_OK);
         } catch (\Exception $e) {

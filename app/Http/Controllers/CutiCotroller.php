@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\Cuti;
+use App\Models\Notifikasi;
 use App\Models\TipeCuti;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
@@ -151,6 +152,14 @@ class CutiCotroller extends Controller
         'tgl_to' => $request->tgl_selesai,
         'durasi' => $request->durasi,
         'status_cuti_id' => 1
+      ]);
+
+      $notifikasi = Notifikasi::create([
+        'kategori_notifikasi_id' => 1,
+        'user_id' => Auth::user()->id,
+        'message' => 'Pengajuan Cuti ' . Auth::user()->nama,
+        'is_read' => 0,
+        'is_ verifikasi' => 1,
       ]);
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Cuti berhasil diajukan', $cutis), Response::HTTP_OK);

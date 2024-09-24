@@ -10,6 +10,7 @@ use App\Models\HariLibur;
 use App\Models\Jadwal;
 use App\Models\LokasiKantor;
 use App\Models\NonShift;
+use App\Models\Notifikasi;
 use App\Models\Presensi;
 use App\Models\TukarJadwal;
 use App\Models\User;
@@ -515,6 +516,14 @@ class JadwalController extends Controller
         'jadwal_ditukar' => $cek->id,
         'status_penukaran_id' => 1, //Menunggu
         'kategori_penukaran_id' => $kategori
+      ]);
+
+      $notifikasi = Notifikasi::create([
+        'kategori_notifikasi_id' => 2,
+        'user_id' => Auth::user()->id,
+        'message' => 'Pengajuan tukar jadwal ' . Auth::user()->nama,
+        'is_read' => 0,
+        'is_ verifikasi' => 1,
       ]);
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil ditukar', $tukarjadwal), Response::HTTP_OK);

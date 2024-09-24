@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
+use App\Models\Notifikasi;
 use App\Models\RiwayatIzin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -91,6 +92,14 @@ class IzinController extends Controller
                 'keterangan' => $request->keterangan,
                 'status_izin_id' => 1,
             ]);
+
+            $notifikasi = Notifikasi::create([
+                'kategori_notifikasi_id' => 10,
+                'user_id' => Auth::user()->id,
+                'message' => 'Pengajuan Cuti ' . Auth::user()->nama,
+                'is_read' => 0,
+                'is_ verifikasi' => 1,
+              ]);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Izin berhasil diajukan', $izin), Response::HTTP_OK);
 
