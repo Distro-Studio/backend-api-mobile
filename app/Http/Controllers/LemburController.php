@@ -34,22 +34,27 @@ class LemburController extends Controller
 
       $totallembur = $query->count();
       $data = $query->get();
-      // $time = Carbon::parse();
+       $time = Carbon::parse();
       $totalwaktu = 0;
-      foreach ($data as $d) {
-        $seconds = $this->timeToSeconds($d->durasi);
-        $totalwaktu += $seconds;
+      if($data->isNotEmpty()){
+        foreach ($data as $d) {
+            $seconds = $d->durasi;
+            $totalwaktu += $seconds;
+          }
+      } else {
+          $seconds = 0;
       }
+      
       // $totallembur = Lembur::where('user_id', Auth::user()->id)->where('status_lembur_id', 3)->whereBetween('tgl_pengajuan', [$tgl_mulai, $tgl_selesai])->count();
 
       $data = [
         'total_lembur' => $totallembur,
-        'total_waktu' => $totalwaktu
+        'total_waktu' => $seconds
       ];
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Statistik lembur berhasil didapatkan', $data), Response::HTTP_OK);
     } catch (\Exception $e) {
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -78,12 +83,12 @@ class LemburController extends Controller
         $data = $datasementara->map(function ($item) {
           return [
             "id" => 2,
-            "user_id" => 42,
-            "jadwal_id" => 3,
-            "durasi" => "01:00:00",
-            "catatan" => "semangat bang",
-            "created_at" => "2024-09-01T00:45:34.000000Z",
-            "updated_at" => "2024-09-01T00:45:34.000000Z",
+            "user_id" => Auth::user()->id,
+            "jadwal_id" => $item->jadwal_id,
+            "durasi" => $item->durasi,
+            "catatan" => $item->catatan,
+            "created_at" => $item->created_at,
+            "updated_at" => $item->updated_at,
             'jadwal' => [
               'id' => $item->jadwal->id,
               'tgl_mulai' => $item->jadwal->tgl_mulai,

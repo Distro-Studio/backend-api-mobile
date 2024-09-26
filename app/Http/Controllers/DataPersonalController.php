@@ -142,6 +142,9 @@ class DataPersonalController extends Controller
       $data->no_ijazah = $request->no_ijazah;
       $data->tahun_lulus = $request->tahun_lulus;
       $data->pendidikan_terakhir = $request->pendidikan_terakhir;
+      $data->riwayat_penyakit = $request->riwayat_penyakit;
+      $data->asal_sekolah = $request->asal_sekolah;
+      $data->gelar_belakang = $request->gelar_belakang;
       $data->save();
 
       $user->data_completion_step = 2;
@@ -184,7 +187,7 @@ class DataPersonalController extends Controller
             'data_karyawan_id' => $data->id,
             'nama_keluarga' => $k['nama_keluarga'],
             'hubungan' => $k['hubungan']['value'],
-            'pendidikan_terakhir' => $k['pendidikan_terakhir'],
+            'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'],
             'status_hidup' => $k['status_hidup']['value'],
             'pekerjaan' => $k['pekerjaan'],
             'no_hp' => $k['no_hp'],
@@ -201,7 +204,8 @@ class DataPersonalController extends Controller
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
     } catch (\Exception $e) {
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    //   return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
   }
@@ -594,7 +598,8 @@ class DataPersonalController extends Controller
       'data_karyawans.user',
       'data_karyawans.unitkerja',
       'data_karyawans.kelompok_gaji',
-      'data_karyawans.ptkp'
+      'data_karyawans.ptkp',
+      'riwayat_penggajians.status_gajis'
     ])
       ->where('data_karyawan_id', $user->dataKaryawan->id)
       ->whereMonth('created_at', $request->bulan)
@@ -603,6 +608,10 @@ class DataPersonalController extends Controller
 
     if (!$penggajian) {
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data penggajian tidak ditemukan.'), Response::HTTP_NOT_FOUND);
+    }
+
+    if($penggajian->riwayat_penggajians->status_gaji_id == 1) {
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Penggajian belum di publikas'), Response::HTTP_NOT_FOUND);
     }
 
     $dataKaryawan = $penggajian->data_karyawans;
@@ -745,7 +754,7 @@ class DataPersonalController extends Controller
         'user_id' => Auth::user()->id,
         'message' => 'Pengajuan perubahan data ' . Auth::user()->nama,
         'is_read' => 0,
-        'is_ verifikasi' => 1,
+        'is_verifikasi' => 1,
       ]);
 
 
@@ -788,10 +797,14 @@ class DataPersonalController extends Controller
     }
 
     if (!empty($datakeluarga)) {
+        // return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'hehehe', $datakeluarga), Response::HTTP_INTERNAL_SERVER_ERROR);
       foreach ($datakeluarga as $keluargaItem) {
+        // $updated_data[] = [
+        //         'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'],
+        //     ];
           $statushidup = 1;
           $isbpjs = 1;
-          if($keluargaItem['status_hidup']['value']){
+          if($keluargaItem['status_hidup']){
             $statushidup = 1;
           }else {
             $statushidup = 0;
@@ -804,10 +817,10 @@ class DataPersonalController extends Controller
           }
           $updated_data[] = [
               'data_keluarga_id' => $keluargaItem['data_keluarga_id'] ?? null,
-              'hubungan' => $keluargaItem['hubungan']['value'],
+              'hubungan' => $keluargaItem['hubungan'],
               'nama_keluarga' => $keluargaItem['nama_keluarga'],
               'status_hidup' => $statushidup,
-              'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['value'],
+              'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'],
               'pekerjaan' => $keluargaItem['pekerjaan'],
               'no_hp' => $keluargaItem['no_hp'],
               'email' => $keluargaItem['email'],
@@ -815,6 +828,8 @@ class DataPersonalController extends Controller
               'id' => $keluargaItem['id'] ?? null
           ];
       }
+
+        //  return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'hehehe', $updated_data), Response::HTTP_INTERNAL_SERVER_ERROR);
   }
 
   if($formatedData == null) {
@@ -845,9 +860,9 @@ class DataPersonalController extends Controller
         'riwayat_perubahan_id' => $datadiubah->id,
         'data_keluarga_id' => $k['data_keluarga_id'] ?? null, // Akses dengan notasi array
         'nama_keluarga' => $k['nama_keluarga'], // Akses dengan notasi array
-        'hubungan' => $k['hubungan']['label'], // Akses dengan notasi array
-        'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'], // Akses dengan notasi array
-        'status_hidup' => $k['status_hidup']['value'], // Akses dengan notasi array
+        'hubungan' => $k['hubungan'], // Akses dengan notasi array
+        'pendidikan_terakhir' => $k['pendidikan_terakhir']['id'], // Akses dengan notasi array
+        'status_hidup' => $k['status_hidup'], // Akses dengan notasi array
         'pekerjaan' => $k['pekerjaan'], // Akses dengan notasi array
         'no_hp' => $k['no_hp'], // Akses dengan notasi array
         'email' => $k['email'], // Akses dengan notasi array
@@ -859,7 +874,7 @@ class DataPersonalController extends Controller
         'user_id' => Auth::user()->id,
         'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->nama,
         'is_read' => 0,
-        'is_ verifikasi' => 1,
+        'is_verifikasi' => 1,
       ]);
 
     return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
@@ -878,7 +893,7 @@ class DataPersonalController extends Controller
     $data_karyawan_id = $user->data_karyawan_id;
 
     // Find karyawan by data_karyawan_id
-    $karyawan = DataKaryawan::where('id',$data_karyawan_id)->first();
+    $karyawan = DataKaryawan::where('id',$data_karyawan_id)->with('pendidikanTerakhir')->first();
     // $karyawan->pendidikan_terakhir = $karyawan->pendidikan_terakhir->label;
 
     if (!$karyawan) {
@@ -985,7 +1000,7 @@ class DataPersonalController extends Controller
       'jenis_kelamin' => $karyawan->jenis_kelamin,
       'agama' => $karyawan->kategoriagama,
       'golongan_darah' => $karyawan->golonganDarah,
-      'pendidikan_terakhir' => $karyawan->pendidikan_terakhir,
+      'pendidikan_terakhir' => $karyawan->pendidikanTerakhir,
       'tinggi_badan' => $karyawan->tinggi_badan,
       'berat_badan' => $karyawan->berat_badan,
       'no_ijazah' => $karyawan->no_ijazah,
@@ -996,6 +1011,8 @@ class DataPersonalController extends Controller
       'masa_berlaku_str' => $karyawan->masa_berlaku_str,
       'masa_berlaku_sip' => $karyawan->masa_berlaku_sip,
       'tgl_berakhir_pks' => $karyawan->tgl_berakhir_pks,
+      'bmi_value' => $karyawan->bmi_value,
+      'bmi_ket' => $karyawan->bmi_ket,
       'masa_diklat' => $karyawan->masa_diklat,
       'created_at' => $karyawan->created_at,
       'updated_at' => $karyawan->updated_at

@@ -78,10 +78,14 @@ class IzinController extends Controller
         // if()
 
         try {
-            $cekkuotabulan = RiwayatIzin::where('user_id', Auth::user()->id)->whereMonth('tgl_izin', Carbon::parse($request->tgl_izin)->month)->get();
+            $cekkuotabulan = RiwayatIzin::where('user_id', Auth::user()->id)->where('status_izin_id', 2)->whereMonth('tgl_izin', Carbon::parse($request->tgl_izin)->month)->get();
 
             if ($cekkuotabulan->isNotEmpty()){
                 return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Kuota bulan ini sudah habis'), Response::HTTP_BAD_REQUEST);
+            }
+
+            if($request->durasi >7200) {
+                return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Durasi tidak boleh lebih dari 2 jam'), Response::HTTP_BAD_REQUEST);
             }
 
             $izin = RiwayatIzin::create([
@@ -98,7 +102,7 @@ class IzinController extends Controller
                 'user_id' => Auth::user()->id,
                 'message' => 'Pengajuan Cuti ' . Auth::user()->nama,
                 'is_read' => 0,
-                'is_ verifikasi' => 1,
+                'is_verifikasi' => 1,
               ]);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Izin berhasil diajukan', $izin), Response::HTTP_OK);

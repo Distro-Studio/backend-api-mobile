@@ -21,6 +21,7 @@ class DataKeluarga extends Model
     'pekerjaan' => 'string',
     'no_hp' => 'string',
     'email' => 'string',
+    'is_bpjs' => 'integer',
     'created_at' => 'datetime',
     'updated_at' => 'datetime',
   ];

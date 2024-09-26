@@ -111,15 +111,23 @@ class DiklatController extends Controller
             $endTimeInput = $request->jam_selesai;     // Contoh: "12:30:00"
 
             // Membuat objek Carbon dari input waktu
-            $startTime = Carbon::createFromFormat('H:i:s', $startTimeInput);
-            $endTime = Carbon::createFromFormat('H:i:s', $endTimeInput);
+            // $startTime = Carbon::createFromFormat('H:i:s', $startTimeInput);
+            // $endTime = Carbon::createFromFormat('H:i:s', $endTimeInput);
 
-            $startDay = Carbon::createFromFormat('Y-m-d', $request->tgl_mulai);
-            $endDay = Carbon::createFromFormat('Y-m-d', $request->tgl_selesai);
+            // $startDay = Carbon::createFromFormat('Y-m-d', $request->tgl_mulai);
+            // $endDay = Carbon::createFromFormat('Y-m-d', $request->tgl_selesai);
 
-            $dayDiff = $endDay->diffInDays() + 1;
+            // $dayDiff = $endDay->diffInDays() + 1;
 
-            $durasi = $endTime->diffInSeconds($startTime);
+            // $durasi = $endTime->diffInSeconds($startTime);
+
+            $startDateTime = Carbon::parse($request->tgl_mulai . ' ' . $request->jam_mulai);
+            $endDateTime = Carbon::parse($request->tgl_mulai . ' ' . $request->jam_selesai);
+
+            $diffinsecond = $startDateTime->diffInSeconds($endDateTime);
+
+            $totalDays = Carbon::parse($request->tgl_mulai)->diffInDays(Carbon::parse($request->tgl_selesai)) + 1;
+
 
             $diklat = Diklat::create([
                 'dokumen_eksternal' => $berkasserti->id,
@@ -132,7 +140,7 @@ class DiklatController extends Controller
                 'tgl_selesai' => $request->tgl_selesai,
                 'jam_mulai' => $request->jam_mulai,
                 'jam_selesai' => $request->jam_selesai,
-                'durasi' => $durasi * $dayDiff,
+                'durasi' => $diffinsecond * $totalDays,
                 'lokasi' => $request->lokasi,
                 'skp' => $request->skp
             ]);
@@ -147,7 +155,7 @@ class DiklatController extends Controller
                 'user_id' => Auth::user()->id,
                 'message' => 'Pengajuan diklat eksternal ' . Auth::user()->nama,
                 'is_read' => 0,
-                'is_ verifikasi' => 1,
+                'is_verifikasi' => 1,
               ]);
 
             return response()->json(new DataResource(Response::HTTP_OK,'Diklat berhasil diajukan', $diklat), Response::HTTP_OK);

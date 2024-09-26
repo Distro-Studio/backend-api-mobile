@@ -31,7 +31,9 @@ class JadwalController extends Controller
       $officeloc = LokasiKantor::where('id', 1)->first();
       $aktivitas = false;
 
-      $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->first();
+      $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->with(['jadwal.shift'])->first();
+
+
       if ($cekpresensi) {
         if ($cekpresensi->jam_keluar == null) {
           $aktivitas = true;
@@ -42,6 +44,10 @@ class JadwalController extends Controller
 
       if ($datakaryawan->unitkerja->jenis_karyawan == 1) {
         $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
+
+        // $startTime = Carbon::parse(->jam_masuk)
+        // $endTime = Carbon::parse($time);
+        // $duration = $startTime->diff($endTime);
         if ($jadwal) {
           $jadwal->office_lat = $officeloc->lat;
           $jadwal->office_long = $officeloc->long;
@@ -87,15 +93,27 @@ class JadwalController extends Controller
         $encode = json_encode($jadwaln);
 
         $jadwal = json_decode($encode);
+
+
       }
 
       if (!$jadwal) {
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
 
+        $time = date('Y-m-d H:i:s');
+        $schDate = Carbon::parse($jadwal->shift->jam_from);
+        $nowTime = Carbon::parse($time);
+        $duration = $schDate->diffInSeconds($nowTime);
+
+        if($duration > 7200) {
+            return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Absensi belum dimulai', $jadwal), Response::HTTP_NOT_FOUND);
+        }
+
+        $jadwal->duration = $duration;
       return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
     } catch (\Exception $e) {
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
   }
@@ -523,7 +541,7 @@ class JadwalController extends Controller
         'user_id' => Auth::user()->id,
         'message' => 'Pengajuan tukar jadwal ' . Auth::user()->nama,
         'is_read' => 0,
-        'is_ verifikasi' => 1,
+        'is_verifikasi' => 1,
       ]);
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil ditukar', $tukarjadwal), Response::HTTP_OK);

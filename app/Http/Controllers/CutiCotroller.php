@@ -33,7 +33,7 @@ class CutiCotroller extends Controller
       foreach ($tipecuti as $leaveType) {
         // $leaveType->used = Cuti::where('tipe_cuti_id', $leaveType->id)->where('status_cuti_id', 2)->where('user_id', Auth::user()->id)->whereBetween('created_at', [$startDate, $endDate])->count();
         $usedDays = Cuti::where('tipe_cuti_id', $leaveType->id)
-          ->where('status_cuti_id', 2) // Only consider approved leaves
+          ->where('status_cuti_id', 4) // Only consider approved leaves
           ->where('user_id', Auth::user()->id)
           ->whereYear('created_at', Carbon::now()->year) // Within the current year
           ->get()
@@ -159,7 +159,7 @@ class CutiCotroller extends Controller
         'user_id' => Auth::user()->id,
         'message' => 'Pengajuan Cuti ' . Auth::user()->nama,
         'is_read' => 0,
-        'is_ verifikasi' => 1,
+        'is_verifikasi' => 1,
       ]);
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Cuti berhasil diajukan', $cutis), Response::HTTP_OK);

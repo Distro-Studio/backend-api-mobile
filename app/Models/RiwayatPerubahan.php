@@ -23,4 +23,6 @@ class RiwayatPerubahan extends Model
     'updated_at' => 'datetime',
   ];
 
+//   public function 
+
 }
