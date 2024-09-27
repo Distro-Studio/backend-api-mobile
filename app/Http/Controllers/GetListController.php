@@ -102,7 +102,7 @@ class GetListController extends Controller
   {
     try {
       if ($request->limit == 0) {
-        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->get();
+        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->get();
       } else {
         $pengumuman = Pengumuman::take($request->limit)->get();
       }

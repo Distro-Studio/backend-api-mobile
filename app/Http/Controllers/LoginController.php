@@ -39,13 +39,18 @@ class LoginController extends Controller
             // $authenticate = false;
 
             if (!$dataKaryawan) {
+                $ceknik = DataKaryawan::where('nik', $request->email)->first();
                 // return response()->json(['error' => 'Email tidak ditemukan.'], 404);
                 // $authenticate = false;
-                $usercek = User::where('username', $request->email)->first();
-                if (!$usercek) {
-                    return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email/username atau password salah'), Response::HTTP_UNAUTHORIZED);
-                }else {
-                    $dataKaryawan = DataKaryawan::where('user_id', $usercek->id)->first();
+                if(!$ceknik) {
+                    $usercek = User::where('username', $request->email)->first();
+                    if (!$usercek) {
+                        return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email/username atau password salah'), Response::HTTP_UNAUTHORIZED);
+                    }else {
+                        $dataKaryawan = DataKaryawan::where('user_id', $usercek->id)->first();
+                    }
+                }else{
+                    $dataKaryawan = $ceknik;
                 }
             }
 
@@ -98,7 +103,7 @@ class LoginController extends Controller
             return response()->json(new DataResource(Response::HTTP_OK, 'Login Berhasil', $users), Response::HTTP_OK);
 
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal server error'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         // if(Auth::attempt($request->only('username', 'password'))){
