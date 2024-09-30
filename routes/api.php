@@ -16,6 +16,7 @@ use App\Http\Controllers\LemburController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PerubahannDataController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TukarJadwalController;
@@ -41,10 +42,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/coba-face', [CobaController::class, 'compareFaces']);
-Route::post('/password-reset', [PasswordResetController::class, 'passreset']);
-Route::post('/check-password-reset', [PasswordResetController::class, 'checktoken']);
+// Route::post('/password-reset', [PasswordResetController::class, 'passreset']);
+// Route::post('/check-password-reset', [PasswordResetController::class, 'checktoken']);
 
 Route::get('/cobadownload', [CobaController::class, 'cobadownload']);
+Route::post('/forgot-password-sendOtp', [ForgotPasswordController::class, 'sendOtp']);
+Route::post('/forgot-password-verifyOtp', [ForgotPasswordController::class, 'verifyOtp']);
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']);
 
 
 
@@ -107,6 +111,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   Route::post('/get-pengajuan-swap', [TukarJadwalController::class, 'getpengajuan']);
   Route::post('/get-permintaan-swap', [TukarJadwalController::class, 'getpermintaan']);
+
+  Route::post('/acc-swap', [TukarJadwalController::class, 'acctukar']);
 
   Route::get('/get-statistik-lembur', [LemburController::class, 'getstatistik']);
   Route::post('/get-riwayat-lembur', [LemburController::class, 'getriwayat']);

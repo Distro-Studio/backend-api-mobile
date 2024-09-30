@@ -12,6 +12,7 @@ use App\Models\LokasiKantor;
 use App\Models\NonShift;
 use App\Models\Notifikasi;
 use App\Models\Presensi;
+use App\Models\Shift;
 use App\Models\TukarJadwal;
 use App\Models\User;
 use Carbon\Carbon;
@@ -31,24 +32,50 @@ class JadwalController extends Controller
       $officeloc = LokasiKantor::where('id', 1)->first();
       $aktivitas = false;
 
-      $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->with(['jadwal.shift'])->first();
 
-
-      if ($cekpresensi) {
-        if ($cekpresensi->jam_keluar == null) {
-          $aktivitas = true;
-        } else {
-          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Presensi sudah dilakukan'), Response::HTTP_NOT_FOUND);
-        }
-      }
 
       if ($datakaryawan->unitkerja->jenis_karyawan == 1) {
-        $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
+        //cek jadwal kemarin jika shift malam
+        $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
+        $now = Carbon::now();
+        // $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
+        $jadwal = Jadwal::where('user_id', Auth::user()->id)
+        ->where(function ($query) use ($today, $yesterday, $now) {
+            // Kondisi 1: Jadwal hari ini
+            $query->whereDate('tgl_mulai', $today);
+              // ->whereHas('shift', function ($shiftQuery) use ($now) {
+              //   $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
+              // });
+
+            // Kondisi 2: Shift malam
+            $query->orWhere(function ($query) use ($today, $yesterday, $now) {
+                $query->whereDate('tgl_mulai', $yesterday)
+                    ->whereDate('tgl_selesai', '>=', $today)
+                    ->whereHas('shift', function ($shiftQuery) use ($now) {
+                        $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
+                    });
+            });
+        })->with('shift')
+        ->first();
 
         // $startTime = Carbon::parse(->jam_masuk)
         // $endTime = Carbon::parse($time);
         // $duration = $startTime->diff($endTime);
+        // return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, $jadwal->id), Response::HTTP_NOT_FOUND);
         if ($jadwal) {
+            $cekpresensi = Presensi::where('user_id', Auth::user()->id)->where('jadwal_id', $jadwal->id)->with(['jadwal.shift'])->first();
+
+
+            if ($cekpresensi) {
+                if ($cekpresensi->jam_keluar == null) {
+                    $aktivitas = true;
+
+                } else {
+                    $aktivitas = false;
+                    return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Presensi sudah dilakukan'), Response::HTTP_NOT_FOUND);
+                }
+            }
           $jadwal->office_lat = $officeloc->lat;
           $jadwal->office_long = $officeloc->long;
           $jadwal->radius = $officeloc->radius;
@@ -94,23 +121,51 @@ class JadwalController extends Controller
 
         $jadwal = json_decode($encode);
 
+        $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->first();
+        if ($cekpresensi) {
+          if ($cekpresensi->jam_keluar == null) {
+            $aktivitas = true;
+          } else {
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Presensi sudah dilakukan'), Response::HTTP_NOT_FOUND);
+          }
+        }
+
 
       }
 
       if (!$jadwal) {
+        $cekpresensik = Presensi::where('user_id', Auth::user()->id)->whereMonth('created_at', Carbon::now()->month)->whereDate('created_at', '<', Carbon::now()->format('Y-m-d H:i:s'))->get();
+        // $reward = true;
+        foreach($cekpresensik as $c) {
+          if ($c->jam_keluar == null) {
+            // $reward = false;
+            $datakaryawan->status_reward_presensi = 0;
+            $datakaryawan->save();
+            break;
+          }
+        }
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
 
+      if(!$aktivitas) {
         $time = date('Y-m-d H:i:s');
         $schDate = Carbon::parse($jadwal->shift->jam_from);
         $nowTime = Carbon::parse($time);
         $duration = $schDate->diffInSeconds($nowTime);
 
-        if($duration > 7200) {
+        if ($duration > 7200) {
             return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Absensi belum dimulai', $jadwal), Response::HTTP_NOT_FOUND);
         }
 
         $jadwal->duration = $duration;
+      }
+
+
+      // $endTime = Carbon::createFromFormat('Y-m-d H:i:s', $jadwal->tgl_selesai . ' ' . $jadwal->shift->jam_to);
+      // if(Carbon::now()->greaterThan($endTime)) {
+      //   $datakaryawan->status_reward_presensi = 0;
+      //   $datakaryawan->save();
+      // }
       return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -366,7 +421,8 @@ class JadwalController extends Controller
         if (!$jadwal) {
           return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }
-        $getuser = Jadwal::where('tgl_mulai', $jadwal->tgl_mulai)->where('shift_id', $jadwal->shift_id)->where('user_id', '!=', $jadwal->user_id)->select('user_id')->with('user')->with(['user.dataKaryawan.kompetensi', 'user.dataKaryawan.statusKaryawan'])->get();
+        // $getuser = Jadwal::where('tgl_mulai', $jadwal->tgl_mulai)->where('shift_id', $jadwal->shift_id)->where('user_id', '!=', $jadwal->user_id)->select('user_id')->with('user')->with(['user.dataKaryawan.kompetensi', 'user.dataKaryawan.statusKaryawan'])->get();
+        $getuser = Jadwal::where('tgl_mulai', $jadwal->tgl_mulai)->where('user_id', '!=', $jadwal->user_id)->select('user_id')->with('user')->with(['user.dataKaryawan.kompetensi', 'user.dataKaryawan.statusKaryawan'])->get();
         $data = $getuser->map(function ($item) {
               return [
                 'user_id' => $item->user_id,
@@ -578,7 +634,9 @@ class JadwalController extends Controller
       } else {
         $schedule = Jadwal::where('user_id', Auth::user()->id)
           ->where('shift_id', '!=', null)
-          ->where('tgl_mulai', '>=', date('Y-m-d'))
+        //   ->where('tgl_mulai', '>=', date('Y-m-d'))
+          ->where('tgl_mulai', $jadwal->tgl_mulai)
+        //   ->orWhere()
           ->with('shift')
           ->get();
 

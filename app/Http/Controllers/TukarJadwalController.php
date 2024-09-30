@@ -8,6 +8,7 @@ use App\Models\TukarJadwal;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
 class TukarJadwalController extends Controller
@@ -134,6 +135,29 @@ class TukarJadwalController extends Controller
             return response()->json(new DataResource(Response::HTTP_OK, 'List pengajuan tukar jadwal berhasil didapatkan', $tukar), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function acctukar(Request $request)
+    {
+        $validator =  Validator::make($request->all(), [
+            'tukar_jadwal_id' => 'required',
+        ], [
+            'tukar_jadwal_id.required' => 'Jadwal harus dipilih',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
+        }
+
+        try {
+        $tukarJadwal = TukarJadwal::where('id', $request->tukar_jadwal_id)->first();
+        $tukarJadwal->update([
+            'acc_user_ditukar' => 1
+        ]);
+        return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Tukar jadwal berhasil'), Response::HTTP_OK);
+        } catch(\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

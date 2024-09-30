@@ -97,7 +97,7 @@ class PresensiController extends Controller
             $status = 1; //TEPAT WAKTU
         } else {
             $differenceInMinutes = $start->diffInMinutes($end);
-            $status = 3; //ABSEN
+            $status = 4; //ABSEN
         }
 
         // return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'sdad'), Response::HTTP_NOT_FOUND);
@@ -157,6 +157,20 @@ class PresensiController extends Controller
                     'kategori_presensi_id' => $status,
                 ]);
 
+                $checkinTime = Carbon::now();
+                if($jadwalid) {
+                    $jadwalTime = Carbon::parse($jadwal->shift->jam_from);
+                    if ($checkinTime->greaterThan($jadwalTime)) {
+                        $datakaryawan->status_reward_presensi = 0;
+                        $datakaryawan->save();
+                    }
+                }else {
+                    if($checkinTime->greaterThan($jamMasuk)) {
+                        $datakaryawan->status_reward_presensi = 0;
+                        $datakaryawan->save();
+                    }
+                }
+
                 $activity = ActivityLog::create([
                     'activity' => 'Masuk',
                     'user_id' => Auth::user()->id,
@@ -205,8 +219,17 @@ class PresensiController extends Controller
 
         if ($distance <= $radius) {
 
-
-            $checkpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->where('jam_keluar', NULL)->first();
+            $today = Carbon::today();
+            $yesterday = Carbon::yesterday();
+            $now = Carbon::now();
+            // $checkpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->where('jam_keluar', NULL)->first();
+            $checkpresensi = Presensi::where('user_id', Auth::user()->id)
+                ->whereNull('jam_keluar')
+                ->whereHas('jadwal', function($query) use ($now) {
+                    $query->whereDate('tgl_mulai', '<=', $now)
+                        ->whereDate('tgl_selesai', '>=', $now);
+                })->with(['jadwal.shift'])
+                ->first();
 
             if(!$checkpresensi){
                 return response()->json(new DataResource(Response::HTTP_IM_USED, 'Presensi belum dilakukan', $checkpresensi), Response::HTTP_IM_USED);
@@ -267,6 +290,13 @@ class PresensiController extends Controller
                 // $checkpresensi->presensi = 1;
                 $checkpresensi->foto_keluar = $saveberkas->id;
                 $checkpresensi->save();
+
+                $chekoutTime = Carbon::now();
+                $outTime = Carbon::parse($checkpresensi->jadwal->shift->jam_to);
+
+                if($chekoutTime->lessThan($outTime)) {
+                    DataKaryawan::where('user_id', Auth::user()->id)->update(['status_reward_presensi' => 0]);
+                }
 
                 $activity = ActivityLog::create([
                     'activity' => 'Keluar',

@@ -120,7 +120,7 @@ class GetListController extends Controller
   public function getlistnotifikasi()
   {
     $user = Auth::user();
-    $notifikasi = Notifikasi::where('user_id', $user->id)
+    $notifikasi = Notifikasi::whereJsonContains('user_id', $user->id)
       ->orderBy('is_read', 'asc')
       ->orderBy('created_at', 'desc')
       ->get();
@@ -130,7 +130,7 @@ class GetListController extends Controller
     }
 
     $formattedData = $notifikasi->map(function ($item) {
-        $item->users->makeHidden('password');
+        // $item->users->makeHidden('password');
       return [
         'id' => $item->id,
         'kategori_notifikasi' => $item->kategori_notifikasis,
