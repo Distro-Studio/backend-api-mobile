@@ -42,7 +42,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [LoginController::class, 'login']);
 Route::get('/coba-face', [CobaController::class, 'compareFaces']);
-// Route::post('/password-reset', [PasswordResetController::class, 'passreset']);
 // Route::post('/check-password-reset', [PasswordResetController::class, 'checktoken']);
 
 Route::get('/cobadownload', [CobaController::class, 'cobadownload']);
@@ -53,6 +52,7 @@ Route::post('/reset-password', [PasswordResetController::class, 'resetPassword']
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
+  Route::post('/password-reset', [PasswordResetController::class, 'passreset']);
   Route::post('/change-password-reset', [PasswordResetController::class, 'changepass']);
   Route::post('/logout', [LoginController::class, 'logout']);
   Route::get('/getuserinfo', [UserController::class, 'checkuser']);

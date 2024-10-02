@@ -558,7 +558,13 @@ class JadwalController extends Controller
   public function changeschedule(Request $request)
   {
     try {
-      $cek = Jadwal::where('id', $request->jadwal_id_ditukar)->first();
+      $cektukarsebelum = TukarJadwal::whereNotNull('verifikator_1')->whereNotNull('verifikator_2')->get();
+
+      if($cektukarsebelum->isNotEmpty()) {
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda masih memiliki pengajuan tukar jadwal yang belom terverifikasi'), Response::HTTP_NOT_ACCEPTABLE);
+      }
+
+      $cek = Jadwal::where('id', $request->jadwal_id_ditukar)->with('userDitukar')->first();
       if (!$cek) {
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
@@ -589,18 +595,35 @@ class JadwalController extends Controller
         'user_ditukar' => $cek->user_id,
         'jadwal_ditukar' => $cek->id,
         'status_penukaran_id' => 1, //Menunggu
-        'kategori_penukaran_id' => $kategori
+        'kategori_penukaran_id' => $kategori,
+        'acc_user_ditukar' => 1
       ]);
 
       $notifikasi = Notifikasi::create([
         'kategori_notifikasi_id' => 2,
         'user_id' => Auth::user()->id,
-        'message' => 'Pengajuan tukar jadwal ' . Auth::user()->nama,
+        'message' => 'Pengajuan tukar jadwal ' . Auth::user()->nama . ' terkirim',
         'is_read' => 0,
         'is_verifikasi' => 1,
       ]);
 
-      return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil ditukar', $tukarjadwal), Response::HTTP_OK);
+      Notifikasi::create([
+        'kategori_notifikasi_id' => 2,
+        'user_id' => $cek->user_id,
+        'message' => Auth::user()->nama . ' mengajukan tukar jadwal dengan anda',
+        'is_read' => 0,
+        'is_verifikasi' => 1,
+      ]);
+
+      Notifikasi::create([
+        'kategori_notifikasi_id' => 2,
+        'user_id' => 1,
+        'message' => Auth::user()->nama . ' mengajukan tukar jadwal dengan ' . $cek->userDitukar->nama,
+        'is_read' => 0,
+        'is_verifikasi' => 1,
+      ]);
+
+      return response()->json(new DataResource(Response::HTTP_OK, 'Permintaan tukar jadwal berhasil terkirim', $tukarjadwal), Response::HTTP_OK);
 
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -610,9 +633,9 @@ class JadwalController extends Controller
   public function getjadwalditukar(Jadwal $jadwal)
   {
     try {
-      if ($jadwal->shift_id == null) {
+      if ($jadwal->shift_id == 0) {
         $karyawanA = Jadwal::where('user_id', Auth::user()->id)
-          ->where('shift_id', null)
+          ->where('shift_id', 0)
           ->where('tgl_mulai', '>=', date('Y-m-d'))
           ->get();
 
@@ -620,7 +643,7 @@ class JadwalController extends Controller
 
         foreach ($karyawanA as $schedule) {
           $karyawanB = Jadwal::where('tgl_mulai', $schedule->tgl_mulai)
-            ->where('shift_id', null)
+            ->where('shift_id', 0)
             ->where('user_id', $jadwal->user_id)
             ->exists();
 
@@ -633,10 +656,10 @@ class JadwalController extends Controller
         return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal ditukar', $validSchedules), Response::HTTP_OK);
       } else {
         $schedule = Jadwal::where('user_id', Auth::user()->id)
-          ->where('shift_id', '!=', null)
-        //   ->where('tgl_mulai', '>=', date('Y-m-d'))
-          ->where('tgl_mulai', $jadwal->tgl_mulai)
-        //   ->orWhere()
+          ->whereIn('shift_id', 1)
+        //   ->where('shift_id', '>=', 1)
+          ->where('tgl_mulai', '>=', date('Y-m-d'))
+        //   ->where('tgl_mulai', $jadwal->tgl_mulai)
           ->with('shift')
           ->get();
 

@@ -104,7 +104,7 @@ class GetListController extends Controller
       if ($request->limit == 0) {
         $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->get();
       } else {
-        $pengumuman = Pengumuman::take($request->limit)->get();
+        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->take($request->limit)->get();
       }
 
       if ($pengumuman->isEmpty()) {
@@ -201,24 +201,15 @@ class GetListController extends Controller
         //     $notifikasi_id = explode(',', $request->notifikasi_id); // Ubah string menjadi array
         // }
         $notifikasi = Notifikasi::whereIn('id', json_decode($request->notifikasi_id))->where('user_id', Auth::user()->id)->update(['is_read' => 1]);
-
+        // $notifikasi = Notifikasi::whereIn('id', json_decode($request->notifikasi_id))->whereJsonContains('user_id', Auth::user()->id)->update(['is_read' => 1]);
         // $notifikasi->is_read = 1;
         // $notifikasi->save();
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Notifkasi berhasil dibaca'), Response::HTTP_OK);
     } catch (\Exception $e) {
-        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
-  public function deletereadnotif(Request $request)
-  {
-    try {
-        //
-
-    } catch (\Exception $e) {
-        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-  }
 
   public function getallpendidikan()
   {
@@ -245,6 +236,8 @@ class GetListController extends Controller
         if($notif->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Notifikasi tidak ditemukan'), Response::HTTP_BAD_REQUEST);
         }
+
+        $notif->delete();
 
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Notifkasi berhasil dihapus'), Response::HTTP_OK);
     } catch (\Exception $e) {

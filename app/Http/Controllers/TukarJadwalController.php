@@ -46,7 +46,7 @@ class TukarJadwalController extends Controller
             if ($request->filled('offset')){
                 $offset = $request->offset;
             }
-
+            $query->with(['jadwalPengajuan.shift', 'jadwalDitukar.shift']);
             $tukar = $query->paginate($offset);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'List pengajuan tukar jadwal berhasil didapatkan', $tukar), Response::HTTP_OK);
@@ -87,7 +87,7 @@ class TukarJadwalController extends Controller
             if ($request->filled('offset')){
                 $offset = $request->offset;
             }
-
+            $query->with(['jadwalPengajuan.shift', 'jadwalDitukar.shift']);
             $tukar = $query->paginate($offset);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'List pengajuan tukar jadwal berhasil didapatkan', $tukar), Response::HTTP_OK);
@@ -142,8 +142,10 @@ class TukarJadwalController extends Controller
     {
         $validator =  Validator::make($request->all(), [
             'tukar_jadwal_id' => 'required',
+            'is_acc' => 'required'
         ], [
             'tukar_jadwal_id.required' => 'Jadwal harus dipilih',
+            'is_acc.required' => 'Silahkan pilih setujui atau tolak'
         ]);
 
         if ($validator->fails()) {
@@ -152,9 +154,15 @@ class TukarJadwalController extends Controller
 
         try {
         $tukarJadwal = TukarJadwal::where('id', $request->tukar_jadwal_id)->first();
-        $tukarJadwal->update([
-            'acc_user_ditukar' => 1
-        ]);
+
+        if($request->is_acc) {
+        $tukarJadwal->acc_user_ditukar = 2;
+
+        }else {
+            $tukarJadwal->acc_user_ditukar = 3;
+        }
+
+        $tukarJadwal->save();
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Tukar jadwal berhasil'), Response::HTTP_OK);
         } catch(\Exception $e) {
         return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);

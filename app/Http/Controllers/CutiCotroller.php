@@ -157,7 +157,7 @@ class CutiCotroller extends Controller
       $notifikasi = Notifikasi::create([
         'kategori_notifikasi_id' => 1,
         'user_id' => Auth::user()->id,
-        'message' => 'Pengajuan Cuti ' . Auth::user()->nama,
+        'message' => 'Pengajuan Cuti ' . Auth::user()->nama . ' berhasil',
         'is_read' => 0,
         'is_verifikasi' => 1,
       ]);

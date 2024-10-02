@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ResetPasswordRequest;
+use App\Http\Requests\UpdateUserPasswordRequest;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
@@ -18,36 +19,33 @@ use Illuminate\Support\Str;
 
 class PasswordResetController extends Controller
 {
-    public function passreset(Request $request)
+    public function passreset(UpdateUserPasswordRequest $request)
     {
-        $validator = Validator::make($request->all(),[
-            'email' => 'required|email',
-        ], [
-            'email.required' => 'Email harus diisi',
-            'email.email' => 'Format email tidak sesuai',
-        ]);
+        // TODO: Buat validasi email dahulu
 
-        if ($validator->fails())
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()),Response::HTTP_NOT_ACCEPTABLE);
+        $user = Auth::user();
+
+        $dataKaryawan = $user->dataKaryawan;
+        if ($dataKaryawan && $dataKaryawan->email == 'super_admin@admin.rski') {
+            return response()->json(new WithoutDataResource(Response::HTTP_FORBIDDEN, 'Anda tidak dapat memperbarui kata sandi pada role Super Admin.'), Response::HTTP_FORBIDDEN);
         }
 
-        $checkemail = DataKaryawan::where('email', $request->email)->first();
+        $data = $request->validated();
+        if (isset($data['password'])) {
+            // Check if the current password is correct
+            $currentPassword = $request->input('current_password');
+            if (!Hash::check($currentPassword, $user->password)) {
+                return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Kata sandi yang anda masukkan tidak valid.'), Response::HTTP_BAD_REQUEST);
+            }
 
-        if(!$checkemail)
-        {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND,'Email anda tidak ditemukan'),Response::HTTP_NOT_FOUND);
+            // TODO: Verify email before changing password
+
+            // Update the new password
+            $data['password'] = Hash::make($data['password']);
         }
-
-
-        $user = User::where('id', $checkemail->user_id)->first();
-        $user->remember_token = Str::random(60);
-        $user->updated_at = date('Y-m-d H:i:s');
-        $user->save();
-
-        //disini script untuk kirim email nya
-
-        return response()->json(new DataResource(Response::HTTP_OK, 'Link reset password berhasil dikirim', ['email' => $request->email]), Response::HTTP_OK);
+        /** @var \App\Models\User $user **/
+        $user->fill($data)->save();
+        return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berhasil memperbarui kata sandi anda.', $user), Response::HTTP_OK);
     }
 
     public function tokencheck($token)
@@ -193,7 +191,7 @@ class PasswordResetController extends Controller
     {
         $data = $request->validated();
 
-        $user = User::whereHas('data_karyawans', function ($query) use ($data) {
+        $user = User::whereHas('dataKaryawan', function ($query) use ($data) {
             $query->where('email', $data['email']);
         })->first();
 

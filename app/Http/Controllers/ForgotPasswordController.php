@@ -18,7 +18,7 @@ class ForgotPasswordController extends Controller
     {
         $data = $request->validated();
 
-        $user = User::whereHas('data_karyawans', function ($query) use ($data) {
+        $user = User::whereHas('dataKaryawan', function ($query) use ($data) {
             $query->where('email', $data['email']);
         })->first();
 
@@ -43,7 +43,7 @@ class ForgotPasswordController extends Controller
     {
         $data = $request->validated();
 
-        $user = User::whereHas('data_karyawans', function ($query) use ($data) {
+        $user = User::whereHas('dataKaryawan', function ($query) use ($data) {
             $query->where('email', $data['email']);
         })->first();
 
