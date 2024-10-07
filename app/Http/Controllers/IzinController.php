@@ -105,6 +105,14 @@ class IzinController extends Controller
                 'is_verifikasi' => 1,
               ]);
 
+            Notifikasi::create([
+                'kategori_notifikasi_id' => 10,
+                'user_id' => 1,
+                'message' => 'Pengajuan Cuti ' . Auth::user()->nama,
+                'is_read' => 0,
+                'is_verifikasi' => 1,
+            ]);
+
             return response()->json(new DataResource(Response::HTTP_OK, 'Izin berhasil diajukan', $izin), Response::HTTP_OK);
 
 

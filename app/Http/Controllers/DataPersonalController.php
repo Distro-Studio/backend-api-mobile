@@ -752,7 +752,15 @@ class DataPersonalController extends Controller
       $notifikasi = Notifikasi::create([
         'kategori_notifikasi_id' => 6,
         'user_id' => Auth::user()->id,
-        'message' => 'Pengajuan perubahan data ' . Auth::user()->nama,
+        'message' => 'Pengajuan perubahan data ' . Auth::user()->nama . ' berhasil terkirim',
+        'is_read' => 0,
+        'is_verifikasi' => 1,
+      ]);
+
+      Notifikasi::create([
+        'kategori_notifikasi_id' => 6,
+        'user_id' => 1,
+        'message' => 'Pengajuan perubahan data ' . Auth::user()->nama . ' berhasil terkirim',
         'is_read' => 0,
         'is_verifikasi' => 1,
       ]);
@@ -872,10 +880,16 @@ class DataPersonalController extends Controller
     $notifikasi = Notifikasi::create([
         'kategori_notifikasi_id' => 6,
         'user_id' => Auth::user()->id,
-        'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->nama,
+        'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->nama . ' berhasil terkirim',
         'is_read' => 0,
         'is_verifikasi' => 1,
       ]);
+
+    Notifikasi::create([
+        'kategori_notifikasi_id' => 6,
+        'user_id' => 1,
+        'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->id . ' berhasil terkirim',
+    ]);
 
     return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
     // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Perubahan berhasil disimpan', $datakeluarga), Response::HTTP_NOT_FOUND);

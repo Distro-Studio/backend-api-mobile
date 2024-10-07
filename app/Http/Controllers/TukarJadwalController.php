@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
+use App\Models\Notifikasi;
 use App\Models\TukarJadwal;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -163,6 +164,11 @@ class TukarJadwalController extends Controller
         }
 
         $tukarJadwal->save();
+
+        Notifikasi::create([
+            'kategori_notifikasi_id' => 2,
+            // 'user_id' => 
+        ]);
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Tukar jadwal berhasil'), Response::HTTP_OK);
         } catch(\Exception $e) {
         return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);

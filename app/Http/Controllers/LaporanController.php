@@ -67,6 +67,13 @@ class LaporanController extends Controller
                 'is_read' => 0
             ]);
 
+            Notifikasi::create([
+                'kategori_notifikasi_id' => 9, //laporan
+                'user_id' => 1,
+                'message' => 'Pelaporan baru '. Auth::user()->name,
+                'is_read' => 0
+            ]);
+
             return response()->json(new DataResource(Response::HTTP_OK, 'Laporan berhasil disimpan', $notifikasi), Response::HTTP_OK);
         } catch (\Exception $e) {
             return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wronng'), Response::HTTP_INTERNAL_SERVER_ERROR);

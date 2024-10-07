@@ -153,10 +153,16 @@ class DiklatController extends Controller
             $notifikasi = Notifikasi::create([
                 'kategori_notifikasi_id' => 4,
                 'user_id' => Auth::user()->id,
-                'message' => 'Pengajuan diklat eksternal ' . Auth::user()->nama,
+                'message' => 'Pengajuan diklat eksternal ' . Auth::user()->nama . ' berhasil terkirim',
                 'is_read' => 0,
                 'is_verifikasi' => 1,
               ]);
+
+            Notifikasi::create([
+                'kategori_notifikasi_id' => 4,
+                'user_id' => 1,
+                'message' => 'Pengajuan diklat eksternal ' . Auth::user()->nama . ' berhasil terkirim',
+            ]);
 
             return response()->json(new DataResource(Response::HTTP_OK,'Diklat berhasil diajukan', $diklat), Response::HTTP_OK);
         } catch (\Exception $e) {
