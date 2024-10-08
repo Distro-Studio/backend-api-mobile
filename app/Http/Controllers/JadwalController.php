@@ -86,9 +86,9 @@ class JadwalController extends Controller
         $jamMasuk = Carbon::parse($nonshift->jam_from);
         $jamKeluar = Carbon::parse($nonshift->jam_to);
         $waktuSekarang = Carbon::now();
-        if (!$waktuSekarang->between($jamMasuk, $jamKeluar)) {
-          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
-        }
+        // if (!$waktuSekarang->between($jamMasuk, $jamKeluar)) {
+        //   return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+        // }
 
         if (Carbon::now()->isSunday()) {
           return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
@@ -152,12 +152,14 @@ class JadwalController extends Controller
         $schDate = Carbon::parse($jadwal->shift->jam_from);
         $nowTime = Carbon::parse($time);
         $duration = $schDate->diffInSeconds($nowTime);
+        $jadwal->duration = $duration;
+        if($nowTime->lessThan($schDate)){
+          if ($duration > 7200 ) {
+              return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Absensi belum dimulai', $jadwal), Response::HTTP_NOT_FOUND);
+          }
 
-        if ($duration > 7200) {
-            return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Absensi belum dimulai', $jadwal), Response::HTTP_NOT_FOUND);
         }
 
-        $jadwal->duration = $duration;
       }
 
 

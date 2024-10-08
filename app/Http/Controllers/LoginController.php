@@ -7,6 +7,7 @@ use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
 use App\Models\UnitKerja;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -86,7 +87,12 @@ class LoginController extends Controller
             Auth::login($datauser);
 
             // Buat token atau lakukan tindakan lain setelah login berhasil
-            $token = $user->createToken('TLogin')->plainTextToken;
+            $tokenResult = $user->createToken('TLogin');
+            $token = $tokenResult->plainTextToken;
+            $tokenExpiration = Carbon::now()->addHours(20);
+            $tokenResult->accessToken->expires_at = $tokenExpiration;
+            $tokenResult->accessToken->save();
+
             $users = User::where('id', Auth::user()->id)->with('roles')->first();
             $users->arrtoken = [
                 'token' => $token
