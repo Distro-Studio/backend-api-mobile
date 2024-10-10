@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\BerkasController;
+use App\Http\Controllers\CMSController;
 use App\Http\Controllers\CobaController;
 use App\Http\Controllers\CountController;
 use App\Http\Controllers\CutiCotroller;
@@ -178,4 +179,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::delete('/destroy-read-notification', [GetListController::class, 'destroyreadnotif']);
 
   Route::post('/get-swap', [TukarJadwalController::class, 'getswap']);
+
+  Route::get('/get-about-hospital', [CMSController::class, 'getabout']);
 });
