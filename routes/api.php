@@ -181,4 +181,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('/get-swap', [TukarJadwalController::class, 'getswap']);
 
   Route::get('/get-about-hospital', [CMSController::class, 'getabout']);
+  Route::get('/get-visi-misi', [CMSController::class, 'getvisimisi']);
+  Route::get('/get-mutu', [CMSController::class, 'getmutu']);
+
+  Route::get('/get-materi', [CMSController::class, 'getmateri']);
 });
