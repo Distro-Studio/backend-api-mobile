@@ -30,4 +30,9 @@ class Jadwal extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function userDitukar()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }

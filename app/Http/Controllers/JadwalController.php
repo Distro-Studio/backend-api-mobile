@@ -82,10 +82,26 @@ class JadwalController extends Controller
           $jadwal->aktivitas = $aktivitas;
         }
       } else {
-        $nonshift = NonShift::where('id', 1)->first();
+        $hari = [
+          'Sunday' => 'Minggu',
+          'Monday' => 'Senin',
+          'Tuesday' => 'Selasa',
+          'Wednesday' => 'Rabu',
+          'Thursday' => 'Kamis',
+          'Friday' => 'Jumat',
+          'Saturday' => 'Sabtu',
+        ];
+        $waktuSekarang = Carbon::now();
+        $nonshift = NonShift::where('nama', $hari[$waktuSekarang->isoFormat('dddd')])->first();
+
+        if(!$nonshift){
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+        }
+        
         $jamMasuk = Carbon::parse($nonshift->jam_from);
         $jamKeluar = Carbon::parse($nonshift->jam_to);
-        $waktuSekarang = Carbon::now();
+
+        // return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, $hari[$waktuSekarang->isoFormat('dddd')]), Response::HTTP_NOT_FOUND);
         // if (!$waktuSekarang->between($jamMasuk, $jamKeluar)) {
         //   return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
         // }
@@ -150,9 +166,11 @@ class JadwalController extends Controller
       if(!$aktivitas) {
         $time = date('Y-m-d H:i:s');
         $schDate = Carbon::parse($jadwal->shift->jam_from);
+        $endDate = Carbon::parse($jadwal->shift->jam_to);
         $nowTime = Carbon::parse($time);
         $duration = $schDate->diffInSeconds($nowTime);
         $jadwal->duration = $duration;
+
         if($nowTime->lessThan($schDate)){
           if ($duration > 7200 ) {
               return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Absensi belum dimulai', $jadwal), Response::HTTP_NOT_FOUND);
@@ -160,6 +178,9 @@ class JadwalController extends Controller
 
         }
 
+        if($nowTime->greaterThan($endDate)){
+          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+        }
       }
 
 
