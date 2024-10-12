@@ -244,4 +244,14 @@ class GetListController extends Controller
         return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
+
+
+  public function countnotif()
+  {
+    $notif = Notifikasi::where('user_id', Auth::user()->id)->where('is_read', 0)->count();
+    $mappingData = [
+        'inbox' => $notif,
+    ];
+    return response()->json(new DataResource(Response::HTTP_OK, 'Notifkasi berhasil dihapus', $mappingData), Response::HTTP_OK);
+  }
 }

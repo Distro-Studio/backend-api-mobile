@@ -185,4 +185,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/get-mutu', [CMSController::class, 'getmutu']);
 
   Route::get('/get-materi', [CMSController::class, 'getmateri']);
+
+  Route::get('/count-notifikasi', [GetListController::class, 'countnotif']);
 });

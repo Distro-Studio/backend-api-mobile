@@ -97,7 +97,7 @@ class JadwalController extends Controller
         if(!$nonshift){
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }
-        
+
         $jamMasuk = Carbon::parse($nonshift->jam_from);
         $jamKeluar = Carbon::parse($nonshift->jam_to);
 
@@ -306,7 +306,7 @@ class JadwalController extends Controller
 
         $result = array_values($user_schedule_array);
       } else {
-        $result = Jadwal::where('user_id', Auth::user()->id)->whereBetween('tgl_mulai', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])->with('shift')->get();
+        $result = Jadwal::where('user_id', Auth::user()->id)->whereBetween('tgl_mulai', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])->with('shift')->orderBy('tgl_mulai', 'asc')->get();
         // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $startDate->format('Y-m-d') . ' ' . $endDate->format('Y-m-d')), Response::HTTP_OK);
         if ($result->isEmpty()) {
           return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
@@ -565,7 +565,7 @@ class JadwalController extends Controller
 
         $result = array_values($user_schedule_array);
       } else {
-        $result = Jadwal::where('user_id', $user->id)->whereBetween('tgl_mulai', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])->with('shift')->get();
+        $result = Jadwal::where('user_id', $user->id)->whereBetween('tgl_mulai', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])->with('shift')->orderBy('tgl_mulai', 'asc')->get();
         // return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $startDate->format('Y-m-d') . ' ' . $endDate->format('Y-m-d')), Response::HTTP_OK);
         if ($result->isEmpty()) {
           return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);

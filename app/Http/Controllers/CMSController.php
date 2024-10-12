@@ -170,7 +170,7 @@ class CMSController extends Controller
 
     public function getmateri()
     {
-        $data = MateriPelatihan::where('id', 2)->with('user', 'berkas_1', 'berkas_2', 'berkas_3')->get();
+        $data = MateriPelatihan::with('user', 'berkas_1', 'berkas_2', 'berkas_3')->get();
         if($data->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }
