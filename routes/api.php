@@ -187,4 +187,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/get-materi', [CMSController::class, 'getmateri']);
 
   Route::get('/count-notifikasi', [GetListController::class, 'countnotif']);
+
+  Route::post('/delete-berkas', [BerkasController::class, 'destroy']);
 });

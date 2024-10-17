@@ -131,4 +131,35 @@ class BerkasController extends Controller
         }
 
     }
+
+    public function destroy(Request $request)
+    {
+        $validation = Validator::make($request->all(), [
+            'berkas_id' => 'required|integer',
+        ], [
+            'berkas_id.required' => 'ID berkas harus di isi',
+            'berkas_id.integer' => 'ID berkas harus berupa ID angka',
+        ]);
+
+        if($validation->fails()){
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, $validation->errors()), Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $berkas = Berkas::find($request->berkas_id);
+            $name = $berkas->nama;
+            if (!$berkas) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Berkas tidak ditemuka'), Response::HTTP_NOT_FOUND);
+            }
+
+            // if($berkas->user_id) {
+
+            // }
+            $delete = StorageFileHelper::deleteFromServer($berkas);
+            $berkas->delete();
+            return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berkas '. $name .' berhasil di hapus'), Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

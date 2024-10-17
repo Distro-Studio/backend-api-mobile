@@ -103,6 +103,30 @@ class StorageFileHelper
         }
     }
 
+    public static function deleteFromServer(Berkas $berkas) {
+        $response = Http::asForm()->post(env('URL_STORAGE').'/api/login',[
+            'username' => env('USERNAME_STORAGE'),
+            'password' => env('PASSWORD_STORAGE')
+        ]);
+        $logininfo = $response->json();
+        $token = $logininfo['data']['token'];
+
+        $responseupload = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->asMultipart()->post(env('URL_STORAGE').'/api/delete-file',[
+            'file_id' => $berkas->file_id,
+        ]);
+
+        $uploadinfo = $responseupload->json();
+        $dataupload = $uploadinfo['data'];
+
+        $logout = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->post(env('URL_STORAGE').'/api/logout');
+
+        return $dataupload;
+    }
+
     private static function getFileNameFromHeader($header)
     {
         // Extract filename from Content-Disposition header

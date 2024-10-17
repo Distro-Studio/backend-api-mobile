@@ -95,7 +95,11 @@ class PresensiController extends Controller
             $differenceInMinutes = 0;
             // $status = "Karyawan tepat waktu.";
             $status = 1; //TEPAT WAKTU
-        } else {
+        } else if($end->lt($start)){
+            $differenceInMinutes = 0;
+            // $status = "Karyawan tepat waktu.";
+            $status = 1; //TEPAT WAKTU
+        }else {
             $differenceInMinutes = $start->diffInMinutes($end);
             $status = 4; //ABSEN
         }
