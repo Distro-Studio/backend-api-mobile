@@ -581,7 +581,7 @@ class JadwalController extends Controller
   public function changeschedule(Request $request)
   {
     try {
-      $cektukarsebelum = TukarJadwal::whereNotNull('verifikator_1')->whereNotNull('verifikator_2')->get();
+        $cektukarsebelum = TukarJadwal::whereNotNull('verifikator_1')->whereNotNull('verifikator_2')->where('user_pengajuan', Auth::user()->id)->get();
 
       if($cektukarsebelum->isNotEmpty()) {
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda masih memiliki pengajuan tukar jadwal yang belom terverifikasi'), Response::HTTP_NOT_ACCEPTABLE);
