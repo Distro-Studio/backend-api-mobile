@@ -679,8 +679,8 @@ class JadwalController extends Controller
         return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal ditukar', $validSchedules), Response::HTTP_OK);
       } else {
         $schedule = Jadwal::where('user_id', Auth::user()->id)
-          ->whereIn('shift_id', 1)
-        //   ->where('shift_id', '>=', 1)
+        //   ->whereIn('shift_id', 1)
+          ->where('shift_id', '!=', 0)
           ->where('tgl_mulai', '>=', date('Y-m-d'))
         //   ->where('tgl_mulai', $jadwal->tgl_mulai)
           ->with('shift')

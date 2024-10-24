@@ -153,11 +153,28 @@ class GetListController extends Controller
   {
     $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
     $riwayat = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)->get();
+
     if (!$riwayat) {
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Riwayat perubahan tidak ditemukan'), Response::HTTP_NOT_FOUND);
     }
 
-    return response()->json(new DataResource(Response::HTTP_OK, 'Riwayat perubahan ditemukan', $riwayat), Response::HTTP_OK);
+    $formattedData = $riwayat->map(function($item){
+        return [
+            "id" => $item->id,
+            "data_karyawan_id" => $item->data_karyawan_id,
+            "jenis_perubahan" => $item->jenis_perubahan,
+            "kolom" => $item->kolom,
+            "original_data" => json_decode($item->original_data),
+            "updated_data" => json_decode($item->updated_data),
+            "status_perubahan_id" => $item->status_perubahan_id,
+            "verifikator_1" => $item->verifikator_1,
+            "alasan" => $item->alasan,
+            "created_at" => $item->created_at,
+            "updated_at" => $item->updated_data
+        ];
+    });
+
+    return response()->json(new DataResource(Response::HTTP_OK, 'Riwayat perubahan ditemukan', $formattedData), Response::HTTP_OK);
   }
 
   public function getalldiklat()
