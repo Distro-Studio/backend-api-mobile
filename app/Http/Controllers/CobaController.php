@@ -89,6 +89,50 @@ class CobaController extends Controller
         // }
     }
 
+    public function sendPushNotification($heading, $message)
+    {
+        $content = [
+            "en" => $message
+        ];
+
+        $fields = [
+            'app_id' => env('ONESIGNAL_APP_ID'),
+            "target_channel" => "push",
+            'included_segments' => ['All'], // atau target user tertentu dengan Player ID
+            'include_aliases' => [
+                'external_id' => ['765a41bc-ac9b-41e5-93d4-6032bd8d8625'],
+            ],
+            'headings' => ['en' => $heading],
+            'contents' => $content,
+        ];
+
+        $fields = json_encode($fields);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://onesignal.com/api/v1/notifications");
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json; charset=utf-8',
+            'Authorization: Basic ' . env('ONESIGNAL_REST_API_KEY')
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($ch, CURLOPT_HEADER, FALSE);
+        curl_setopt($ch, CURLOPT_POST, TRUE);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $fields);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        return $response;
+    }
+
+    public function sendTestNotification()
+    {
+        $response = $this->sendPushNotification('Test Notification', 'This is a test push notification.');
+        return response()->json(['response' => json_decode($response)], 200);
+    }
+
+
     // private function getFileNameFromHeader($header)
     // {
     //     // Extract filename from Content-Disposition header

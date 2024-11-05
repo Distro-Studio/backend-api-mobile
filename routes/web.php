@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CobaController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,5 +17,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return ['RSKI-Mobile' => app()->version()];
 });
+
+Route::get('/test-notification', [CobaController::class, 'sendTestNotification']);
+
 
 require __DIR__.'/auth.php';

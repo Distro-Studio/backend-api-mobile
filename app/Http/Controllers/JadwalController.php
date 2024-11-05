@@ -110,6 +110,15 @@ class JadwalController extends Controller
           return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }
 
+        $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->first();
+        if ($cekpresensi) {
+          if ($cekpresensi->jam_keluar == null) {
+            $aktivitas = true;
+          } else {
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Presensi sudah dilakukan'), Response::HTTP_NOT_FOUND);
+          }
+        }
+
         $jadwaln = [
           "id" => 0,
           "user_id" => $datakaryawan->user_id,
@@ -137,14 +146,7 @@ class JadwalController extends Controller
 
         $jadwal = json_decode($encode);
 
-        $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->first();
-        if ($cekpresensi) {
-          if ($cekpresensi->jam_keluar == null) {
-            $aktivitas = true;
-          } else {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Presensi sudah dilakukan'), Response::HTTP_NOT_FOUND);
-          }
-        }
+
 
 
       }

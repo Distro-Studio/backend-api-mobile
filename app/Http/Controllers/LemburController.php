@@ -44,7 +44,7 @@ class LemburController extends Controller
       } else {
           $seconds = 0;
       }
-      
+
       // $totallembur = Lembur::where('user_id', Auth::user()->id)->where('status_lembur_id', 3)->whereBetween('tgl_pengajuan', [$tgl_mulai, $tgl_selesai])->count();
 
       $data = [
@@ -121,12 +121,16 @@ class LemburController extends Controller
           return [
             'id' => $item->id,
             'user_id' => $item->user_id,
+            'tgl_pengajuan' => $item->tgl_pengajuan,
+            'durasi' => $item->durasi,
             'jadwal' => [
               'id' => null,
               'tgl_mulai' => null,
               'tgl_selesai' => null,
-              'jam_from' => $jamMasuk, // Ambil dari relasi shift
-              'jam_to' => $jamKeluar,     // Ambil dari relasi shift
+              'jam_from' => Carbon::parse($jamMasuk)->format('H:i:s'),
+              'jam_to' => Carbon::parse($jamKeluar)->format('H:i:s'),
+
+
             ],
             // Atribut lainnya...
           ];
