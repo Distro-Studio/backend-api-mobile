@@ -277,14 +277,31 @@ class PresensiController extends Controller
             $today = Carbon::today();
             $yesterday = Carbon::yesterday();
             $now = Carbon::now();
-            // $checkpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->where('jam_keluar', NULL)->first();
-            $checkpresensi = Presensi::where('user_id', Auth::user()->id)
-                ->whereNull('jam_keluar')
-                ->whereHas('jadwal', function($query) use ($now) {
-                    $query->whereDate('tgl_mulai', '<=', $now)
-                        ->whereDate('tgl_selesai', '>=', $now);
-                })->with(['jadwal.shift'])
-                ->first();
+            $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
+            if($datakaryawan->unitkerja->jenis_karyawan == 1){
+                $checkpresensi = Presensi::where('user_id', Auth::user()->id)
+                    ->whereNull('jam_keluar')
+                    ->whereHas('jadwal', function($query) use ($now) {
+                        $query->whereDate('tgl_mulai', '<=', $now)
+                            ->whereDate('tgl_selesai', '>=', $now);
+                    })->with(['jadwal.shift'])
+                    ->first();
+                $timetoout = $checkpresensi->jadwal->shift->jam_to;
+            }else {
+                $checkpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->where('jam_keluar', NULL)->first();
+                $hari = [
+                    'Sunday' => 'Minggu',
+                    'Monday' => 'Senin',
+                    'Tuesday' => 'Selasa',
+                    'Wednesday' => 'Rabu',
+                    'Thursday' => 'Kamis',
+                    'Friday' => 'Jumat',
+                    'Saturday' => 'Sabtu',
+                  ];
+                $waktuSekarang = Carbon::now();
+                $nonshift = NonShift::where('nama', $hari[$waktuSekarang->isoFormat('dddd')])->first();
+                $timetoout = $nonshift->jam_to;
+            }
 
             if(!$checkpresensi){
                 return response()->json(new DataResource(Response::HTTP_IM_USED, 'Presensi belum dilakukan', $checkpresensi), Response::HTTP_IM_USED);
@@ -333,13 +350,22 @@ class PresensiController extends Controller
 
                 $time = date('Y-m-d H:i:s');
 
+                // $startTime = Carbon::parse($checkpresensi->jam_masuk);
+                // $endTime = Carbon::parse($time);
+                // $duration = $startTime->diff($endTime);
+
+
+                // $checkpresensi->jam_keluar = $time;
+                // $checkpresensi->durasi = $duration->s;
+                // $checkpresensi->latkeluar = $request->lat;
+                // $checkpresensi->longkeluar = $request->long;
+
                 $startTime = Carbon::parse($checkpresensi->jam_masuk);
                 $endTime = Carbon::parse($time);
-                $duration = $startTime->diff($endTime);
-
 
                 $checkpresensi->jam_keluar = $time;
-                $checkpresensi->durasi = $duration->s;
+                $durationInSeconds = $startTime->diffInSeconds($checkpresensi->jam_keluar);
+                $checkpresensi->durasi = $durationInSeconds;
                 $checkpresensi->latkeluar = $request->lat;
                 $checkpresensi->longkeluar = $request->long;
                 // $checkpresensi->presensi = 1;
@@ -347,7 +373,7 @@ class PresensiController extends Controller
                 $checkpresensi->save();
 
                 $chekoutTime = Carbon::now();
-                $outTime = Carbon::parse($checkpresensi->jadwal->shift->jam_to);
+                $outTime = Carbon::parse($timetoout);
 
                 if($chekoutTime->lessThan($outTime)) {
                     DataKaryawan::where('user_id', Auth::user()->id)->update(['status_reward_presensi' => 0]);
@@ -361,7 +387,7 @@ class PresensiController extends Controller
 
                 return response()->json(new DataResource(Response::HTTP_OK, 'Presensi berhasil dilakukan', $checkpresensi), Response::HTTP_OK);
             } catch (\Exception $e){
-                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } else {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda diluar radius kantor'), Response::HTTP_NOT_ACCEPTABLE);
