@@ -429,6 +429,7 @@ class PresensiController extends Controller
                 foreach ($presensiBulanIni as $presensi) {
                   if ($presensi->jam_masuk) {
                     $aktivitasPresensi[] = [
+                      'id' => $presensi->id,
                       'presensi' => 'Masuk',
                       'tanggal' => Carbon::parse($presensi->jam_masuk)->format('Y-m-d'),
                       'jam' =>  Carbon::parse($presensi->jam_masuk)->format('H:i:s'),
@@ -436,6 +437,7 @@ class PresensiController extends Controller
                   }
                   if ($presensi->jam_keluar) {
                     $aktivitasPresensi[] = [
+                      'id' => $presensi->id,
                       'presensi' => 'Keluar',
                       'tanggal' => Carbon::parse($presensi->jam_keluar)->format('Y-m-d'),
                       'jam' =>  Carbon::parse($presensi->jam_keluar)->format('H:i:s'),
@@ -451,6 +453,133 @@ class PresensiController extends Controller
 
     }
 
+    public function getdetailpresensi(Request $request)
+    {
+        try {
+            // $presensi = Presensi::where('id', $request->id)->first();
+            $presensiHariIni = Presensi::with([
+                'user',
+                'jadwal.shift',
+                'datakaryawan.unitkerja',
+                'kategori_presensis'
+            ])
+                ->where('id', $request->id)
+                ->first();
 
+            if (!$presensiHariIni) {
+                return response()->json([
+                    'status' => Response::HTTP_NOT_FOUND,
+                    'message' => 'Data presensi karyawan tidak ditemukan.'
+                ], Response::HTTP_NOT_FOUND);
+            }
 
+            $fotoMasukBerkas = Berkas::where('id', $presensiHariIni->foto_masuk)->first();
+            $fotoKeluarBerkas = Berkas::where('id', $presensiHariIni->foto_keluar)->first();
+
+            $baseUrl = env('STORAGE_SERVER_DOMAIN'); // Ganti dengan URL domain Anda
+
+            $fotoMasukExt = $fotoMasukBerkas ? StorageFileHelper::getExtensionFromMimeType($fotoMasukBerkas->ext) : null;
+            $fotoMasukUrl = $fotoMasukBerkas ? $baseUrl . $fotoMasukBerkas->path : null;
+
+            $fotoKeluarExt = $fotoKeluarBerkas ? StorageFileHelper::getExtensionFromMimeType($fotoKeluarBerkas->ext) : null;
+            $fotoKeluarUrl = $fotoKeluarBerkas ? $baseUrl . $fotoKeluarBerkas->path : null;
+
+            // Ambil data lokasi kantor
+            $lokasiKantor = LokasiKantor::find(1);
+
+            // Ambil data jadwal non-shift jika jenis_karyawan = false
+            $jadwalNonShift = null;
+            $jenisKaryawan = $presensiHariIni->users->datakaryawan->unitkerja->jenis_karyawan ?? null;
+            if ($jenisKaryawan === 0) {
+                $jamMasukDate = Carbon::parse($presensiHariIni->jam_masuk)->format('l');
+                $hariNamaIndonesia = [
+                    'Monday' => 'Senin',
+                    'Tuesday' => 'Selasa',
+                    'Wednesday' => 'Rabu',
+                    'Thursday' => 'Kamis',
+                    'Friday' => 'Jumat',
+                    'Saturday' => 'Sabtu',
+                    'Sunday' => 'Minggu'
+                ][$jamMasukDate] ?? 'Senin';
+                $jadwalNonShift = NonShift::where('nama', $hariNamaIndonesia)->first();
+            }
+
+            return response()->json([
+                'status' => Response::HTTP_OK,
+                'message' => "Detail data presensi karyawan '{$presensiHariIni->user->nama}' berhasil ditampilkan.",
+                'data' => [
+                    'id' => $presensiHariIni->id,
+                    'user' => [
+                        'id' => $presensiHariIni->user->id,
+                        'nama' => $presensiHariIni->user->nama,
+                        'username' => $presensiHariIni->user->username,
+                        'email_verified_at' => $presensiHariIni->user->email_verified_at,
+                        'data_karyawan_id' => $presensiHariIni->user->data_karyawan_id,
+                        'foto_profil' => $presensiHariIni->user->foto_profil,
+                        'data_completion_step' => $presensiHariIni->user->data_completion_step,
+                        'status_aktif' => $presensiHariIni->user->status_aktif,
+                        'created_at' => $presensiHariIni->user->created_at,
+                        'updated_at' => $presensiHariIni->user->updated_at,
+                    ],
+                    'unit_kerja' => $presensiHariIni->datakaryawan->unitkerja,
+                    'data_presensi' => [
+                        'jadwal_shift' => $presensiHariIni->jadwal ? [
+                            'id' => $presensiHariIni->jadwal->id,
+                            'tgl_mulai' => $presensiHariIni->jadwal->tgl_mulai,
+                            'tgl_selesai' => $presensiHariIni->jadwal->tgl_selesai,
+                            'shift' => $presensiHariIni->jadwal->shifts,
+                        ] : null,
+                        'jadwal_non_shift' => $jadwalNonShift ? [
+                            'id' => $jadwalNonShift->id,
+                            'nama' => $jadwalNonShift->nama,
+                            'jam_from' => $jadwalNonShift->jam_from,
+                            'jam_to' => $jadwalNonShift->jam_to,
+                            'deleted_at' => $jadwalNonShift->deleted_at,
+                            'created_at' => $jadwalNonShift->created_at,
+                            'updated_at' => $jadwalNonShift->updated_at,
+                        ] : null,
+                        'jam_masuk' => $presensiHariIni->jam_masuk,
+                        'jam_keluar' => $presensiHariIni->jam_keluar,
+                        'durasi' => $presensiHariIni->durasi,
+                        'lokasi_kantor' => [
+                            'id' => $lokasiKantor->id,
+                            'alamat' => $lokasiKantor->alamat,
+                            'lat' => $lokasiKantor->lat,
+                            'long' => $lokasiKantor->long,
+                            'radius' => $lokasiKantor->radius,
+                        ],
+                        'lat_masuk' => $presensiHariIni->lat,
+                        'long_masuk' => $presensiHariIni->long,
+                        'lat_keluar' => $presensiHariIni->latkeluar,
+                        'long_keluar' => $presensiHariIni->longkeluar,
+                        'foto_masuk' => $fotoMasukBerkas ? [
+                            'id' => $fotoMasukBerkas->id,
+                            'user_id' => $fotoMasukBerkas->user_id,
+                            'file_id' => $fotoMasukBerkas->file_id,
+                            'nama' => $fotoMasukBerkas->nama,
+                            'nama_file' => $fotoMasukBerkas->nama_file,
+                            'path' => $fotoMasukUrl,
+                            'ext' => $fotoMasukBerkas->ext,
+                            'size' => $fotoMasukBerkas->size,
+                        ] : null,
+                        'foto_keluar' => $fotoKeluarBerkas ? [
+                            'id' => $fotoKeluarBerkas->id,
+                            'user_id' => $fotoKeluarBerkas->user_id,
+                            'file_id' => $fotoKeluarBerkas->file_id,
+                            'nama' => $fotoKeluarBerkas->nama,
+                            'nama_file' => $fotoKeluarBerkas->nama_file,
+                            'path' => $fotoKeluarUrl,
+                            'ext' => $fotoKeluarBerkas->ext,
+                            'size' => $fotoKeluarBerkas->size,
+                        ] : null,
+                        'kategori_presensi' => $presensiHariIni->kategori_presensis,
+                        'created_at' => $presensiHariIni->created_at,
+                        'updated_at' => $presensiHariIni->updated_at
+                    ]
+                ],
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

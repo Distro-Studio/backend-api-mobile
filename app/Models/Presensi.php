@@ -55,4 +55,9 @@ class Presensi extends Model
     {
         return $this->belongsTo(Berkas::class, 'foto_keluar');
     }
+
+    public function kategori_presensis()
+    {
+        return $this->belongsTo(KategoriPresensi::class, 'kategori_presensi_id');
+    }
 }
