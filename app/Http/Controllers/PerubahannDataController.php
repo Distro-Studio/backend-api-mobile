@@ -27,25 +27,25 @@ class PerubahannDataController extends Controller
       // }
       $data = [
         // 'foto_profil' => env('URL_STORAGE') . $foto->path,
-        'nama' => Auth::user()->nama,
-        'kompetensi' => $personal->kompetensi->nama_kompetensi,
-        'tempat_lahir' => $personal->tempat_lahir,
-        'tanggal_lahir' => $personal->tgl_lahir,
-        'no_hp' => $personal->no_hp,
-        'jenis_kelamin' => $personal->jenis_kelamin, //nanti digantni
-        'nik_ktp' => $personal->nik_ktp,
-        'no_kk' => $personal->no_kk,
-        'agama' => $personal->kategoriagama,
-        'tinggi_badan' => $personal->tinggi_badan,
-        'alamat' => $personal->alamat,
-        'no_telp' => $personal->no_hp,
-        'golongan_darah' => $personal->golonganDarah,
+        'nama' => Auth::user()->nama ?? null,
+        'kompetensi' => $personal->kompetensi->nama_kompetensi ?? null,
+        'tempat_lahir' => $personal->tempat_lahir ?? null,
+        'tanggal_lahir' => $personal->tgl_lahir ?? null,
+        'no_hp' => $personal->no_hp ?? null,
+        'jenis_kelamin' => $personal->jenis_kelamin ?? null, //nanti digantni
+        'nik_ktp' => $personal->nik_ktp ?? null,
+        'no_kk' => $personal->no_kk ?? null,
+        'agama' => $personal->kategoriagama ?? null,
+        'tinggi_badan' => $personal->tinggi_badan ?? null,
+        'alamat' => $personal->alamat ?? null,
+        'no_telp' => $personal->no_hp ?? null,
+        'golongan_darah' => $personal->golonganDarah ?? null,
         // 'tinggi_badan' => $personal->tinggi_badan,
-        'berat_badan' => $personal->berat_badan,
-        'no_ijasah' => $personal->no_ijazah,
-        'tahun_lulus' => $personal->tahun_lulus,
-        'pendidikan_terakhir' => $personal->pendidikanTerakhir,
-        'gelar_depan' => $personal->gelar_depan,
+        'berat_badan' => $personal->berat_badan ?? null,
+        'no_ijasah' => $personal->no_ijazah ?? null,
+        'tahun_lulus' => $personal->tahun_lulus ?? null,
+        'pendidikan_terakhir' => $personal->pendidikanTerakhir ?? null,
+        'gelar_depan' => $personal->gelar_depan ?? null,
       ];
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data personal ditemukan', $data), Response::HTTP_OK);
