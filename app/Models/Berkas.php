@@ -27,4 +27,16 @@ class Berkas extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function kategori_berkas(){
+        return $this->belongsTo(KategoriBerkas::class, 'kategori_berkas_id','id');
+    }
+
+    public function status_berkas(){
+        return $this->belongsTo(StatusBerkas::class, 'status_berkas_id','id');
+    }
+
+    public function verifikator(){
+        return $this->belongsTo(User::class, 'verifikator_1','id');
+    }
 }

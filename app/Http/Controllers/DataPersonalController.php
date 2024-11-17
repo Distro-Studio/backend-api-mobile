@@ -665,6 +665,7 @@ class DataPersonalController extends Controller
     }
 
     try {
+
       $originaldata = null;
       $updateddata = $request->value_diubah;
 
@@ -730,24 +731,38 @@ class DataPersonalController extends Controller
         $originaldata = $datakaryawan->gelar_depan;
       }
 
-      if($request->asal_sekolah == 'asal_sekolah') {
+      if($request->kolom_diubah == 'asal_sekolah') {
         $originaldata = $datakaryawan->asal_sekolah;
       }
 
-      if($request->gelar_belakang == 'gelar_belakang') {
+      if($request->kolom_diubah == 'gelar_belakang') {
         $originaldata = $datakaryawan->gelar_belakang;
       }
 
+      $cekdata = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)
+            ->where('kolom', $request->kolom_diubah)
+            ->where('jenis_perubahan', 'Personal')
+            ->where('status_perubahan_id', 1)
+            ->first();
 
-      $datadiubah = RiwayatPerubahan::create([
-        'data_karyawan_id' => $datakaryawan->id,
-        'jenis_perubahan' => 'Personal',
-        'kolom' => $request->kolom_diubah,
-        'original_data' => $originaldata,
-        'updated_data' => $updateddata,
-        'status_perubahan_id' => 1,
-        'updated_at' => null
-      ]);
+      if($cekdata){
+        $cekdata->original_data = $originaldata;
+        $cekdata->updated_data = $updateddata;
+        $cekdata->save();
+        $datadiubah = $cekdata;
+      } else {
+          $datadiubah = RiwayatPerubahan::create([
+            'data_karyawan_id' => $datakaryawan->id,
+            'jenis_perubahan' => 'Personal',
+            'kolom' => $request->kolom_diubah,
+            'original_data' => $originaldata,
+            'updated_data' => $updateddata,
+            'status_perubahan_id' => 1,
+            'updated_at' => null
+          ]);
+      }
+
+
 
       $notifikasi = Notifikasi::create([
         'kategori_notifikasi_id' => 6,
@@ -766,7 +781,7 @@ class DataPersonalController extends Controller
       ]);
 
 
-      return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
+      return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil diajukan, Mohon tunggu penngajuan anda sedang diverifikasi', $datadiubah), Response::HTTP_OK);
     //   return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $request->value_diubah['value']), Response::HTTP_OK);
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -851,14 +866,30 @@ class DataPersonalController extends Controller
   } else {
       $update = json_encode($updated_data);
   }
-    $datadiubah = RiwayatPerubahan::create([
-      'data_karyawan_id' => $datakaryawan->id,
-      'jenis_perubahan' => 'Keluarga',
-      'kolom' => 'Data Keluarga',
-      'original_data' => $original,
-      'updated_data' => $update,
-      'status_perubahan_id' => 1,
-    ]);
+
+  $cekdata = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)
+            ->where('kolom', 'Data Keluarga')
+            ->where('jenis_perubahan', 'Keluarga')
+            ->where('status_perubahan_id', 1)
+            ->first();
+
+  if($cekdata){
+    $cekdata->updated_data = $update;
+    $cekdata->save();
+
+    $datadiubah = $cekdata;
+
+    PerubahanKeluarga::where('riwayat_perubahan_id', $cekdata->id)->delete();
+  }else {
+      $datadiubah = RiwayatPerubahan::create([
+        'data_karyawan_id' => $datakaryawan->id,
+        'jenis_perubahan' => 'Keluarga',
+        'kolom' => 'Data Keluarga',
+        'original_data' => $original,
+        'updated_data' => $update,
+        'status_perubahan_id' => 1,
+      ]);
+  }
 
     // return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Erorr', $datakeluarga), Response::HTTP_INTERNAL_SERVER_ERROR);
 
@@ -874,6 +905,7 @@ class DataPersonalController extends Controller
         'pekerjaan' => $k['pekerjaan'], // Akses dengan notasi array
         'no_hp' => $k['no_hp'], // Akses dengan notasi array
         'email' => $k['email'], // Akses dengan notasi array
+        'is_bpjs' => $k['is_bpjs'],
       ]);
     }
 

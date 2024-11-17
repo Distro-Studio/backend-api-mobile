@@ -159,13 +159,37 @@ class GetListController extends Controller
     }
 
     $formattedData = $riwayat->map(function($item){
+        // 'pendidikan, golongann darah', agama
+        // $orinaldata =
+        if($item->kolom == 'pendidikan_terakhir') {
+            $pendori = KategoriPendidikan::where('id', $item->original_data)->first();
+            $pendup = KategoriPendidikan::where('id', $item->updated_data)->first();
+            $originaldata = $pendori;
+            $updateddata = $pendup;
+        }else if($item->kolom == 'golongan_darah') {
+            $golori = KategoriDarah::where('id', $item->original_data)->first();
+            $golup = KategoriDarah::where('id', $item->updated_data)->first();
+            $originaldata = $golori;
+            $updateddata = $golup;
+        }else if($item->kolom == 'agama') {
+            $agamaori = KategoriAgama::where('id', $item->original_data)->first();
+            $agamau = KategoriAgama::where('id', $item->updated_data)->first();
+            $originaldata = $agamaori;
+            $updateddata = $agamau;
+        }else if($item->kolom == 'Data Keluarga'){
+            $originaldata = json_decode($item->original_data);
+            $updateddata = json_decode($item->updated_data);
+        }else {
+            $originaldata = $item->original_data;
+            $updateddata = $item->updated_data;
+        }
         return [
             "id" => $item->id,
             "data_karyawan_id" => $item->data_karyawan_id,
             "jenis_perubahan" => $item->jenis_perubahan,
             "kolom" => $item->kolom,
-            "original_data" => json_decode($item->original_data),
-            "updated_data" => json_decode($item->updated_data),
+            "original_data" => $originaldata,
+            "updated_data" => $updateddata,
             "status_perubahan_id" => $item->status_perubahan_id,
             "verifikator_1" => $item->verifikator_1,
             "alasan" => $item->alasan,
