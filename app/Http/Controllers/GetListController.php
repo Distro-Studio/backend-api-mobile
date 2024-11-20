@@ -11,6 +11,7 @@ use App\Models\Diklat;
 use App\Models\KategoriAgama;
 use App\Models\KategoriDarah;
 use App\Models\KategoriPendidikan;
+use App\Models\LokasiKantor;
 use App\Models\Notifikasi;
 use App\Models\Penggajian;
 use App\Models\Pengumuman;
@@ -294,5 +295,16 @@ class GetListController extends Controller
         'inbox' => $notif,
     ];
     return response()->json(new DataResource(Response::HTTP_OK, 'Notifkasi berhasil dihapus', $mappingData), Response::HTTP_OK);
+  }
+
+  public function getofficeloc()
+  {
+    try {
+        $officeloc = LokasiKantor::where('id', 1)->first();
+        return response()->json(new DataResource(Response::HTTP_OK, 'Data kantor berhasil didapatkan', $officeloc), Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Erorr'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
   }
 }

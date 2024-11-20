@@ -129,6 +129,14 @@ class CutiCotroller extends Controller
       // Calculate the total days used in the current year for this leave type
       $userId = Auth::id(); // Get the current authenticated user's ID
 
+      $datecheck = Cuti::where('user_id', Auth::user()->id)
+                ->where('tgl_from', $request->tgl_mulai)
+                ->where('tgl_to', $request->tgl_selesai)->first();
+
+      if($datecheck) {
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Cuti dengan rentang tanggal tersebut sudah pernah diajukan'), Response::HTTP_NOT_ACCEPTABLE);
+      }
+
       $usedDays = Cuti::where('tipe_cuti_id', $leaveType->id)
         ->where('status_cuti_id', 2) // Only consider approved leaves
         ->where('user_id', $userId)

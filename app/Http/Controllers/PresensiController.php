@@ -395,7 +395,7 @@ class PresensiController extends Controller
 
     }
 
-    public function getactivity()
+    public function getactivity(Request $request)
     {
         try {
             //code...
@@ -420,10 +420,20 @@ class PresensiController extends Controller
             // return response()->json(new DataResource(Response::HTTP_OK, 'Data activity log', $formattedActivity), Response::HTTP_OK);
             $starofweek = Carbon::now()->startOfMonth();
             $endofweek = Carbon::now()->endOfMonth();
+            $take = 14;
+
+            if($request->tgl_mulai != null && $request->tgl_selesai != null){
+                $starofweek = Carbon::parse($request->tgl_mulai)->format('Y-m-d');
+                $endofweek = Carbon::parse($request->tgl_selesai)->format('Y-m-d');
+            }
+
+            if($request->limit) {
+                $take = $request->limit;
+            }
             $presensiBulanIni = Presensi::where('user_id', Auth::user()->id)
                 ->whereBetween('created_at',[$starofweek, $endofweek])
                 ->orderBy('jam_masuk')
-                ->get();
+                ->take($take)->get();
 
                 $aktivitasPresensi = [];
                 foreach ($presensiBulanIni as $presensi) {
