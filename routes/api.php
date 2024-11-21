@@ -194,4 +194,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('/get-detail-presensi', [PresensiController::class, 'getdetailpresensi']);
 
   Route::get('/get-office-location', [GetListController::class, 'getofficeloc']);
+  
 });

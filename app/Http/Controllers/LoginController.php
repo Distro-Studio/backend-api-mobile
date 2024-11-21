@@ -61,7 +61,7 @@ class LoginController extends Controller
 
             // Cek password
             if (!Hash::check($request->password, $datauser->password)) {
-                return response()->json(new WithoutDataResource(Response::HTTP_UNAUTHORIZED, 'Email/username atau password salah'), Response::HTTP_UNAUTHORIZED);
+                return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Email/username atau password salah'), Response::HTTP_BAD_REQUEST);
             }
 
             // $cekuser = User::where('id', Auth::user()->id)->select('status_aktif')->first();
@@ -110,7 +110,7 @@ class LoginController extends Controller
             return response()->json(new DataResource(Response::HTTP_OK, 'Login Berhasil', $users), Response::HTTP_OK);
 
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         // if(Auth::attempt($request->only('username', 'password'))){
