@@ -119,22 +119,22 @@ class CutiCotroller extends Controller
       $startDate = Carbon::parse($request->tgl_mulai);
       $endDate = Carbon::parse($request->tgl_selesai);
 
+      $sdate = $startDate->format('d-m-Y');
+      $edate = $endDate->format('d-m-Y');
+
       // Check if the requested dates overlap with any existing leave
       $userId = Auth::id(); // Get the current authenticated user's ID
-      $overlap = Cuti::where('user_id', $userId)
-          ->where(function ($query) use ($startDate, $endDate) {
-              $query->whereBetween('tgl_from', [$startDate, $endDate])
-                    ->orWhereBetween('tgl_to', [$startDate, $endDate])
-                    ->orWhere(function ($query) use ($startDate, $endDate) {
-                        $query->where('tgl_from', '<=', $startDate)
-                              ->where('tgl_to', '>=', $endDate);
-                    });
-          })
-          ->exists();
+        $overlapQuery = Cuti::where('user_id', $userId)
+            ->where(function ($query) use ($sdate, $edate) {
+                $query->where('tgl_from', '<=', $edate)
+                      ->where('tgl_to', '>=', $sdate);
+            });
 
-      if ($overlap) {
-          return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Tanggal cuti bertabrakan dengan pengajuan cuti yang sudah ada'), Response::HTTP_NOT_ACCEPTABLE);
-      }
+        $overlapResults = $overlapQuery->get();
+
+        if ($overlapResults->count() > 0) {
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Tanggal cuti bertabrakan dengan pengajuan cuti yang sudah ada'), Response::HTTP_NOT_ACCEPTABLE);
+        }
 
       // Calculate the number of days requested
       $requestedDays = $startDate->diffInDays($endDate) + 1; // inclusive of start and end date
