@@ -165,6 +165,10 @@ class JadwalController extends Controller
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
 
+      if($jadwal->shift_id == 0){
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+      }
+
       if(!$aktivitas) {
         $time = date('Y-m-d H:i:s');
         $schDate = Carbon::parse($jadwal->shift->jam_from);
