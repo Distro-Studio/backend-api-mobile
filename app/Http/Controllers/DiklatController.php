@@ -47,7 +47,7 @@ class DiklatController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Diklat tidak ditemukan'), Response::HTTP_NOT_FOUND);
             }
 
-            if($diklat->kuota <= $diklat->total_peserta +1) {
+            if($diklat->kuota < $diklat->total_peserta +1) {
                 return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Kuota diklat sudah penuh'), Response::HTTP_BAD_REQUEST);
             }
 
@@ -175,18 +175,74 @@ class DiklatController extends Controller
     {
         try {
 
-            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat')->get();
+            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat', 'diklat.image', 'diklat.kategori', 'diklat.status', 'diklat.dokumen_eksternal')->get();
             if($peserta->isEmpty()) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada riwayat diklat'), Response::HTTP_NOT_FOUND);
             }
+            // $peserta->map(function($item){
+            //     $item->diklat->status;
+            //     $item->diklat->kategori;
+            //     unset($item->id);
+            //     unset($item->diklat_id);
+            //     unset($item->peserta);
+            //     unset($item->created_at);
+            //     unset($item->updated_at);
+            // });
+
             $peserta->map(function($item){
-                $item->diklat->status;
-                $item->diklat->kategori;
-                unset($item->id);
-                unset($item->diklat_id);
-                unset($item->peserta);
-                unset($item->created_at);
-                unset($item->updated_at);
+                return [
+                    'diklat' => [
+                        "id" => $item->diklat->id,
+                        "gambar" => $item->diklat->image ? [
+                            "id" => $item->diklat->image->id ?? null,
+                            "user_id" => $item->diklat->image->user_id ?? null,
+                            "file_id" => $item->diklat->image->file_id ?? null,
+                            "nama" => $item->diklat->image->nama ?? null,
+                            "kategori_berkas_id" => $item->diklat->image->kategori_berkas_id ?? null,
+                            "status_berkas_id" => $item->diklat->image->status_berkas_id ?? null,
+                            "path" => env('URL_STORAGE').($item->diklat->image->path ?? ''),
+                            "tgl_upload" => $item->diklat->image->tgl_upload ?? null,
+                            "nama_file" => $item->diklat->image->nama_file ?? null,
+                            "ext" => $item->diklat->image->ext ?? null,
+                            "size" => $item->diklat->image->size ?? null,
+                            "verifikator_1" => $item->diklat->image->verifikator_1 ?? null,
+                            "alasan" => $item->diklat->image->alasan ?? null,
+                        ] : null,
+                        "dokumen_eksternal" => $item->diklat->dokumen_eksternal ? [
+                            "id" => $item->diklat->dokumen_eksternal->id ?? null,
+                            "user_id" => $item->diklat->dokumen_eksternal->user_id ?? null,
+                            "file_id" => $item->diklat->dokumen_eksternal->file_id ?? null,
+                            "nama" => $item->diklat->dokumen_eksternal->nama ?? null,
+                            "kategori_berkas_id" => $item->diklat->dokumen_eksternal->kategori_berkas_id ?? null,
+                            "status_berkas_id" => $item->diklat->dokumen_eksternal->status_berkas_id ?? null,
+                            "path" => env('URL_STORAGE').($item->diklat->dokumen_eksternal->path ?? ''),
+                            "tgl_upload" => $item->diklat->dokumen_eksternal->tgl_upload ?? null,
+                            "nama_file" => $item->diklat->dokumen_eksternal->nama_file ?? null,
+                            "ext" => $item->diklat->dokumen_eksternal->ext ?? null,
+                            "size" => $item->diklat->dokumen_eksternal->size ?? null,
+                            "verifikator_1" => $item->diklat->dokumen_eksternal->verifikator_1 ?? null,
+                            "alasan" => $item->diklat->dokumen_eksternal->alasan ?? null,
+                        ] : null,
+                        "nama" => $item->diklat->nama ?? null,
+                        "kategori_diklat_id" => $item->diklat->kategori_diklat_id ?? null,
+                        "status_diklat_id" => $item->diklat->status_diklat_id ?? null,
+                        "certificate_published" => $item->diklat->certificate_published ?? null,
+                        "certificate_verified_by" => $item->diklat->certificate_verified_by ?? null,
+                        "deskripsi" => $item->diklat->deskripsi ?? null,
+                        "kuota" => $item->diklat->kuota ?? null,
+                        "total_peserta" => $item->diklat->total_peserta ?? null,
+                        "skp" => $item->diklat->skp ?? null,
+                        "tgl_mulai" => $item->diklat->tgl_mulai ?? null,
+                        "tgl_selesai" => $item->diklat->tgl_selesai ?? null,
+                        "jam_mulai" => $item->diklat->jam_mulai ?? null,
+                        "jam_selesai" => $item->diklat->jam_selesai ?? null,
+                        "durasi" => $item->diklat->durasi ?? null,
+                        "lokasi" => $item->diklat->lokasi ?? null,
+                        "verifikator_1" => $item->diklat->verifikator_1 ?? null,
+                        "verifikator_2" => $item->diklat->verifikator_2 ?? null,
+                        "alasan" => $item->diklat->alasan ?? null,
+                    ]
+                ];
             });
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Riwayat diklat berhasil didapatkan', $peserta), Response::HTTP_OK);

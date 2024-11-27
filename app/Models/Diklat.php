@@ -17,6 +17,8 @@ class Diklat extends Model
         'dokumen_eksternal' => 'integer',
         'kategori_diklat_id' => 'integer',
         'status_diklat_id' => 'integer',
+        'tgl_mulai' => 'date',
+        'tgl_selesai' => 'date',
         'kuota' => 'integer',
         'durasi' => 'integer',
         'verifikator_1' => 'integer',
@@ -38,5 +40,10 @@ class Diklat extends Model
     public function status()
     {
         return $this->belongsTo(StatusDiklat::class, 'status_diklat_id', 'id');
+    }
+
+    public function dokumen_eksternal()
+    {
+        return $this->belongsTo(Berkas::class, 'dokumen_eksternal', 'id');
     }
 }

@@ -60,7 +60,6 @@
       }
       body {
         padding: 16px;
-        border: 1px solid red;
         width: 100%;
         height: 842px;
         max-width: 760px;

@@ -21,6 +21,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class GetListController extends Controller
@@ -205,12 +206,13 @@ class GetListController extends Controller
   public function getalldiklat()
   {
     try {
-        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->where('tgl_mulai', '>', Carbon::now()->format('Y-m-d'))->with('image')->get();
+        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->whereDate(DB::raw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y')"), '>', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->with('image');
         $diklat->map(function($item){
             $item->path = env('URL_STORAGE') . $item->image->path;
             $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
             unset($item->image);
         });
+        // return response()->json(new DataResource(Response::HTTP_OK, 'List diklat berhasil didapatkan', $diklat->toSql()->get()), Response::HTTP_OK);
         if($diklat->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'List diklat tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }

@@ -53,7 +53,7 @@ class BerkasController extends Controller
     public function getallberkas()
     {
         try {
-            $berkas = Berkas::where('user_id', Auth::user()->id)->where('kategori_berkas_id', 1)->with('kategori_berkas', 'status_berkas', 'verifikator')->latest()->get();
+            $berkas = Berkas::where('user_id', Auth::user()->id)->where('kategori_berkas_id', 1)->where('status_berkas_id', 2)->with('kategori_berkas', 'status_berkas', 'verifikator')->latest()->get();
 
             if ($berkas->isEmpty())
             {

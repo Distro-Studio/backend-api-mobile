@@ -80,6 +80,9 @@ class JadwalController extends Controller
           $jadwal->office_long = $officeloc->long;
           $jadwal->radius = $officeloc->radius;
           $jadwal->aktivitas = $aktivitas;
+          if($jadwal->shift_id == 0){
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
+          }
         }
       } else {
         $hari = [
@@ -93,6 +96,12 @@ class JadwalController extends Controller
         ];
         $waktuSekarang = Carbon::now();
         $nonshift = NonShift::where('nama', $hari[$waktuSekarang->isoFormat('dddd')])->first();
+
+        $harilibur = HariLibur::whereDate('tanggal', $waktuSekarang->format('Y-m-d'))->first();
+
+        if ($harilibur) {
+          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, "Terdapat hari libur '{$harilibur->nama}' pada hari ini"), Response::HTTP_NOT_FOUND);
+        }
 
         if(!$nonshift){
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
@@ -147,8 +156,6 @@ class JadwalController extends Controller
         $jadwal = json_decode($encode);
 
 
-
-
       }
 
       if (!$jadwal) {
@@ -165,9 +172,7 @@ class JadwalController extends Controller
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
 
-      if($jadwal->shift_id == 0){
-        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
-      }
+
 
       if(!$aktivitas) {
         $time = date('Y-m-d H:i:s');
@@ -587,7 +592,7 @@ class JadwalController extends Controller
   public function changeschedule(Request $request)
   {
     try {
-        $cektukarsebelum = TukarJadwal::whereNotNull('verifikator_1')->whereNotNull('verifikator_2')->where('user_pengajuan', Auth::user()->id)->get();
+        $cektukarsebelum = TukarJadwal::where('status_penukaran_id', 1)->where('user_pengajuan', Auth::user()->id)->get();
 
       if($cektukarsebelum->isNotEmpty()) {
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda masih memiliki pengajuan tukar jadwal yang belom terverifikasi'), Response::HTTP_NOT_ACCEPTABLE);
@@ -687,8 +692,8 @@ class JadwalController extends Controller
         $schedule = Jadwal::where('user_id', Auth::user()->id)
         //   ->whereIn('shift_id', 1)
           ->where('shift_id', '!=', 0)
-          ->where('tgl_mulai', '>=', date('Y-m-d'))
-        //   ->where('tgl_mulai', $jadwal->tgl_mulai)
+        //   ->where('tgl_mulai', '=', date('Y-m-d'))
+          ->where('tgl_mulai', $jadwal->tgl_mulai)
           ->with('shift')
           ->get();
 
