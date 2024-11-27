@@ -48,6 +48,7 @@ class TukarJadwalController extends Controller
                 $offset = $request->offset;
             }
             $query->with(['jadwalPengajuan.shift', 'jadwalDitukar.shift']);
+            $query->orderBy('created_at', 'desc');
             $tukar = $query->paginate($offset);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'List pengajuan tukar jadwal berhasil didapatkan', $tukar), Response::HTTP_OK);
@@ -89,6 +90,7 @@ class TukarJadwalController extends Controller
                 $offset = $request->offset;
             }
             $query->with(['jadwalPengajuan.shift', 'jadwalDitukar.shift']);
+            $query->orderBy('created_at', 'desc');
             $tukar = $query->paginate($offset);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'List pengajuan tukar jadwal berhasil didapatkan', $tukar), Response::HTTP_OK);
@@ -167,7 +169,7 @@ class TukarJadwalController extends Controller
 
         Notifikasi::create([
             'kategori_notifikasi_id' => 2,
-            // 'user_id' => 
+            // 'user_id' =>
         ]);
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Tukar jadwal berhasil'), Response::HTTP_OK);
         } catch(\Exception $e) {
