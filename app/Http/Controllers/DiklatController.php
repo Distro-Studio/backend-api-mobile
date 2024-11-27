@@ -175,7 +175,7 @@ class DiklatController extends Controller
     {
         try {
 
-            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat', 'diklat.image', 'diklat.kategori', 'diklat.status', 'diklat.dokumen_eksternal')->get();
+            $peserta = PesertaDiklat::where('peserta', Auth::user()->id)->with('diklat', 'diklat.image', 'diklat.kategori', 'diklat.status', 'diklat.dokumen')->get();
             if($peserta->isEmpty()) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada riwayat diklat'), Response::HTTP_NOT_FOUND);
             }
@@ -189,7 +189,12 @@ class DiklatController extends Controller
             //     unset($item->updated_at);
             // });
 
-            $peserta->map(function($item){
+            $peserta = $peserta->map(function($item){
+                unset($item->id);
+                unset($item->diklat_id);
+                unset($item->peserta);
+                unset($item->created_at);
+                unset($item->updated_at);
                 return [
                     'diklat' => [
                         "id" => $item->diklat->id,
@@ -203,29 +208,35 @@ class DiklatController extends Controller
                             "path" => env('URL_STORAGE').($item->diklat->image->path ?? ''),
                             "tgl_upload" => $item->diklat->image->tgl_upload ?? null,
                             "nama_file" => $item->diklat->image->nama_file ?? null,
-                            "ext" => $item->diklat->image->ext ?? null,
+                            "ext" => StorageFileHelper::getExtensionFromMimeType($item->diklat->image->ext) ?? null,
                             "size" => $item->diklat->image->size ?? null,
                             "verifikator_1" => $item->diklat->image->verifikator_1 ?? null,
                             "alasan" => $item->diklat->image->alasan ?? null,
                         ] : null,
-                        "dokumen_eksternal" => $item->diklat->dokumen_eksternal ? [
-                            "id" => $item->diklat->dokumen_eksternal->id ?? null,
-                            "user_id" => $item->diklat->dokumen_eksternal->user_id ?? null,
-                            "file_id" => $item->diklat->dokumen_eksternal->file_id ?? null,
-                            "nama" => $item->diklat->dokumen_eksternal->nama ?? null,
-                            "kategori_berkas_id" => $item->diklat->dokumen_eksternal->kategori_berkas_id ?? null,
-                            "status_berkas_id" => $item->diklat->dokumen_eksternal->status_berkas_id ?? null,
-                            "path" => env('URL_STORAGE').($item->diklat->dokumen_eksternal->path ?? ''),
-                            "tgl_upload" => $item->diklat->dokumen_eksternal->tgl_upload ?? null,
-                            "nama_file" => $item->diklat->dokumen_eksternal->nama_file ?? null,
-                            "ext" => $item->diklat->dokumen_eksternal->ext ?? null,
-                            "size" => $item->diklat->dokumen_eksternal->size ?? null,
-                            "verifikator_1" => $item->diklat->dokumen_eksternal->verifikator_1 ?? null,
-                            "alasan" => $item->diklat->dokumen_eksternal->alasan ?? null,
+                        "dokumen_eksternal" => $item->diklat->dokumen ? [
+                            "id" => $item->diklat->dokumen->id ?? null,
+                            "user_id" => $item->diklat->dokumen->user_id ?? null,
+                            "file_id" => $item->diklat->dokumen->file_id ?? null,
+                            "nama" => $item->diklat->dokumen->nama ?? null,
+                            "kategori_berkas_id" => $item->diklat->dokumen->kategori_berkas_id ?? null,
+                            "status_berkas_id" => $item->diklat->dokumen->status_berkas_id ?? null,
+                            "path" => env('URL_STORAGE').($item->diklat->dokumen->path ?? ''),
+                            "tgl_upload" => $item->diklat->dokumen->tgl_upload ?? null,
+                            "nama_file" => $item->diklat->dokumen->nama_file ?? null,
+                            "ext" => StorageFileHelper::getExtensionFromMimeType($item->diklat->dokumen->ext) ?? null,
+                            "size" => $item->diklat->dokumen->size ?? null,
+                            "verifikator_1" => $item->diklat->dokumen->verifikator_1 ?? null,
+                            "alasan" => $item->diklat->dokumen->alasan ?? null,
                         ] : null,
                         "nama" => $item->diklat->nama ?? null,
-                        "kategori_diklat_id" => $item->diklat->kategori_diklat_id ?? null,
-                        "status_diklat_id" => $item->diklat->status_diklat_id ?? null,
+                        "kategori" => [
+                            'id' => $item->diklat->kategori->id ?? null,
+                            'label' => $item->diklat->kategori->label ?? null
+                        ],
+                        "status" => [
+                            'id' => $item->diklat->status->id ?? null,
+                            'label' => $item->diklat->status->label ?? null
+                        ],
                         "certificate_published" => $item->diklat->certificate_published ?? null,
                         "certificate_verified_by" => $item->diklat->certificate_verified_by ?? null,
                         "deskripsi" => $item->diklat->deskripsi ?? null,

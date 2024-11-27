@@ -42,7 +42,7 @@ class Diklat extends Model
         return $this->belongsTo(StatusDiklat::class, 'status_diklat_id', 'id');
     }
 
-    public function dokumen_eksternal()
+    public function dokumen()
     {
         return $this->belongsTo(Berkas::class, 'dokumen_eksternal', 'id');
     }
