@@ -138,7 +138,7 @@ class CMSController extends Controller
                     'nama' => $d->berkas_1->nama,
                     'nama_file' => $d->berkas_1->nama_file,
                     'path' => env('URL_STORAGE') . $d->berkas_1->path,
-                    'ext' => $d->berkas_1->ext,
+                    'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext),
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext)
                     'size' => $d->berkas_1->size,
                 ] : null,
@@ -147,7 +147,7 @@ class CMSController extends Controller
                     'nama' => $d->berkas_2->nama,
                     'nama_file' => $d->berkas_2->nama_file,
                     'path' => env('URL_STORAGE') . $d->berkas_2->path,
-                    'ext' => $d->berkas_2->ext,
+                    'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext),
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext)
                     'size' => $d->berkas_2->size,
                 ] : null,
@@ -156,7 +156,7 @@ class CMSController extends Controller
                     'nama' => $d->berkas_3->nama,
                     'nama_file' => $d->berkas_3->nama_file,
                     'path' => env('URL_STORAGE') . $d->berkas_3->path,
-                    'ext' => $d->berkas_3->ext,
+                    'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext),
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext)
                     'size' => $d->berkas_3->size,
                 ] : null,
@@ -191,8 +191,8 @@ class CMSController extends Controller
                     'nama' => $d->berkas_1->nama,
                     'nama_file' => $d->berkas_1->nama_file,
                     'path' => env('URL_STORAGE') . $d->berkas_1->path,
-                    'ext' => $d->berkas_1->ext,
-                    // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext)
+                    // 'ext' => $d->berkas_1->ext,
+                    'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext),
                     'size' => $d->berkas_1->size,
                 ] : null,
                 'dokumen_materi_2' => $d->berkas_2 ? [
@@ -200,8 +200,8 @@ class CMSController extends Controller
                     'nama' => $d->berkas_2->nama,
                     'nama_file' => $d->berkas_2->nama_file,
                     'path' => env('URL_STORAGE') . $d->berkas_2->path,
-                    'ext' => $d->berkas_2->ext,
-                    // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext)
+                    // 'ext' => $d->berkas_2->ext,
+                    'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext),
                     'size' => $d->berkas_2->size,
                 ] : null,
                 'dokumen_materi_3' => $d->berkas_3 ? [
@@ -209,8 +209,8 @@ class CMSController extends Controller
                     'nama' => $d->berkas_3->nama,
                     'nama_file' => $d->berkas_3->nama_file,
                     'path' => env('URL_STORAGE') . $d->berkas_3->path,
-                    'ext' => $d->berkas_3->ext,
-                    // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext)
+                    // 'ext' => $d->berkas_3->ext,
+                    'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext),
                     'size' => $d->berkas_3->size,
                 ] : null,
                 'created_at' => $d->created_at,
