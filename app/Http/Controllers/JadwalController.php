@@ -83,6 +83,7 @@ class JadwalController extends Controller
           if($jadwal->shift_id == 0){
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
           }
+          
         }
       } else {
         $hari = [
