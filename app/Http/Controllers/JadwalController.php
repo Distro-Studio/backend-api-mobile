@@ -97,7 +97,7 @@ class JadwalController extends Controller
         $waktuSekarang = Carbon::now();
         $nonshift = NonShift::where('nama', $hari[$waktuSekarang->isoFormat('dddd')])->first();
 
-        $harilibur = HariLibur::whereDate('tanggal', $waktuSekarang->format('Y-m-d'))->first();
+        $harilibur = HariLibur::whereDate('tanggal', $waktuSekarang->format('Y-m-d'))->whereNull('deleted_at')->first();
 
         if ($harilibur) {
           return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, "Terdapat hari libur '{$harilibur->nama}' pada hari ini"), Response::HTTP_NOT_FOUND);
