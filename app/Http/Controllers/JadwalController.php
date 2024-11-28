@@ -83,7 +83,7 @@ class JadwalController extends Controller
           if($jadwal->shift_id == 0){
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
           }
-          
+
         }
       } else {
         $hari = [
@@ -225,7 +225,7 @@ class JadwalController extends Controller
     try {
       $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
       $hariLibur = HariLibur::all()->pluck('tanggal')->toArray();
-      $nonShift = NonShift::where('id', 1)->first();
+      $nonShift = NonShift::whereNotNull('jam_from')->whereNotNull('jam_to')->first();
       // $start = Carbon::now()->startOfWeek();
       // $end = Carbon::now()->endOfWeek();
       // $startDate = Carbon::createFromFormat('Y-m-d', $start);
@@ -295,6 +295,19 @@ class JadwalController extends Controller
           } else if (in_array($date, $listtglcuti)) {
 
           } else if ($nonShift) {
+            if($day_of_week == Carbon::MONDAY){
+                $jdwl = NonShift::where('nama', 'Senin')->first();
+            }else if($day_of_week == Carbon::TUESDAY){
+                $jdwl = NonShift::where('nama', 'Selasa')->first();
+            }else if($day_of_week == Carbon::WEDNESDAY){
+                $jdwl = NonShift::where('nama', 'Rabu')->first();
+            }else if($day_of_week == Carbon::THURSDAY){
+                $jdwl = NonShift::where('nama', 'Kamis')->first();
+            }else if($day_of_week == Carbon::FRIDAY){
+                $jdwl = NonShift::where('nama', 'Jumat')->first();
+            }else if($day_of_week == Carbon::SATURDAY){
+                $jdwl = NonShift::where('nama', 'Sabtu')->first();
+            }
               $user_schedule_array[$date] = [
                 "id" => 0,
                 "user_id" => Auth::user()->id,
@@ -306,8 +319,8 @@ class JadwalController extends Controller
                 "shift" => [
                   "id" => 0,
                   "nama" => "Jam Kerja",
-                  "jam_from" => $nonShift->jam_from,
-                  "jam_to" => $nonShift->jam_to,
+                  "jam_from" => $jdwl->jam_from,
+                  "jam_to" => $jdwl->jam_to,
                   "deleted_at" => null,
                   "created_at" => null,
                   "updated_at" => null
