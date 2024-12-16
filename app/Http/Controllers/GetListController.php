@@ -122,7 +122,7 @@ class GetListController extends Controller
   public function getlistnotifikasi()
   {
     $user = Auth::user();
-    $notifikasi = Notifikasi::whereJsonContains('user_id', $user->id)
+    $notifikasi = Notifikasi::where('user_id', $user->id)
       ->orderBy('is_read', 'asc')
       ->orderBy('created_at', 'desc')
       ->get();
