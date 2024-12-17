@@ -1097,7 +1097,7 @@ class DataPersonalController extends Controller
     $dataAkun = User::find($userId);
 
     Notifikasi::create([
-      'kategori_notifikasi_id' => 13,
+      'kategori_notifikasi_id' => 12,
       'user_id' => 1,
       'message' => "Notifikasi untuk Super Admin: Pengajuan data awal keluarga dari karyawan '{$dataAkun->nama}' pada tanggal '{$konversiTgl}' menunggu untuk diverifikasi.",
       'is_read' => false,
