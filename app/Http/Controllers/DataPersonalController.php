@@ -102,13 +102,13 @@ class DataPersonalController extends Controller
 
       // Menentukan kategori BMI berdasarkan hasil perhitungan
       if ($bmi < 18.5) {
-          $category = 'Berat badan kurang';
+        $category = 'Berat badan kurang';
       } elseif ($bmi >= 18.5 && $bmi <= 24.9) {
-          $category = 'Berat badan normal';
+        $category = 'Berat badan normal';
       } elseif ($bmi >= 25 && $bmi <= 29.9) {
-          $category = 'Berat badan berlebih (overweight)';
+        $category = 'Berat badan berlebih (overweight)';
       } else {
-          $category = 'Obesitas';
+        $category = 'Obesitas';
       }
 
       //   $dataKaryawan = DataKaryawan::where('user_id', Auth::user()->id)->update([
@@ -157,7 +157,6 @@ class DataPersonalController extends Controller
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
-
   }
 
   public function storekeluarga(Request $request)
@@ -184,17 +183,17 @@ class DataPersonalController extends Controller
 
       foreach ($datakeluarga['keluarga'] as $k) {
         $keluarga = DataKeluarga::create([
-            'data_karyawan_id' => $data->id,
-            'nama_keluarga' => $k['nama_keluarga'],
-            'hubungan' => $k['hubungan']['value'],
-            'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'],
-            'status_hidup' => $k['status_hidup']['value'],
-            'pekerjaan' => $k['pekerjaan'],
-            'no_hp' => $k['no_hp'],
-            'email' => $k['email'],
-            'is_bpjs' => $k['is_bpjs'],
-            'status_keluarga_id' => 1,
-            'verifikator_1' => null,
+          'data_karyawan_id' => $data->id,
+          'nama_keluarga' => $k['nama_keluarga'],
+          'hubungan' => $k['hubungan']['value'],
+          'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'],
+          'status_hidup' => $k['status_hidup']['value'],
+          'pekerjaan' => $k['pekerjaan'],
+          'no_hp' => $k['no_hp'],
+          'email' => $k['email'],
+          'is_bpjs' => $k['is_bpjs'],
+          'status_keluarga_id' => 1,
+          'verifikator_1' => null,
         ]);
         // return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $k), Response::HTTP_OK);
 
@@ -204,10 +203,9 @@ class DataPersonalController extends Controller
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
     } catch (\Exception $e) {
-    //   return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
-    return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+      //   return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
-
   }
 
   public function getkeluarga()
@@ -265,20 +263,20 @@ class DataPersonalController extends Controller
   public function step5(Request $request)
   {
     $validator = Validator::make($request->all(), [
-    //   'no_str' => 'required',
+      //   'no_str' => 'required',
       //   'masa_berlaku_str' => 'required',
-    //   'no_sip' => 'required',
+      //   'no_sip' => 'required',
       //   'masa_berlaku_sip' => 'required',
-    //   'no_bpjsksh' => 'required',
-    //   'no_bpjsktk' => 'required',
+      //   'no_bpjsksh' => 'required',
+      //   'no_bpjsktk' => 'required',
       'npwp' => 'required'
     ], [
-    //   'no_str.required' => 'Nomor STR harus diisi',
+      //   'no_str.required' => 'Nomor STR harus diisi',
       //   'masa_berlaku_str.required' => 'Masa berlaku STR harus diisi',
-    //   'no_sip.required' => 'Nomor SIP harus diisi',
+      //   'no_sip.required' => 'Nomor SIP harus diisi',
       //   'masa_berlaku_sip.required' => 'Masa berlaku SIP harus diisi',
-    //   'no_bpjsksh.required' => 'Nomor BPJS Kesehatan harus diisi',
-    //   'no_bpjsktk.required' => 'Nomor BPJS Ketenagakerjaan harus diisi',
+      //   'no_bpjsksh.required' => 'Nomor BPJS Kesehatan harus diisi',
+      //   'no_bpjsktk.required' => 'Nomor BPJS Ketenagakerjaan harus diisi',
       'npwp.required' => 'NPWP harus diisi'
     ]);
 
@@ -354,15 +352,17 @@ class DataPersonalController extends Controller
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
     }
 
+    $userLoggedin = Auth::user()->id;
+
     try {
-      $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+      $datakaryawan = DataKaryawan::where('user_id', $userLoggedin)->first();
       //KTP
       $uploadktp = StorageFileHelper::uploadToServer($request, Str::random(8), 'ktp');
 
-      $cekberkasktp = Berkas::where('nama', 'KTP')->where('user_id', Auth::user()->id)->delete();
+      $cekberkasktp = Berkas::where('nama', 'KTP')->where('user_id', $userLoggedin)->delete();
 
       $berkasktp = Berkas::create([
-        'user_id' => Auth::user()->id,
+        'user_id' => $userLoggedin,
         'file_id' => $uploadktp['id_file']['id'],
         'nama' => 'KTP',
         'kategori_berkas_id' => 1,
@@ -384,10 +384,10 @@ class DataPersonalController extends Controller
       //KK
       $uploadkk = StorageFileHelper::uploadToServer($request, Str::random(8), 'kk');
 
-      $cekberkaskk = Berkas::where('nama', 'KK')->where('user_id', Auth::user()->id)->delete();
+      $cekberkaskk = Berkas::where('nama', 'KK')->where('user_id', $userLoggedin)->delete();
 
       $berkaskk = Berkas::create([
-        'user_id' => Auth::user()->id,
+        'user_id' => $userLoggedin,
         'file_id' => $uploadkk['id_file']['id'],
         'nama' => 'KK',
         'kategori_berkas_id' => 1,
@@ -407,10 +407,10 @@ class DataPersonalController extends Controller
       //SIP
       $uploadsip = StorageFileHelper::uploadToServer($request, Str::random(8), 'sip');
 
-      $cekberkasktp = Berkas::where('nama', 'SIP')->where('user_id', Auth::user()->id)->delete();
+      $cekberkasktp = Berkas::where('nama', 'SIP')->where('user_id', $userLoggedin)->delete();
 
       $berkassip = Berkas::create([
-        'user_id' => Auth::user()->id,
+        'user_id' => $userLoggedin,
         'file_id' => $uploadsip['id_file']['id'],
         'nama' => 'SIP',
         'kategori_berkas_id' => 1,
@@ -430,10 +430,10 @@ class DataPersonalController extends Controller
       //BPJS Kesehatan
       $uploadbpjs = StorageFileHelper::uploadToServer($request, Str::random(8), 'bpjs_kesehatan');
 
-      $cekberkasktp = Berkas::where('nama', 'BPJS Kesehatan')->where('user_id', Auth::user()->id)->delete();
+      $cekberkasktp = Berkas::where('nama', 'BPJS Kesehatan')->where('user_id', $userLoggedin)->delete();
 
       $berkasbpjs = Berkas::create([
-        'user_id' => Auth::user()->id,
+        'user_id' => $userLoggedin,
         'file_id' => $uploadbpjs['id_file']['id'],
         'nama' => 'BPJS Kesehatan',
         'kategori_berkas_id' => 1,
@@ -452,10 +452,10 @@ class DataPersonalController extends Controller
       //BPJS Ketenagakerjaan
       $uploadbpjstk = StorageFileHelper::uploadToServer($request, Str::random(8), 'bpjs_ketenagakerjaan');
 
-      $cekberkasktp = Berkas::where('nama', 'BPJS Ketenagakerjaan')->where('user_id', Auth::user()->id)->delete();
+      $cekberkasktp = Berkas::where('nama', 'BPJS Ketenagakerjaan')->where('user_id', $userLoggedin)->delete();
 
       $berkasbpjstk = Berkas::create([
-        'user_id' => Auth::user()->id,
+        'user_id' => $userLoggedin,
         'file_id' => $uploadbpjstk['id_file']['id'],
         'nama' => 'BPJS Ketenagakerjaan',
         'kategori_berkas_id' => 1,
@@ -474,10 +474,10 @@ class DataPersonalController extends Controller
       //Ijazah
       $uploadijazah = StorageFileHelper::uploadToServer($request, Str::random(8), 'ijazah');
 
-      $cekberkasktp = Berkas::where('nama', 'Ijazah')->where('user_id', Auth::user()->id)->delete();
+      $cekberkasktp = Berkas::where('nama', 'Ijazah')->where('user_id', $userLoggedin)->delete();
 
       $berkasijazah = Berkas::create([
-        'user_id' => Auth::user()->id,
+        'user_id' => $userLoggedin,
         'file_id' => $uploadijazah['id_file']['id'],
         'nama' => 'Ijazah',
         'kategori_berkas_id' => 1,
@@ -496,10 +496,10 @@ class DataPersonalController extends Controller
       //Sertifikat
       $uploadsertifikat = StorageFileHelper::uploadToServer($request, Str::random(8), 'sertifikat');
 
-      $cekberkasktp = Berkas::where('nama', 'Sertifikat')->where('user_id', Auth::user()->id)->delete();
+      $cekberkasktp = Berkas::where('nama', 'Sertifikat')->where('user_id', $userLoggedin)->delete();
 
       $berkassertifikat = Berkas::create([
-        'user_id' => Auth::user()->id,
+        'user_id' => $userLoggedin,
         'file_id' => $uploadsertifikat['id_file']['id'],
         'nama' => 'Sertifikat',
         'kategori_berkas_id' => 1,
@@ -515,10 +515,11 @@ class DataPersonalController extends Controller
         return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Berkas Sertifikat gagal di upload'), Response::HTTP_BAD_REQUEST);
       }
 
-      $user = User::where('id', Auth::user()->id)->update(['data_completion_step' => 5]);
+      $user = User::where('id', $userLoggedin)->update(['data_completion_step' => 5]);
+
+      $this->createNotifikasiBerkas($userLoggedin);
 
       return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berkas berhasil di upload'), Response::HTTP_OK);
-
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
@@ -610,8 +611,8 @@ class DataPersonalController extends Controller
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data penggajian tidak ditemukan.'), Response::HTTP_NOT_FOUND);
     }
 
-    if($penggajian->riwayat_penggajians->status_gaji_id == 1) {
-        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Penggajian belum di publikas'), Response::HTTP_NOT_FOUND);
+    if ($penggajian->riwayat_penggajians->status_gaji_id == 1) {
+      return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Penggajian belum di publikas'), Response::HTTP_NOT_FOUND);
     }
 
     $dataKaryawan = $penggajian->data_karyawans;
@@ -731,35 +732,35 @@ class DataPersonalController extends Controller
         $originaldata = $datakaryawan->gelar_depan;
       }
 
-      if($request->kolom_diubah == 'asal_sekolah') {
+      if ($request->kolom_diubah == 'asal_sekolah') {
         $originaldata = $datakaryawan->asal_sekolah;
       }
 
-      if($request->kolom_diubah == 'gelar_belakang') {
+      if ($request->kolom_diubah == 'gelar_belakang') {
         $originaldata = $datakaryawan->gelar_belakang;
       }
 
       $cekdata = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)
-            ->where('kolom', $request->kolom_diubah)
-            ->where('jenis_perubahan', 'Personal')
-            ->where('status_perubahan_id', 1)
-            ->first();
+        ->where('kolom', $request->kolom_diubah)
+        ->where('jenis_perubahan', 'Personal')
+        ->where('status_perubahan_id', 1)
+        ->first();
 
-      if($cekdata){
+      if ($cekdata) {
         $cekdata->original_data = $originaldata;
         $cekdata->updated_data = $updateddata;
         $cekdata->save();
         $datadiubah = $cekdata;
       } else {
-          $datadiubah = RiwayatPerubahan::create([
-            'data_karyawan_id' => $datakaryawan->id,
-            'jenis_perubahan' => 'Personal',
-            'kolom' => $request->kolom_diubah,
-            'original_data' => $originaldata,
-            'updated_data' => $updateddata,
-            'status_perubahan_id' => 1,
-            'updated_at' => null
-          ]);
+        $datadiubah = RiwayatPerubahan::create([
+          'data_karyawan_id' => $datakaryawan->id,
+          'jenis_perubahan' => 'Personal',
+          'kolom' => $request->kolom_diubah,
+          'original_data' => $originaldata,
+          'updated_data' => $updateddata,
+          'status_perubahan_id' => 1,
+          'updated_at' => null
+        ]);
       }
 
 
@@ -782,7 +783,7 @@ class DataPersonalController extends Controller
 
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil diajukan, Mohon tunggu penngajuan anda sedang diverifikasi', $datadiubah), Response::HTTP_OK);
-    //   return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $request->value_diubah['value']), Response::HTTP_OK);
+      //   return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $request->value_diubah['value']), Response::HTTP_OK);
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
@@ -798,89 +799,89 @@ class DataPersonalController extends Controller
     $datakeluarga = json_decode($request->value_diubah, true);
     $formatedData = [];
     $updated_data = [];
-    if(!$datakeluargori->isEmpty()){
-        $formatedData = $datakeluargori->map(function($item){
-            $labelstatus = 'Hidup';
-            if ($item->status_hidup == 0) {
-                $labelstatus = 'Meninggal';
-            }
-            return[
-                'data_keluarga_id' => $item->id,
-                'hubungan' => $item->hubungan,
-                'nama_keluarga' => $item->nama_keluarga,
-                'status_hidup' => $item->status_hidup,
-                'pendidikan_terakhir' => $item->pendidikanTerakhir->id,
-                'pekerjaan' => $item->pekerjaan,
-                'no_hp' => $item->no_hp,
-                'email' => $item->email,
-                'is_bpjs' => $item->is_bpjs,
-                'id' => $item->id
-            ];
-        });
+    if (!$datakeluargori->isEmpty()) {
+      $formatedData = $datakeluargori->map(function ($item) {
+        $labelstatus = 'Hidup';
+        if ($item->status_hidup == 0) {
+          $labelstatus = 'Meninggal';
+        }
+        return [
+          'data_keluarga_id' => $item->id,
+          'hubungan' => $item->hubungan,
+          'nama_keluarga' => $item->nama_keluarga,
+          'status_hidup' => $item->status_hidup,
+          'pendidikan_terakhir' => $item->pendidikanTerakhir->id,
+          'pekerjaan' => $item->pekerjaan,
+          'no_hp' => $item->no_hp,
+          'email' => $item->email,
+          'is_bpjs' => $item->is_bpjs,
+          'id' => $item->id
+        ];
+      });
     }
 
     if (!empty($datakeluarga)) {
-        // return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'hehehe', $datakeluarga), Response::HTTP_INTERNAL_SERVER_ERROR);
+      // return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'hehehe', $datakeluarga), Response::HTTP_INTERNAL_SERVER_ERROR);
       foreach ($datakeluarga as $keluargaItem) {
         // $updated_data[] = [
         //         'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'],
         //     ];
+        $statushidup = 1;
+        $isbpjs = 1;
+        if ($keluargaItem['status_hidup']) {
           $statushidup = 1;
-          $isbpjs = 1;
-          if($keluargaItem['status_hidup']){
-            $statushidup = 1;
-          }else {
-            $statushidup = 0;
-          }
+        } else {
+          $statushidup = 0;
+        }
 
-          if($keluargaItem['is_bpjs']){
-            $isbpjs = 1;
-          }else {
-            $isbpjs = 0;
-          }
-          $updated_data[] = [
-              'data_keluarga_id' => $keluargaItem['data_keluarga_id'] ?? null,
-              'hubungan' => $keluargaItem['hubungan'],
-              'nama_keluarga' => $keluargaItem['nama_keluarga'],
-              'status_hidup' => $statushidup,
-              'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'],
-              'pekerjaan' => $keluargaItem['pekerjaan'],
-              'no_hp' => $keluargaItem['no_hp'],
-              'email' => $keluargaItem['email'],
-              'is_bpjs' => $isbpjs,
-              'id' => $keluargaItem['id'] ?? null
-          ];
+        if ($keluargaItem['is_bpjs']) {
+          $isbpjs = 1;
+        } else {
+          $isbpjs = 0;
+        }
+        $updated_data[] = [
+          'data_keluarga_id' => $keluargaItem['data_keluarga_id'] ?? null,
+          'hubungan' => $keluargaItem['hubungan'],
+          'nama_keluarga' => $keluargaItem['nama_keluarga'],
+          'status_hidup' => $statushidup,
+          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'],
+          'pekerjaan' => $keluargaItem['pekerjaan'],
+          'no_hp' => $keluargaItem['no_hp'],
+          'email' => $keluargaItem['email'],
+          'is_bpjs' => $isbpjs,
+          'id' => $keluargaItem['id'] ?? null
+        ];
       }
 
-        //  return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'hehehe', $updated_data), Response::HTTP_INTERNAL_SERVER_ERROR);
-  }
+      //  return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'hehehe', $updated_data), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
 
-  if($formatedData == null) {
+    if ($formatedData == null) {
       $original = null;
-  } else {
+    } else {
       $original = json_encode($formatedData);
-  }
+    }
 
-  if($updated_data == null) {
+    if ($updated_data == null) {
       $update = null;
-  } else {
+    } else {
       $update = json_encode($updated_data);
-  }
+    }
 
-  $cekdata = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)
-            ->where('kolom', 'Data Keluarga')
-            ->where('jenis_perubahan', 'Keluarga')
-            ->where('status_perubahan_id', 1)
-            ->first();
+    $cekdata = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)
+      ->where('kolom', 'Data Keluarga')
+      ->where('jenis_perubahan', 'Keluarga')
+      ->where('status_perubahan_id', 1)
+      ->first();
 
-  if($cekdata){
-    $cekdata->updated_data = $update;
-    $cekdata->save();
+    if ($cekdata) {
+      $cekdata->updated_data = $update;
+      $cekdata->save();
 
-    $datadiubah = $cekdata;
+      $datadiubah = $cekdata;
 
-    PerubahanKeluarga::where('riwayat_perubahan_id', $cekdata->id)->delete();
-  }else {
+      PerubahanKeluarga::where('riwayat_perubahan_id', $cekdata->id)->delete();
+    } else {
       $datadiubah = RiwayatPerubahan::create([
         'data_karyawan_id' => $datakaryawan->id,
         'jenis_perubahan' => 'Keluarga',
@@ -889,7 +890,7 @@ class DataPersonalController extends Controller
         'updated_data' => $update,
         'status_perubahan_id' => 1,
       ]);
-  }
+    }
 
     // return response()->json(new DataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Erorr', $datakeluarga), Response::HTTP_INTERNAL_SERVER_ERROR);
 
@@ -910,17 +911,17 @@ class DataPersonalController extends Controller
     }
 
     $notifikasi = Notifikasi::create([
-        'kategori_notifikasi_id' => 6,
-        'user_id' => Auth::user()->id,
-        'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->nama . ' berhasil terkirim',
-        'is_read' => 0,
-        'is_verifikasi' => 1,
-      ]);
+      'kategori_notifikasi_id' => 6,
+      'user_id' => Auth::user()->id,
+      'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->nama . ' berhasil terkirim',
+      'is_read' => 0,
+      'is_verifikasi' => 1,
+    ]);
 
     Notifikasi::create([
-        'kategori_notifikasi_id' => 6,
-        'user_id' => 1,
-        'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->id . ' berhasil terkirim',
+      'kategori_notifikasi_id' => 6,
+      'user_id' => 1,
+      'message' => 'Pengajuan perubahan data keluarga ' . Auth::user()->id . ' berhasil terkirim',
     ]);
 
     return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
@@ -939,7 +940,7 @@ class DataPersonalController extends Controller
     $data_karyawan_id = $user->data_karyawan_id;
 
     // Find karyawan by data_karyawan_id
-    $karyawan = DataKaryawan::where('id',$data_karyawan_id)->with('pendidikanTerakhir')->first();
+    $karyawan = DataKaryawan::where('id', $data_karyawan_id)->with('pendidikanTerakhir')->first();
     // $karyawan->pendidikan_terakhir = $karyawan->pendidikan_terakhir->label;
 
     if (!$karyawan) {
@@ -1069,5 +1070,20 @@ class DataPersonalController extends Controller
       'message' => "Detail karyawan '{$karyawan->user->nama}' berhasil ditampilkan.",
       'data' => $formattedData,
     ], Response::HTTP_OK);
+  }
+
+  private function createNotifikasiBerkas($userId)
+  {
+    $konversiTgl = Carbon::now('Asia/Jakarta')->locale('id')->isoFormat('D MMMM YYYY');
+    $dataAkun = User::find($userId);
+
+    Notifikasi::create([
+      'kategori_notifikasi_id' => 6,
+      'user_id' => 1,
+      'message' => "Notifikasi untuk Super Admin: Pengajuan data awal berkas dari karyawan '{$dataAkun->nama}' pada tanggal '{$konversiTgl}' menunggu untuk diverifikasi.",
+      'is_read' => false,
+      'is_verifikasi' => true,
+      'created_at' => Carbon::now('Asia/Jakarta'),
+    ]);
   }
 }
