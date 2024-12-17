@@ -224,7 +224,7 @@ class JadwalController extends Controller
 
     try {
       $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
-      $hariLibur = HariLibur::all()->pluck('tanggal')->toArray();
+      $hariLibur = HariLibur::all()->pluck('tanggal')->whereNull('deleted_at')->toArray();
       $nonShift = NonShift::whereNotNull('jam_from')->whereNotNull('jam_to')->first();
       // $start = Carbon::now()->startOfWeek();
       // $end = Carbon::now()->endOfWeek();
@@ -263,7 +263,7 @@ class JadwalController extends Controller
         $date_range = $this->generateDateRange($startDate, $endDate);
         foreach ($date_range as $date) {
           $day_of_week = Carbon::createFromFormat('Y-m-d', $date)->dayOfWeek;
-          $harilibur = HariLibur::whereDate('tanggal', $date)->first();
+          $harilibur = HariLibur::whereDate('tanggal', $date)->whereNull('deleted_at')->first();
           if ($day_of_week == Carbon::SUNDAY) {
             // Libur pada hari Minggu
             // $user_schedule_array[$date] = [
@@ -567,6 +567,19 @@ class JadwalController extends Controller
               'status' => 3 // libur besar
             ];
           } else if ($nonShift) {
+            if($day_of_week == Carbon::MONDAY){
+                $jdwl = NonShift::where('nama', 'Senin')->first();
+            }else if($day_of_week == Carbon::TUESDAY){
+                $jdwl = NonShift::where('nama', 'Selasa')->first();
+            }else if($day_of_week == Carbon::WEDNESDAY){
+                $jdwl = NonShift::where('nama', 'Rabu')->first();
+            }else if($day_of_week == Carbon::THURSDAY){
+                $jdwl = NonShift::where('nama', 'Kamis')->first();
+            }else if($day_of_week == Carbon::FRIDAY){
+                $jdwl = NonShift::where('nama', 'Jumat')->first();
+            }else if($day_of_week == Carbon::SATURDAY){
+                $jdwl = NonShift::where('nama', 'Sabtu')->first();
+            }
             $user_schedule_array[$date] = [
               "id" => 0,
               "user_id" => Auth::user()->id,
