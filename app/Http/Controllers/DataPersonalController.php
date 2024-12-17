@@ -171,8 +171,10 @@ class DataPersonalController extends Controller
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
     }
 
+    $userLoggedin = Auth::user()->id;
+
     try {
-      $data = DataKaryawan::where('user_id', Auth::user()->id)->first();
+      $data = DataKaryawan::where('user_id', $userLoggedin)->first();
 
       if (!$data) {
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'), Response::HTTP_NOT_FOUND);
@@ -199,11 +201,13 @@ class DataPersonalController extends Controller
 
       }
 
-      $user = User::where('id', Auth::user()->id)->update(['data_completion_step' => 3]);
+      $user = User::where('id', $userLoggedin)->update(['data_completion_step' => 3]);
+
+      $this->createNotifikasiKeluarga($userLoggedin);
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
     } catch (\Exception $e) {
-      //   return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
@@ -1081,6 +1085,21 @@ class DataPersonalController extends Controller
       'kategori_notifikasi_id' => 6,
       'user_id' => 1,
       'message' => "Notifikasi untuk Super Admin: Pengajuan data awal berkas dari karyawan '{$dataAkun->nama}' pada tanggal '{$konversiTgl}' menunggu untuk diverifikasi.",
+      'is_read' => false,
+      'is_verifikasi' => true,
+      'created_at' => Carbon::now('Asia/Jakarta'),
+    ]);
+  }
+
+  private function createNotifikasiKeluarga($userId)
+  {
+    $konversiTgl = Carbon::now('Asia/Jakarta')->locale('id')->isoFormat('D MMMM YYYY');
+    $dataAkun = User::find($userId);
+
+    Notifikasi::create([
+      'kategori_notifikasi_id' => 13,
+      'user_id' => 1,
+      'message' => "Notifikasi untuk Super Admin: Pengajuan data awal keluarga dari karyawan '{$dataAkun->nama}' pada tanggal '{$konversiTgl}' menunggu untuk diverifikasi.",
       'is_read' => false,
       'is_verifikasi' => true,
       'created_at' => Carbon::now('Asia/Jakarta'),
