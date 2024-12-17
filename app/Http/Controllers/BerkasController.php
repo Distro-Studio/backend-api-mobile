@@ -10,9 +10,9 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Helpers\StorageFileHelper;
 use App\Http\Resources\DataResource;
-use App\Http\Resources\WithoutDataResource;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Resources\WithoutDataResource;
 use Symfony\Component\HttpFoundation\Response;
 
 class BerkasController extends Controller
@@ -24,7 +24,7 @@ class BerkasController extends Controller
             'label' => 'required',
         ]);
 
-        $userLoggedin = Auth::user()->id;
+        $userLoggedin = Auth::user();
 
         if ($validator->fails()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
@@ -33,24 +33,8 @@ class BerkasController extends Controller
         try {
             $dataupload = StorageFileHelper::uploadToServer($request, Str::random(8), 'file');
 
-            Notifikasi::create([
-                'user_id' => Auth::user()->id,
-                'kategori_notifikasi_id' => 6, //berkas
-                'judul' => 'Upload Berkas',
-                'isi' => 'Upload Berkas ' . $request->label,
-                'status_notifikasi_id' => 1,
-            ]);
-
-            Notifikasi::create([
-                'user_id' => 1,
-                'kategori_notifikasi_id' => 6, //berkas
-                'judul' => 'Upload Berkas',
-                'isi' => 'Upload Berkas ' . $request->label,
-                'status_notifikasi_id' => 1,
-            ]);
-
             $saveberkas = Berkas::create([
-                'user_id' => $userLoggedin,
+                'user_id' => $userLoggedin->id,
                 'file_id' => $dataupload['id_file']['id'],
                 'nama' => $request->label,
                 'kategori_berkas_id' => 1, //pribadi
@@ -62,7 +46,7 @@ class BerkasController extends Controller
                 'size' => $dataupload['size'],
             ]);
 
-            $this->createNotifikasiBerkas($userLoggedin);
+            $this->createNotifikasiBerkas($userLoggedin->id);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Berkas berhasil di upload', $saveberkas), Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -73,7 +57,7 @@ class BerkasController extends Controller
     public function getallberkas()
     {
         try {
-            $berkas = Berkas::where('user_id', Auth::user()->id)->where('kategori_berkas_id', 1)->with('kategori_berkas', 'status_berkas', 'verifikator')->latest()->get();
+            $berkas = Berkas::where('user_id', Auth::user()->id)->where('kategori_berkas_id', 1)->where('status_berkas_id', 2)->with('kategori_berkas', 'status_berkas', 'verifikator')->latest()->get();
 
             if ($berkas->isEmpty()) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Berkas tidak ditemukan'), Response::HTTP_NOT_FOUND);
