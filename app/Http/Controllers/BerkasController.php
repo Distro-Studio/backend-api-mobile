@@ -24,7 +24,7 @@ class BerkasController extends Controller
             'label' => 'required',
         ]);
 
-        $userLoggedin = Auth::user();
+        $userLoggedin = Auth::user()->id;
 
         if ($validator->fails()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
@@ -34,7 +34,7 @@ class BerkasController extends Controller
             $dataupload = StorageFileHelper::uploadToServer($request, Str::random(8), 'file');
 
             $saveberkas = Berkas::create([
-                'user_id' => $userLoggedin->id,
+                'user_id' => $userLoggedin,
                 'file_id' => $dataupload['id_file']['id'],
                 'nama' => $request->label,
                 'kategori_berkas_id' => 1, //pribadi
@@ -46,7 +46,7 @@ class BerkasController extends Controller
                 'size' => $dataupload['size'],
             ]);
 
-            $this->createNotifikasiBerkas($userLoggedin->id);
+            $this->createNotifikasiBerkas($userLoggedin);
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Berkas berhasil di upload', $saveberkas), Response::HTTP_OK);
         } catch (\Exception $e) {
