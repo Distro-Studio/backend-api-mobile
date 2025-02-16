@@ -183,34 +183,110 @@ class DataPersonalController extends Controller
       $keluarga = json_encode($request->keluarga, JSON_UNESCAPED_SLASHES);
       $datakeluarga = json_decode(stripslashes($keluarga), true);
 
-      foreach ($datakeluarga['keluarga'] as $k) {
+      foreach ($datakeluarga as $k) {
         $keluarga = DataKeluarga::create([
           'data_karyawan_id' => $data->id,
           'nama_keluarga' => $k['nama_keluarga'],
           'hubungan' => $k['hubungan']['value'],
+          'tgl_lahir' => $k['tgl_lahir'],
           'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'],
           'status_hidup' => $k['status_hidup']['value'],
           'pekerjaan' => $k['pekerjaan'],
           'no_hp' => $k['no_hp'],
           'email' => $k['email'],
-          'is_bpjs' => $k['is_bpjs'],
           'status_keluarga_id' => 1,
-          'verifikator_1' => null,
+          'is_menikah' => $k['is_menikah'],
+          'is_bpjs' => $k['is_bpjs']
         ]);
-        // return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $k), Response::HTTP_OK);
-
       }
 
-      $user = User::where('id', $userLoggedin)->update(['data_completion_step' => 3]);
+      User::where('id', $userLoggedin)->update(['data_completion_step' => 3]);
 
       $this->createNotifikasiKeluarga($userLoggedin);
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
     } catch (\Exception $e) {
-        // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+      // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Error: ' . $e->getMessage() . ' Line: ' . $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
+
+  // public function storekeluarga(Request $request)
+  // {
+  //   $validator = Validator::make($request->all(), [
+  //     'keluarga' => 'required',
+  //   ], [
+  //     'keluarga.required' => 'Keluarga harus diisi',
+  //   ]);
+
+  //   if ($validator->fails()) {
+  //     return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
+  //   }
+
+  //   $userLoggedin = Auth::user()->id;
+
+  //   try {
+  //     $data = DataKaryawan::where('user_id', $userLoggedin)->first();
+
+  //     if (!$data) {
+  //       return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'), Response::HTTP_NOT_FOUND);
+  //     }
+
+  //     $keluarga = json_encode($request->keluarga, JSON_UNESCAPED_SLASHES);
+  //     $datakeluarga = json_decode(stripslashes($keluarga), true);
+
+  //     if (!isset($datakeluarga['keluarga'])) {
+  //       return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Struktur data keluarga tidak valid'), Response::HTTP_BAD_REQUEST);
+  //     }
+
+  //     // Periksa setiap kolom yang diperlukan
+  //     $requiredColumns = [
+  //       'nama_keluarga',
+  //       'hubungan',
+  //       'tgl_lahir',
+  //       'pendidikan_terakhir',
+  //       'status_hidup',
+  //       'is_menikah',
+  //       'is_bpjs',
+  //     ];
+
+  //     foreach ($datakeluarga['keluarga'] as $index => $k) {
+  //       $missingColumns = [];
+  //       foreach ($requiredColumns as $column) {
+  //         if (!isset($k[$column])) {
+  //           $missingColumns[] = $column;
+  //         }
+  //       }
+
+  //       if (!empty($missingColumns)) {
+  //         return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Kolom berikut tidak ditemukan atau tidak valid: ' . implode(', ', $missingColumns)), Response::HTTP_BAD_REQUEST);
+  //       }
+
+  //       $keluarga = DataKeluarga::create([
+  //         'data_karyawan_id' => $data->id,
+  //         'nama_keluarga' => $k['nama_keluarga'],
+  //         'hubungan' => $k['hubungan']['value'],
+  //         'tgl_lahir' => $k['tgl_lahir'],
+  //         'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'],
+  //         'status_hidup' => $k['status_hidup']['value'],
+  //         'pekerjaan' => $k['pekerjaan'] ?? null,
+  //         'no_hp' => $k['no_hp'] ?? null,
+  //         'email' => $k['email'] ?? null,
+  //         'status_keluarga_id' => 1,
+  //         'is_menikah' => $k['is_menikah'],
+  //         'is_bpjs' => $k['is_bpjs'],
+  //       ]);
+  //     }
+
+  //     $user = User::where('id', $userLoggedin)->update(['data_completion_step' => 3]);
+
+  //     $this->createNotifikasiKeluarga($userLoggedin);
+
+  //     return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
+  //   } catch (\Exception $e) {
+  //     return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+  //   }
+  // }
 
   public function getkeluarga()
   {
