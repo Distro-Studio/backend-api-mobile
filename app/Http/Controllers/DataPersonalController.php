@@ -32,7 +32,7 @@ class DataPersonalController extends Controller
       'tempat_lahir' => 'required',
       'tanggal_lahir' => 'required|date',
       'no_hp' => 'required|numeric',
-      'jenis_kelamin' => 'required|in:0,1,2',
+      'jenis_kelamin' => 'required|in:0,1',
       'nik_ktp' => 'required',
       'no_kk' => 'required',
       'agama' => 'required',
@@ -262,7 +262,7 @@ class DataPersonalController extends Controller
     }
 
     try {
-    
+
       $dataKeluarga->nama_keluarga = $request->nama_keluarga;
       $dataKeluarga->hubungan = $request->hubungan;
       $dataKeluarga->pendidikan_terakhir = $request->pendidikan_terakhir;
