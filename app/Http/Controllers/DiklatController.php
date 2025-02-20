@@ -88,23 +88,28 @@ class DiklatController extends Controller
     {
         // StorageFileHelper::uploadToServer($request, Str::random(8), 'bpjs_ketenagakerjaan');
         try {
-            $uploadserti = StorageFileHelper::uploadToServer($request, Str::random(8), 'dokumen');
+            $berkasid = null;
+            if($request->dokumen != null) {
+                $uploadserti = StorageFileHelper::uploadToServer($request, Str::random(8), 'dokumen');
 
-            $berkasserti = Berkas::create([
-                'user_id' => Auth::user()->id,
-                'file_id' => $uploadserti['id_file']['id'],
-                'nama' => 'KTP',
-                'kategori_berkas_id' => 1,
-                'status_berkas_id' => 1,
-                'path' => $uploadserti['path'],
-                'tgl_upload' => date('Y-m-d'),
-                'nama_file' => $uploadserti['nama_file'],
-                'ext' => $uploadserti['ext'],
-                'size' => $uploadserti['size'],
-            ]);
+                $berkasserti = Berkas::create([
+                    'user_id' => Auth::user()->id,
+                    'file_id' => $uploadserti['id_file']['id'],
+                    'nama' => 'KTP',
+                    'kategori_berkas_id' => 1,
+                    'status_berkas_id' => 1,
+                    'path' => $uploadserti['path'],
+                    'tgl_upload' => date('Y-m-d'),
+                    'nama_file' => $uploadserti['nama_file'],
+                    'ext' => $uploadserti['ext'],
+                    'size' => $uploadserti['size'],
+                ]);
 
-            if(!$berkasserti) {
-                return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Sertifikat gagal di upload'), Response::HTTP_BAD_REQUEST);
+                if(!$berkasserti) {
+                    return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Sertifikat gagal di upload'), Response::HTTP_BAD_REQUEST);
+                }
+
+                $berkasid = $berkasserti->id;
             }
 
             $startTimeInput = $request->jam_mulai; // Contoh: "08:00:00"
@@ -130,7 +135,7 @@ class DiklatController extends Controller
 
 
             $diklat = Diklat::create([
-                'dokumen_eksternal' => $berkasserti->id,
+                'dokumen_eksternal' => $berkasid,
                 'nama' => $request->nama,
                 'kategori_diklat_id' => 2,
                 'status_diklat_id' => 1,

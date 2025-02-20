@@ -32,7 +32,7 @@ class DataPersonalController extends Controller
       'tempat_lahir' => 'required',
       'tanggal_lahir' => 'required|date',
       'no_hp' => 'required|numeric',
-      'jenis_kelamin' => 'required|in:0,1,2',
+      'jenis_kelamin' => 'required|in:0,1',
       'nik_ktp' => 'required',
       'no_kk' => 'required',
       'agama' => 'required',
@@ -184,6 +184,17 @@ class DataPersonalController extends Controller
       $datakeluarga = json_decode(stripslashes($keluarga), true);
 
       foreach ($datakeluarga['keluarga'] as $k) {
+        if($k['hubungan']['value'] == 'Anak Ke-1' || $k['hubungan']['value'] == 'Anak Ke-2' || $k['hubungan']['value'] == 'Anak Ke-3'){
+            $cekUmur = Carbon::parse($data['tgl_lahir'])->age;
+            if ($cekUmur > 25 && $data['is_bpjs'] == 1) {
+                return response()->json([
+                    'status' => Response::HTTP_BAD_REQUEST,
+                    'message' => "Tidak dapat memperbarui data karena anak '{$data['nama_keluarga']}' dengan usia {$cekUmur} tahun tidak memenuhi syarat untuk BPJS Kesehatan"
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+
+        }
         $keluarga = DataKeluarga::create([
           'data_karyawan_id' => $data->id,
           'nama_keluarga' => $k['nama_keluarga'],
@@ -194,6 +205,8 @@ class DataPersonalController extends Controller
           'no_hp' => $k['no_hp'],
           'email' => $k['email'],
           'is_bpjs' => $k['is_bpjs'],
+          'tgl_lahir' => $k['tgl_lahir'],
+          'is_menikah' => $k['is_menikah'],
           'status_keluarga_id' => 1,
           'verifikator_1' => null,
         ]);
@@ -249,6 +262,7 @@ class DataPersonalController extends Controller
     }
 
     try {
+
       $dataKeluarga->nama_keluarga = $request->nama_keluarga;
       $dataKeluarga->hubungan = $request->hubungan;
       $dataKeluarga->pendidikan_terakhir = $request->pendidikan_terakhir;

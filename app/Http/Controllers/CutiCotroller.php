@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\DB;
 
 class CutiCotroller extends Controller
 {
@@ -66,10 +67,13 @@ class CutiCotroller extends Controller
       }
 
       if ($request->tgl_selesai != null) {
-        $tgl_selesai = Carbon::parse($request->tgl_selesai);
+          $tgl_selesai = Carbon::parse($request->tgl_selesai);
       }
 
-      $query->whereBetween('created_at', [$tgl_mulai, $tgl_selesai]);
+      $query->whereBetween(
+            DB::raw("STR_TO_DATE(tgl_from, '%d-%m-%Y')"),
+            [$tgl_mulai->toDateString(), $tgl_selesai->toDateString()]
+        );
 
       if ($request->filled('jenis')) {
         $query->where('tipe_cuti_id', $request->jenis);
@@ -88,7 +92,7 @@ class CutiCotroller extends Controller
       $cutis = $query->paginate($offset);
       // dd($query->toSql(), $query->getBindings());
       // dd($tgl_mulai);
-      return response()->json(new DataResource(Response::HTTP_OK, 'List statistik cuti berhasil didapatkan', $cutis), Response::HTTP_OK);
+      return response()->json(new DataResource(Response::HTTP_OK, 'List statistik cuti berhasil didapatkan '. $tgl_mulai . ' ' . $tgl_selesai, $cutis), Response::HTTP_OK);
     } catch (\Exception $e) {
       // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
