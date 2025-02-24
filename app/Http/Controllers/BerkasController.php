@@ -72,7 +72,7 @@ class BerkasController extends Controller
                     'tgl_upload' => $i->tgl_upload,
                     'ext' => $ext,
                     'size' => $i->size,
-                    'path' => env('URL_STORAGE') . $i->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $i->path,
                     'kategori_berkas' => $i->kategori_berkas,
                     'status_berkas' => $i->status_berkas,
                     'verifikator' => $i->verifikator,

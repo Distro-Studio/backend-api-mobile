@@ -208,7 +208,7 @@ class GetListController extends Controller
     try {
         $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->whereDate(DB::raw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y')"), '>', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->with('image');
         $diklat->map(function($item){
-            $item->path = env('URL_STORAGE') . $item->image->path;
+            $item->path = 'https://192.168.0.20/RskiSistem24/file-storage/public' . $item->image->path;
             $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
             unset($item->image);
         });
@@ -281,7 +281,7 @@ class GetListController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Notifikasi tidak ditemukan'), Response::HTTP_BAD_REQUEST);
         }
 
-        $notif->delete();
+        Notifikasi::where('user_id', Auth::user()->id)->where('is_read', 1)->delete();
 
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Notifkasi berhasil dihapus'), Response::HTTP_OK);
     } catch (\Exception $e) {
