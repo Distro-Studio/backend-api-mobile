@@ -105,8 +105,8 @@ class StorageFileHelper
 
     public static function deleteFromServer(Berkas $berkas) {
         $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
-            'username' => env('USERNAME_STORAGE'),
-            'password' => env('PASSWORD_STORAGE')
+            'username' => 'usermobilerski',
+            'password' => '12345678'
         ])->throw();
         $logininfo = $response->json();
         $token = $logininfo['data']['token'];
