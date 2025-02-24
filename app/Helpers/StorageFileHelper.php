@@ -11,8 +11,8 @@ class StorageFileHelper
     public static function uploadToServer(Request $request, $filename='File Upload', $filerequestname)
     {
         $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
-            'username' => env('USERNAME_STORAGE'),
-            'password' => env('PASSWORD_STORAGE')
+            'username' => 'usermobilerski',
+            'password' => '12345678'
         ]);
         $logininfo = $response->json();
         $token = $logininfo['data']['token'];
@@ -39,8 +39,8 @@ class StorageFileHelper
     public static function checkfile(Berkas $berkas)
     {
         $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
-            'username' => env('USERNAME_STORAGE'),
-            'password' => env('PASSWORD_STORAGE')
+            'username' => 'usermobilerski',
+            'password' => '12345678'
         ]);
         $logininfo = $response->json();
         $token = $logininfo['data']['token'];
@@ -64,8 +64,8 @@ class StorageFileHelper
         // $berkasfile = Berkas::where('id', 5)->first();
         $ext = explode('/', $berkas->ext);
         $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
-            'username' => env('USERNAME_STORAGE'),
-            'password' => env('PASSWORD_STORAGE')
+            'username' => 'usermobilerski',
+            'password' => '12345678'
         ]);
         $logininfo = $response->json();
         $token = $logininfo['data']['token'];
