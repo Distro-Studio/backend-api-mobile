@@ -165,7 +165,7 @@ class BerkasController extends Controller
             $berkas->delete();
             return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berkas ' . $name . ' berhasil di hapus'), Response::HTTP_OK);
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
