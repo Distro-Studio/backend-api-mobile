@@ -107,7 +107,7 @@ class StorageFileHelper
         $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
             'username' => env('USERNAME_STORAGE'),
             'password' => env('PASSWORD_STORAGE')
-        ]);
+        ])->throw();
         $logininfo = $response->json();
         $token = $logininfo['data']['token'];
 
@@ -115,14 +115,14 @@ class StorageFileHelper
             'Authorization' => 'Bearer ' . $token,
         ])->asMultipart()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/delete-file',[
             'file_id' => $berkas->file_id,
-        ]);
+        ])->throw();
 
         $uploadinfo = $responseupload->json();
         $dataupload = $uploadinfo['data'];
 
         $logout = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/logout');
+        ])->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/logout')->throw();
 
         return $dataupload;
     }
