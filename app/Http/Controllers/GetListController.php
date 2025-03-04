@@ -206,7 +206,7 @@ class GetListController extends Controller
   public function getalldiklat()
   {
     try {
-        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->whereDate(DB::raw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y')"), '>', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->with('image')->get();
+        $diklat = Diklat::where('kategori_diklat_id', 1)->orWhere('status_diklat_id', 4)->whereDate(DB::raw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y')"), '>', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->with('image')->get();
         $diklat->map(function($item){
             $item->path = 'https://192.168.0.20/RskiSistem24/file-storage/public' . $item->image->path;
             $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
