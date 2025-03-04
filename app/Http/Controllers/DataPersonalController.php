@@ -1009,6 +1009,19 @@ class DataPersonalController extends Controller
     // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Perubahan berhasil disimpan', $datakeluarga), Response::HTTP_NOT_FOUND);
   }
 
+  public function getBMIStatus($bmi)
+  {
+    if ($bmi < 18.5) {
+      return 'Berat badan kurang';
+    } elseif ($bmi >= 18.5 && $bmi <= 24.9) {
+      return 'Berat badan normal';
+    } elseif ($bmi >= 25 && $bmi <= 29.9) {
+      return 'Berat badan berlebih (overweight)';
+    } else {
+      return 'Obesitas';
+    }
+  }
+
   public function getdatakaryawandetail()
   {
     $user = User::find(Auth::user()->id);
@@ -1033,29 +1046,23 @@ class DataPersonalController extends Controller
 
     $role = $karyawan->user->roles->first();
 
-    // $berkasFields = [
-    //   'file_ktp' => $karyawan->file_ktp ?? null,
-    //   'file_kk' => $karyawan->file_kk ?? null,
-    //   'file_sip' => $karyawan->file_sip ?? null,
-    //   'file_bpjs_kesehatan' => $karyawan->file_bpjsksh ?? null,
-    //   'file_bpjs_ketenagakerjaan' => $karyawan->file_bpjsktk ?? null,
-    //   'file_ijazah' => $karyawan->file_ijazah ?? null,
-    //   'file_sertifikat' => $karyawan->file_sertifikat ?? null,
-    // ];
+    if (empty($karyawan->bmi_value) || empty($karyawan->bmi_ket)) {
+        // Hitung BMI jika data kosong
+        // $tinggiBadan = $karyawan->tinggi_badan;
+        // $beratBadan = $karyawan->berat_badan;
 
-    // $baseUrl = env('STORAGE_SERVER_DOMAIN');
+        $weight = $karyawan->berat_badan;
+        $height = $karyawan->tinggi_badan / 100; // Konversi cm ke meter
 
-    // $formattedPaths = [];
-    // foreach ($berkasFields as $field => $berkasId) {
-    //   $berkas = Berkas::where('id', $berkasId)->first();
-    //   if ($berkas) {
-    //     $extension = StorageServerHelper::getExtensionFromMimeType($berkas->ext);
-    //     // $formattedPaths[$field] = $baseUrl . $berkas->path . '.' . $extension;
-    //     $formattedPaths[$field] = $baseUrl . $berkas->path;
-    //   } else {
-    //     $formattedPaths[$field] = null;
-    //   }
-    // }
+        if ($height && $weight) {
+            $bmi = $weight / ($height * $height); // Rumus BMI
+            $karyawan->bmi_value = $bmi;
+            $karyawan->bmi_ket = $this->getBMIStatus($bmi); // Menentukan status BMI
+        } else {
+            $karyawan->bmi_value = null;
+            $karyawan->bmi_ket = 'Data tidak lengkap';
+        }
+    }
 
     // Format the karyawan data
     $formattedData = [
