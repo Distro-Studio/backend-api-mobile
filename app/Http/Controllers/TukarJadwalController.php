@@ -89,7 +89,7 @@ class TukarJadwalController extends Controller
             if ($request->filled('offset')){
                 $offset = $request->offset;
             }
-            $query->with(['jadwalPengajuan.shift', 'jadwalDitukar.shift']);
+            $query->with(['jadwalTukar.shift', 'jadwalDitukar.shift']);
             $query->orderBy('created_at', 'desc');
             $tukar = $query->paginate($offset);
 
