@@ -35,7 +35,7 @@ class TukarJadwal extends Model
         return $this->belongsTo(User::class, 'user_ditukar', 'id');
     }
 
-    public function jadwalTukar()
+    public function jadwalPengajuan()
     {
         return $this->belongsTo(Jadwal::class, 'jadwal_pengajuan', 'id');
     }
