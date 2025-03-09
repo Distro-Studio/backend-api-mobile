@@ -1066,6 +1066,9 @@ class DataPersonalController extends Controller
         }
     }
 
+    $created_sip = $karyawan->created_str;
+    $created_str = $karyawan->created_sip;
+
     // Format the karyawan data
     $formattedData = [
       'id' => $karyawan->id,
@@ -1151,8 +1154,8 @@ class DataPersonalController extends Controller
       'bmi_value' => $karyawan->bmi_value,
       'bmi_ket' => $karyawan->bmi_ket,
       'masa_diklat' => $karyawan->masa_diklat,
-      'created_str' => $karyawan->created_str,
-      'created_sip' => $karyawan->created_sip,
+      'created_str' => $created_str,
+      'created_sip' => $created_sip,
       'created_at' => $karyawan->created_at,
       'updated_at' => $karyawan->updated_at
     ];
