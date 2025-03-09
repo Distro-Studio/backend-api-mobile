@@ -145,6 +145,8 @@ class DataPersonalController extends Controller
       $data->riwayat_penyakit = $request->riwayat_penyakit;
       $data->asal_sekolah = $request->asal_sekolah;
       $data->gelar_belakang = $request->gelar_belakang;
+      $data->created_str = $request-> created_str;
+      $data->created_sip = $request->created_sip;
       $data->save();
 
       $user->data_completion_step = 2;
@@ -1149,6 +1151,8 @@ class DataPersonalController extends Controller
       'bmi_value' => $karyawan->bmi_value,
       'bmi_ket' => $karyawan->bmi_ket,
       'masa_diklat' => $karyawan->masa_diklat,
+      'created_str' => $karyawan->created_str,
+      'created_sip' => $karyawan->created_sip,
       'created_at' => $karyawan->created_at,
       'updated_at' => $karyawan->updated_at
     ];
