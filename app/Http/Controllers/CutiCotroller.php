@@ -37,7 +37,7 @@ class CutiCotroller extends Controller
           ->where('status_cuti_id', 4) // Only consider approved leaves
           ->where('user_id', Auth::user()->id)
           ->whereYear('created_at', Carbon::now()->year) // Within the current year
-          ->where('deleted_at', '!=', NULL)
+          ->orWhere('deleted_at', '!=', NULL)
           ->get()
           ->sum(function ($cuti) {
             $tglFrom = Carbon::parse($cuti->tgl_from);
