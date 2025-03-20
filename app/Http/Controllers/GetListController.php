@@ -104,9 +104,9 @@ class GetListController extends Controller
   {
     try {
       if ($request->limit == 0) {
-        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->get();
+        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->orderBy('created_at', 'desc')->get();
       } else {
-        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->take($request->limit)->get();
+        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->orderBy('created_at', 'desc')->take($request->limit)->get();
       }
 
       if ($pengumuman->isEmpty()) {

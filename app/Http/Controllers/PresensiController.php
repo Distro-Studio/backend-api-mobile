@@ -307,6 +307,18 @@ class PresensiController extends Controller
                 return response()->json(new DataResource(Response::HTTP_IM_USED, 'Presensi belum dilakukan', $checkpresensi), Response::HTTP_IM_USED);
             }
 
+            // Add the 15-minute validation HERE
+            // $startTime = Carbon::parse($checkpresensi->jam_masuk);
+            // $endTime = Carbon::now();
+            // $minutesDifference = $startTime->diffInMinutes($endTime);
+
+            // if ($minutesDifference < 15) {
+            //     return response()->json(new WithoutDataResource(
+            //         Response::HTTP_NOT_ACCEPTABLE,
+            //         'Presensi keluar tidak valid. Minimal durasi presensi adalah 15 menit.'
+            //     ), Response::HTTP_NOT_ACCEPTABLE);
+            // }
+
             try{
                 // $presensisebelum = Presensi::where('user_id', Auth::user()->id)->where('jam_keluar', NULL)->update(['presensi' => 0]);
 
