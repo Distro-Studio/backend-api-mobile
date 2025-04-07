@@ -190,7 +190,7 @@ class JadwalController extends Controller
                 $duration = $schDate->diffInSeconds($nowTime);
                 $jadwal->duration = $duration;
             } else {
-                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 1'), Response::HTTP_NOT_FOUND);
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
             }
         } else {
             // Jadwal tidak melintasi tengah malam, lakukan pengecekan normal
@@ -204,7 +204,7 @@ class JadwalController extends Controller
             }
 
             if ($nowTime->greaterThan($endDate)) {
-                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 2'), Response::HTTP_NOT_FOUND);
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
             }
         }
     }
