@@ -170,30 +170,42 @@ class JadwalController extends Controller
             break;
           }
         }
-        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 1'), Response::HTTP_NOT_FOUND);
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
 
 
 
       if(!$aktivitas) {
         $time = date('Y-m-d H:i:s');
-        $schDate = Carbon::parse($jadwal->shift->jam_from);
-        $endDate = Carbon::parse($jadwal->shift->jam_to);
-        $nowTime = Carbon::parse($time);
-        $duration = $schDate->diffInSeconds($nowTime);
-        $jadwal->duration = $duration;
+        $schDate = Carbon::parse($jadwal->shift->jam_from); // Waktu mulai
+        $endDate = Carbon::parse($jadwal->shift->jam_to);   // Waktu selesai
+        $nowTime = Carbon::parse($time);                    // Waktu sekarang
 
-        if($nowTime->lessThan($schDate)){
-          if ($duration > 7200 ) {
-              return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Absensi belum dimulai', $jadwal), Response::HTTP_NOT_FOUND);
-          }
+        // Jika jadwal melintasi tengah malam (jam_from > jam_to)
+        if ($schDate->greaterThan($endDate)) {
+            // Cek apakah waktu sekarang lebih besar dari waktu mulai atau lebih kecil dari waktu selesai
+            if ($nowTime->greaterThanOrEqualTo($schDate) || $nowTime->lessThanOrEqualTo($endDate)) {
+                $duration = $schDate->diffInSeconds($nowTime);
+                $jadwal->duration = $duration;
+            } else {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 1'), Response::HTTP_NOT_FOUND);
+            }
+        } else {
+            // Jadwal tidak melintasi tengah malam, lakukan pengecekan normal
+            $duration = $schDate->diffInSeconds($nowTime);
+            $jadwal->duration = $duration;
 
+            if($nowTime->lessThan($schDate)){
+                if ($duration > 7200 ) {
+                    return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Absensi belum dimulai', $jadwal), Response::HTTP_NOT_FOUND);
+                }
+            }
+
+            if($nowTime->greaterThan($endDate)){
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 2'), Response::HTTP_NOT_FOUND);
+            }
         }
-
-        if($nowTime->greaterThan($endDate)){
-          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 2'), Response::HTTP_NOT_FOUND);
-        }
-      }
+    }
 
 
       // $endTime = Carbon::createFromFormat('Y-m-d H:i:s', $jadwal->tgl_selesai . ' ' . $jadwal->shift->jam_to);
