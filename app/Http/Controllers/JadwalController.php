@@ -517,10 +517,10 @@ class JadwalController extends Controller
       // $end = Carbon::now()->endOfWeek();
       // $startDate = Carbon::createFromFormat('Y-m-d', $start);
       // $endDate = Carbon::createFromFormat('Y-m-d', $end);
-      // $startDate = Carbon::now('Asia/Jakarta')->startOfWeek();
-      // $endDate = Carbon::now('Asia/Jakarta')->endOfWeek();
-      $startDate = Carbon::now('Asia/Jakarta')->startOfWeek();
-      $endDate = Carbon::now('Asia/Jakarta')->endOfWeek();
+      $startDate = Carbon::now('Asia/Jakarta')->startOfMonth();
+      $endDate = Carbon::now('Asia/Jakarta')->endOfMonth();
+    //   $startDate = Carbon::now('Asia/Jakarta')->startOfWeek();
+    //   $endDate = Carbon::now('Asia/Jakarta')->endOfWeek();
 
       // if($request->filled('tgl_mulai')) {
       //     $startDate = Carbon::createFromFormat('Y-m-d', $request->tgl_mulai, 'Asia/Jakarta');
