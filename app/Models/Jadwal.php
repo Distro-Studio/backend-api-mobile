@@ -36,4 +36,9 @@ class Jadwal extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+    public function presensi()
+    {
+        return $this->hasOne(Presensi::class);
+    }
 }
