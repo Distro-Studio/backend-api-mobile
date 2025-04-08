@@ -44,19 +44,18 @@ class JadwalController extends Controller
         ->where(function ($query) use ($today, $yesterday, $now) {
             // Kondisi 1: Jadwal hari ini
             $query->whereDate('tgl_mulai', $today);
-              // ->whereHas('shift', function ($shiftQuery) use ($now) {
-              //   $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
-              // });
 
-            // Kondisi 2: Shift malam
+            // Kondisi 2: Shift malam (misalnya mulai kemarin dan selesai hari ini)
             $query->orWhere(function ($query) use ($today, $yesterday, $now) {
                 $query->whereDate('tgl_mulai', $yesterday)
-                    ->whereDate('tgl_selesai', '>=', $today)
+                    ->whereDate('tgl_selesai', $today)
                     ->whereHas('shift', function ($shiftQuery) use ($now) {
+                        // Menyaring shift yang masih aktif sampai sekarang (jam keluar setelah sekarang)
                         $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
                     });
             });
-        })->with('shift')
+        })
+        ->with('shift')
         ->first();
 
         // $startTime = Carbon::parse(->jam_masuk)
@@ -65,7 +64,6 @@ class JadwalController extends Controller
         // return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, $jadwal->id), Response::HTTP_NOT_FOUND);
         if ($jadwal) {
             $cekpresensi = Presensi::where('user_id', Auth::user()->id)->where('jadwal_id', $jadwal->id)->with(['jadwal.shift'])->first();
-
 
             if ($cekpresensi) {
                 if ($cekpresensi->jam_keluar == null) {
