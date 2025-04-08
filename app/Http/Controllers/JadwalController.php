@@ -81,7 +81,7 @@ class JadwalController extends Controller
           $jadwal->radius = $officeloc->radius;
           $jadwal->aktivitas = $aktivitas;
           if($jadwal->shift_id == 0){
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 1'), Response::HTTP_NOT_FOUND);
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 1 '. $jadwal), Response::HTTP_NOT_FOUND);
           }
 
         }
