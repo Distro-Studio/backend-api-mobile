@@ -39,6 +39,13 @@ class Jadwal extends Model
 
     public function presensi()
     {
-        return $this->hasOne(Presensi::class);
+        return $this->hasMany(Presensi::class);
+    }
+
+    public function nextJadwal()
+    {
+        return $this->hasOne(Jadwal::class, 'user_id', 'user_id')
+            ->whereNotNull('tgl_mulai') // Pastikan tidak null
+            ->where('tgl_mulai', '>', $this->tgl_selesai);
     }
 }
