@@ -56,25 +56,25 @@ class PresensiController extends Controller
             $now = Carbon::now();
             // $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
             $jadwal = Jadwal::where('user_id', Auth::user()->id)
-                ->where(function ($query) use ($today, $yesterday, $now) {
-                    // Kondisi 1: Jadwal hari ini
-                    $query->whereDate('tgl_mulai', $today);
+              ->where(function ($query) use ($today, $yesterday, $now) {
+                  // Kondisi 1: Jadwal hari ini
+                  $query->whereDate('tgl_mulai', $today);
 
-                    // Kondisi 2: Shift malam (misalnya mulai kemarin dan selesai hari ini)
-                    $query->orWhere(function ($query) use ($today, $yesterday, $now) {
-                        $query->whereDate('tgl_mulai', $yesterday)
-                            ->whereDate('tgl_selesai', $today)
-                            ->whereHas('presensi', function($shiftQuerys) use ($now){
-                                $shiftQuerys->whereNull('jam_keluar');
-                            })
-                            ->whereHas('shift', function ($shiftQuery) use ($now) {
-                                // Menyaring shift yang masih aktif sampai sekarang (jam keluar setelah sekarang)
-                                $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
-                            });
-                    });
-                })
-                ->with('shift')
-                ->first();
+                  // Kondisi 2: Shift malam (misalnya mulai kemarin dan selesai hari ini)
+                  $query->orWhere(function ($query) use ($today, $yesterday, $now) {
+                      $query->whereDate('tgl_mulai', $yesterday)
+                          ->whereDate('tgl_selesai', $today)
+                          ->whereHas('presensi', function($shiftQuerys) use ($now) {
+                              $shiftQuerys->whereNull('jam_keluar');
+                          })
+                          ->whereHas('shift', function ($shiftQuery) use ($now) {
+                              // Menyaring shift yang masih aktif sampai sekarang (jam keluar setelah sekarang)
+                              $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
+                          });
+                  });
+              })
+              ->with('shift')
+              ->first();
 
 
             // $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
