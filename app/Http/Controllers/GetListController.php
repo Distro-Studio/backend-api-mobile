@@ -206,19 +206,31 @@ class GetListController extends Controller
   public function getalldiklat()
   {
     try {
-        $diklat = Diklat::where('kategori_diklat_id', 1)->orWhere('status_diklat_id', 4)->whereDate(DB::raw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y')"), '>', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->with('image')->get();
-        $diklat->map(function($item){
-            $item->path = 'https://192.168.0.20/RskiSistem24/file-storage/public' . $item->image->path;
-            $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
-            unset($item->image);
-        });
+        $today = now()->format('Y-m-d'); // Format tanggal hari ini
+
+        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)
+                    ->whereRaw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y') >= ?", [$today])
+                    ->with('image')
+                    ->get();
+
+        // return response()->json(new DataResource(Response::HTTP_OK, 'List diklat berhasil didapatkan', $diklat->toSql()), Response::HTTP_OK);
         // return response()->json(new DataResource(Response::HTTP_OK, 'List diklat berhasil didapatkan', $diklat->toSql()->get()), Response::HTTP_OK);
         if($diklat->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'List diklat tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }
+
+        $diklat->map(function($item){
+            if($item->gambar != null){
+                $item->path = 'https://192.168.0.20/RskiSistem24/file-storage/public' . $item->image->path;
+                $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
+                unset($item->image);
+            }
+        });
+
+
         return response()->json(new DataResource(Response::HTTP_OK, 'List diklat berhasil didapatkan', $diklat), Response::HTTP_OK);
     } catch (\Exception $e) {
-        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage() . ' ' . $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 

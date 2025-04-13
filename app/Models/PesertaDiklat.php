@@ -26,6 +26,11 @@ class PesertaDiklat extends Model
         return $this->belongsTo(Diklat::class, 'diklat_id', 'id');
     }
 
+    public function diklats()
+    {
+        return $this->belongsTo(Diklat::class, 'diklat_id', 'id');
+    }
+
     public function peserta()
     {
         return $this->belongsTo(User::class, 'peserta', 'id');
