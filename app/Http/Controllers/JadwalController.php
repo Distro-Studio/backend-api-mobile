@@ -51,17 +51,45 @@ class JadwalController extends Controller
                         ->whereDate('tgl_selesai', $today)
                         ->whereHas('presensi', function($shiftQuerys) use ($now) {
                             $shiftQuerys->whereNull('jam_keluar');
-                        })
-                        ->whereHas('shift', function ($shiftQuery) use ($now) {
-                            // Menyaring shift yang masih aktif sampai sekarang (jam keluar setelah sekarang)
-                            $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
                         });
+                        // ->whereHas('shift', function ($shiftQuery) use ($now) {
+                        //     // Menyaring shift yang masih aktif sampai sekarang (jam keluar setelah sekarang)
+                        //     $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
+                        // });
                 });
             })
             ->with('shift')
             ->first();
 
-          
+            if(Carbon::parse($jadwal->tgl_keluar)->isToday()) {
+                $jwl = Jadwal::where('user_id', Auth::user()->id)
+                    ->where(function ($query) use ($today, $yesterday, $now) {
+                        // Kondisi 1: Jadwal hari ini
+                        $query->whereDate('tgl_mulai', $today);
+                        $query->where('shift_id', '!=', 0);
+                        // Kondisi 2: Shift malam (misalnya mulai kemarin dan selesai hari ini)
+                        $query->orWhere(function ($query) use ($today, $yesterday, $now) {
+                            $query->whereDate('tgl_mulai', $today)
+                                ->whereHas('presensi', function($shiftQuerys) use ($now) {
+                                    $shiftQuerys->whereNull('jam_keluar');
+                                });
+                        });
+                    })
+                    ->with('shift')
+                    ->first();
+                if($jwl){
+                    $times = date('Y-m-d H:i:s');
+                    $nowTimes = Carbon::parse($times);
+                    $schDates = Carbon::parse($jwl->tgl_mulai . ' ' . $jwl->shift->jam_from);
+                    $durations = $schDates->diffInSeconds($nowTimes);
+
+                    if ($durations < 7200) {
+                        $jadwal = $jwl;
+                    }
+                }
+            }
+
+
           if ($jadwal) {
               $cekpresensi = Presensi::where('user_id', Auth::user()->id)->where('jadwal_id', $jadwal->id)->with(['jadwal.shift'])->first();
               if ($cekpresensi) {
