@@ -512,7 +512,7 @@ class JadwalController extends Controller
 
         $getuser = Jadwal::where('tgl_mulai', $jadwal->tgl_mulai)->where('user_id', '!=', $jadwal->user_id)->select('user_id')->with('user')->with(['user.dataKaryawan.kompetensi', 'user.dataKaryawan.statusKaryawan'])->get();
         $data = $getuser->map(function ($item) {
-              $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+            $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
               if($item->user->dataKaryawan->unit_kerja_id == $datakaryawan->unit_kerja_id) {
                   return [
                     'user_id' => $item->user_id,
@@ -521,7 +521,8 @@ class JadwalController extends Controller
                     'status_karyawan' => $item->user->dataKaryawan->statusKaryawan, // Mengambil data kompetensi
                   ];
               }
-        });
+              return null;
+        })->filter();
       } else {
         $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
         $getuser = DataKaryawan::where('unit_kerja_id', $datakaryawan->unit_kerja_id)->where('user_id', '!=', Auth::user()->id)->with('user', 'kompetensi', 'statusKaryawan')->get();
