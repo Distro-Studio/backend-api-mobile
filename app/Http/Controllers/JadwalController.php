@@ -106,7 +106,7 @@ class JadwalController extends Controller
             $jadwal->radius = $officeloc->radius;
             $jadwal->aktivitas = $aktivitas;
             if($jadwal->shift_id == 0){
-              return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 1 '. $jadwal), Response::HTTP_NOT_FOUND);
+              return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
             }
 
           }
@@ -130,7 +130,7 @@ class JadwalController extends Controller
           }
 
           if(!$nonshift){
-              return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 2'), Response::HTTP_NOT_FOUND);
+              return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
           }
 
           $jamMasuk = Carbon::parse($nonshift->jam_from);
@@ -142,7 +142,7 @@ class JadwalController extends Controller
           // }
 
           if (Carbon::now()->isSunday()) {
-            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 3'), Response::HTTP_NOT_FOUND);
+            return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
           }
 
           $cekpresensi = Presensi::where('user_id', Auth::user()->id)->whereDate('created_at', date('Y-m-d'))->first();
@@ -195,7 +195,7 @@ class JadwalController extends Controller
               break;
             }
           }
-          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 4'), Response::HTTP_NOT_FOUND);
+          return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }
 
 
@@ -215,7 +215,7 @@ class JadwalController extends Controller
                   $duration = $schDate->diffInSeconds($nowTime);
                   $jadwal->duration = $duration;
               } else {
-                  return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 5'), Response::HTTP_NOT_FOUND);
+                  return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
               }
           } else {
               // Jadwal tidak melintasi tengah malam, lakukan pengecekan normal
@@ -229,7 +229,7 @@ class JadwalController extends Controller
               }
 
               if ($nowTime->greaterThan($endDate)) {
-                  return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan 6'), Response::HTTP_NOT_FOUND);
+                  return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Jadwal tidak ditemukan'), Response::HTTP_NOT_FOUND);
               }
           }
       }
@@ -242,7 +242,7 @@ class JadwalController extends Controller
         // }
         return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
       } catch (\Exception $e) {
-        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getLine().' '.$e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
       }
 
     }
