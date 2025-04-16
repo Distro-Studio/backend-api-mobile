@@ -727,7 +727,7 @@ class JadwalController extends Controller
       return response()->json(new DataResource(Response::HTTP_OK, 'Permintaan tukar jadwal berhasil terkirim', $tukarjadwal), Response::HTTP_OK);
 
     } catch (\Exception $e) {
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getLine() . ' ' . $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
