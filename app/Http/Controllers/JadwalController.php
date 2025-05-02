@@ -242,7 +242,7 @@ class JadwalController extends Controller
         // }
         return response()->json(new DataResource(Response::HTTP_OK, 'Jadwal berhasil didapatkan', $jadwal), Response::HTTP_OK);
       } catch (\Exception $e) {
-        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong ' . $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
       }
 
     }
@@ -727,7 +727,7 @@ class JadwalController extends Controller
       return response()->json(new DataResource(Response::HTTP_OK, 'Permintaan tukar jadwal berhasil terkirim', $tukarjadwal), Response::HTTP_OK);
 
     } catch (\Exception $e) {
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong ' . $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
