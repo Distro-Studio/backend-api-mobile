@@ -92,6 +92,13 @@ class JadwalController extends Controller
 
 
           if ($jadwal) {
+            // $timeString = $jadwal->shift->jam_to; // Waktu dalam string
+
+            // $timing = Carbon::parse($timeString);
+            //   if ($timing->hour === 0 && $timing->minute === 0 && $timing->second === 0) {
+
+            //   }
+              //cek presensi
               $cekpresensi = Presensi::where('user_id', Auth::user()->id)->where('jadwal_id', $jadwal->id)->with(['jadwal.shift'])->first();
               if ($cekpresensi) {
                   if ($cekpresensi->jam_keluar == null) {

@@ -212,7 +212,6 @@ class DataPersonalController extends Controller
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Error: ' . $e->getMessage() . ' Line: ' . $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
-
   // public function storekeluarga(Request $request)
   // {
   //   $validator = Validator::make($request->all(), [
@@ -315,11 +314,22 @@ class DataPersonalController extends Controller
       'hubungan' => 'required',
       'pendidikan_terakhir' => 'required',
       'status_hidup' => 'required',
+      'tempat_lahir' => 'required',
+      'jenis_kelamin' => 'required|in:0,1',
+      'kategori_agama_id' => 'required|integer|exists:kategori_agamas,id',
+      'kategori_darah_id' => 'required|integer|exists:kategori_darahs,id',
     ], [
       'nama_keluarga.required' => 'Nama harus diisi',
       'hubungan.required' => 'Hubungan keluarga harus diisi',
       'pendidikan_terakhir.required' => 'Pendidikan terakhir harus diisi',
       'status_hidup.required' => 'Status hidup harus diisi',
+      'tempat_lahir.required' => 'Tempat lahir harus diisi',
+      'jenis_kelamin.required' => 'Jenis kelamin harus diisi',
+      'kategori_agama_id.required' => 'Agama harus diisi',
+      'kategori_darah_id.required' => 'Golongan darah harus diisi',
+      'kategori_darah_id.exists' => 'Golongan darah tidak valid',
+      'kategori_agama_id.exists' => 'Agama tidak valid',
+      'jenis_kelamin.in' => 'Jenis kelamin harus Pria atau Wanita',
     ]);
 
     if ($validator->fails()) {
@@ -335,6 +345,11 @@ class DataPersonalController extends Controller
       $dataKeluarga->pekerjaan = $request->pekerjaan;
       $dataKeluarga->no_hp = $request->no_hp;
       $dataKeluarga->email = $request->email;
+      $dataKeluarga->tempat_lahir = $request->tempat_lahir;
+      $dataKeluarga->jenis_kelamin = $request->jenis_kelamin;
+      $dataKeluarga->kategori_agama_id = $request->kategori_agama_id;
+      $dataKeluarga->kategori_darah_id = $request->kategori_darah_id;
+      $dataKeluarga->no_rm = $request->no_rm;
       $dataKeluarga->save();
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $dataKeluarga), Response::HTTP_OK);
@@ -893,7 +908,12 @@ class DataPersonalController extends Controller
           'hubungan' => $item->hubungan,
           'nama_keluarga' => $item->nama_keluarga,
           'status_hidup' => $item->status_hidup,
-          'pendidikan_terakhir' => $item->pendidikanTerakhir->id,
+          'pendidikan_terakhir' => $item->pendidikanTerakhir->id ?? null,
+          'tempat_lahir' => $item->tempat_lahir ?? null,
+          'jenis_kelamin' => $item->jenis_kelamin ?? null,
+          'kategori_agama_id' => $item->kategori_agama_id ?? null,
+          'kategori_darah_id' => $item->kategori_darah_id ?? null,
+          'no_rm' => $item->no_rm ?? null,
           'pekerjaan' => $item->pekerjaan,
           'no_hp' => $item->no_hp,
           'email' => $item->email,
@@ -927,7 +947,12 @@ class DataPersonalController extends Controller
           'hubungan' => $keluargaItem['hubungan'],
           'nama_keluarga' => $keluargaItem['nama_keluarga'],
           'status_hidup' => $statushidup,
-          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'],
+          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'] ?? null,
+          'tempat_lahir' => $keluargaItem['tempat_lahir'] ?? null,
+          'jenis_kelamin' => $keluargaItem['jenis_kelamin'] ?? null,
+          'kategori_agama_id' => $keluargaItem['kategori_agama_id'] ?? null,
+          'kategori_darah_id' => $keluargaItem['kategori_darah_id'] ?? null,
+          'no_rm' => $keluargaItem['no_rm'] ?? null,
           'pekerjaan' => $keluargaItem['pekerjaan'],
           'no_hp' => $keluargaItem['no_hp'],
           'email' => $keluargaItem['email'],
@@ -984,7 +1009,12 @@ class DataPersonalController extends Controller
         'data_keluarga_id' => $k['data_keluarga_id'] ?? null, // Akses dengan notasi array
         'nama_keluarga' => $k['nama_keluarga'], // Akses dengan notasi array
         'hubungan' => $k['hubungan'], // Akses dengan notasi array
-        'pendidikan_terakhir' => $k['pendidikan_terakhir']['id'], // Akses dengan notasi array
+        'pendidikan_terakhir' => $k['pendidikan_terakhir']['id'] ?? null, // Akses dengan notasi array
+        'tempat_lahir' => $keluargaItem['tempat_lahir'] ?? null,
+        'jenis_kelamin' => $keluargaItem['jenis_kelamin'] ?? null,
+        'kategori_agama_id' => $keluargaItem['kategori_agama_id'] ?? null,
+        'kategori_darah_id' => $keluargaItem['kategori_darah_id'] ?? null,
+        'no_rm' => $keluargaItem['no_rm'] ?? null,
         'status_hidup' => $k['status_hidup'], // Akses dengan notasi array
         'pekerjaan' => $k['pekerjaan'], // Akses dengan notasi array
         'no_hp' => $k['no_hp'], // Akses dengan notasi array
@@ -1165,6 +1195,59 @@ class DataPersonalController extends Controller
       'message' => "Detail karyawan '{$karyawan->user->nama}' berhasil ditampilkan.",
       'data' => $formattedData,
     ], Response::HTTP_OK);
+  }
+
+  public function storefotoprofil(Request $request)
+  {
+    $validator = Validator::make($request->all(), [
+        'file' => 'required|file',
+    ]);
+
+    $userLoggedin = Auth::user()->id;
+
+    if ($validator->fails()) {
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
+    }
+
+    try {
+        if(Auth::user()->foto_profil == null) {
+            $dataupload = StorageFileHelper::uploadToServer($request, Str::random(8), 'file');
+            $saveberkas = Berkas::create([
+                'user_id' => $userLoggedin,
+                'file_id' => $dataupload['id_file']['id'],
+                'nama' => 'Foto Profil '. Auth::user()->nama,
+                'kategori_berkas_id' => 3, //Sistem
+                'status_berkas_id' => 1,
+                'path' => $dataupload['path'],
+                'tgl_upload' => date('Y-m-d'),
+                'nama_file' => $dataupload['nama_file'],
+                'ext' => $dataupload['ext'],
+                'size' => $dataupload['size'],
+            ]);
+
+            $user = User::find($userLoggedin);
+            $user->foto_profil = $saveberkas->id;
+            $user->save();
+        }else{
+            $berkas = Berkas::find(Auth::user()->foto_profil)->first();
+            $dataupload = StorageFileHelper::uploadToServer($request, $berkas->nama_file, 'file');
+
+            $berkas->file_id = $dataupload['id_file']['id'];
+            $berkas->path = $dataupload['path'];
+            $berkas->nama_file = $dataupload['nama_file'];
+            $berkas->tgl_upload = date('Y-m-d');
+            $berkas->ext = $dataupload['ext'];
+            $berkas->size = $dataupload['size'];
+            $berkas->save();
+        }
+
+
+        $this->createNotifikasiBerkas($userLoggedin);
+
+        return response()->json(new DataResource(Response::HTTP_OK, 'Berkas berhasil di upload', $saveberkas), Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
   }
 
   private function createNotifikasiBerkas($userId)

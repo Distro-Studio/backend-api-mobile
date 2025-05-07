@@ -156,21 +156,30 @@ class TukarJadwalController extends Controller
         }
 
         try {
-        $tukarJadwal = TukarJadwal::where('id', $request->tukar_jadwal_id)->first();
+        $tukarJadwal = TukarJadwal::where('id', $request->tukar_jadwal_id)->with('userDitukar')->first();
 
         if($request->is_acc) {
-        $tukarJadwal->acc_user_ditukar = 2;
+            $tukarJadwal->acc_user_ditukar = 2;
+
+            Notifikasi::create([
+                'kategori_notifikasi_id' => 2,
+                'user_id' => $tukarJadwal->user_pengajuan,
+                'message' => 'Tukar jadwal disetujui oleh '.$tukarJadwal->userDitukar->nama,
+            ]);
 
         }else {
             $tukarJadwal->acc_user_ditukar = 3;
+
+            Notifikasi::create([
+                'kategori_notifikasi_id' => 2,
+                'user_id' => $tukarJadwal->user_pengajuan,
+                'message' => 'Tukar jadwal ditolak oleh '.$tukarJadwal->userDitukar->nama,
+            ]);
         }
 
         $tukarJadwal->save();
 
-        Notifikasi::create([
-            'kategori_notifikasi_id' => 2,
-            // 'user_id' =>
-        ]);
+
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Tukar jadwal berhasil'), Response::HTTP_OK);
         } catch(\Exception $e) {
         return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);

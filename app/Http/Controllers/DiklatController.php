@@ -51,6 +51,13 @@ class DiklatController extends Controller
                 return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Kuota diklat sudah penuh'), Response::HTTP_BAD_REQUEST);
             }
 
+            if($diklat->is_whitelist == 1) {
+                $pesertadiklat = PesertaDiklat::where('diklat_id', $request->diklat_id)->where('peserta', Auth::user()->id)->first();
+                if(!$pesertadiklat) {
+                    return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Anda tidak terdaftar di list peserta, silahkan hubungi bagian personalia'), Response::HTTP_BAD_REQUEST);
+                }
+            }
+
             $isAlreadyJoin = PesertaDiklat::where('diklat_id', $request->diklat_id)->where('peserta', Auth::user()->id)->first();
             if($isAlreadyJoin) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Anda sudah bergabung'), Response::HTTP_NOT_FOUND);
