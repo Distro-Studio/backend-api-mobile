@@ -99,13 +99,17 @@ class LoginController extends Controller
                 'token' => $token
             ];
 
-            $dataKaryawan = DataKaryawan::select('unit_kerja_id')->where('user_id', Auth::user()->id)->with('unitkerja')->first();
+            $dataKaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
             $unitkerja = UnitKerja::where('id', $dataKaryawan->unit_kerja_id)->first();
             $users->unit_kerja = [
                 $unitkerja,
             ];
 
             $users->makeHidden('password');
+
+            $users->masa_berlaku_str = $dataKaryawan->masa_berlaku_str;
+            $users->masa_berlaku_sip = $dataKaryawan->masa_berlaku_sip;
+
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Login Berhasil', $users), Response::HTTP_OK);
 

@@ -294,7 +294,7 @@ class DataPersonalController extends Controller
     try {
       //code...
       $karyawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
-      $data = DataKeluarga::where('data_karyawan_id', $karyawan->id)->with('pendidikanTerakhir')->get();
+      $data = DataKeluarga::where('data_karyawan_id', $karyawan->id)->with('pendidikanTerakhir', 'statusKeluarga', 'kategoriAgama', 'kategoriDarah')->get();
       if ($data->isEmpty()) {
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
@@ -908,8 +908,11 @@ class DataPersonalController extends Controller
           'hubungan' => $item->hubungan,
           'nama_keluarga' => $item->nama_keluarga,
           'status_hidup' => $item->status_hidup,
-          'pendidikan_terakhir' => $item->pendidikanTerakhir->id ?? null,
+          'pendidikan_terakhir' => $item->pendidikan_terakhir ?? null,
           'tempat_lahir' => $item->tempat_lahir ?? null,
+          'tgl_lahir' => $item->tgl_lahir ?? null,
+          'agama' => $item->agama ?? null,
+          'goldar' => $item->goldar ?? null,
           'jenis_kelamin' => $item->jenis_kelamin ?? null,
           'kategori_agama_id' => $item->kategori_agama_id ?? null,
           'kategori_darah_id' => $item->kategori_darah_id ?? null,
@@ -947,8 +950,11 @@ class DataPersonalController extends Controller
           'hubungan' => $keluargaItem['hubungan'],
           'nama_keluarga' => $keluargaItem['nama_keluarga'],
           'status_hidup' => $statushidup,
-          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'] ?? null,
+          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir'] ?? null,
           'tempat_lahir' => $keluargaItem['tempat_lahir'] ?? null,
+          'tgl_lahir' => $keluargaItem['tgl_lahir'] ?? null,
+          'agama' => $keluargaItem['agama'] ?? null,
+          'goldar' => $keluargaItem['goldar'] ?? null,
           'jenis_kelamin' => $keluargaItem['jenis_kelamin'] ?? null,
           'kategori_agama_id' => $keluargaItem['kategori_agama_id'] ?? null,
           'kategori_darah_id' => $keluargaItem['kategori_darah_id'] ?? null,
@@ -1009,8 +1015,11 @@ class DataPersonalController extends Controller
         'data_keluarga_id' => $k['data_keluarga_id'] ?? null, // Akses dengan notasi array
         'nama_keluarga' => $k['nama_keluarga'], // Akses dengan notasi array
         'hubungan' => $k['hubungan'], // Akses dengan notasi array
-        'pendidikan_terakhir' => $k['pendidikan_terakhir']['id'] ?? null, // Akses dengan notasi array
+        'pendidikan_terakhir' => $k['pendidikan_terakhir'] ?? null, // Akses dengan notasi array
         'tempat_lahir' => $keluargaItem['tempat_lahir'] ?? null,
+        'tgl_lahir' => $keluargaItem['tgl_lahir'] ?? null,
+        'agama' => $keluargaItem['agama'] ?? null,
+        'goldar' => $keluargaItem['goldar'] ?? null,
         'jenis_kelamin' => $keluargaItem['jenis_kelamin'] ?? null,
         'kategori_agama_id' => $keluargaItem['kategori_agama_id'] ?? null,
         'kategori_darah_id' => $keluargaItem['kategori_darah_id'] ?? null,

@@ -19,6 +19,8 @@ class DataKeluarga extends Model
     'pendidikan_terakhir' => 'string',
     'status_hidup' => 'boolean',
     'pekerjaan' => 'string',
+    'status_keluarga_id' => 'integer',
+    'is_menikah' => 'integer',
     'no_hp' => 'string',
     'email' => 'string',
     'is_bpjs' => 'integer',
@@ -29,6 +31,21 @@ class DataKeluarga extends Model
   public function pendidikanTerakhir()
   {
     return $this->belongsTo(KategoriPendidikan::class, 'pendidikan_terakhir', 'id');
+  }
+
+  public function statusKeluarga()
+  {
+    return $this->belongsTo(StatusKeluarga::class, 'status_keluarga_id', 'id');
+  }
+
+  public function kategoriAgama()
+  {
+    return $this->belongsTo(KategoriAgama::class, 'kategori_agama_id', 'id');
+  }
+
+  public function kategoriDarah()
+  {
+    return $this->belongsTo(KategoriDarah::class, 'kategori_darah_id', 'id');
   }
 
 }
