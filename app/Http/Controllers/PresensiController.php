@@ -43,6 +43,8 @@ class PresensiController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
         }
 
+        $isrewardbatal = 0;
+
 
         // $checkuser = UserActiveHelper::checkActive(User::where('id', Auth::user()->id)->first());
         // if (!$checkuser) {
@@ -145,6 +147,7 @@ class PresensiController extends Controller
             $differenceInMinutes = $end->diffInMinutes($start);
             // $status = "Karyawan terlambat $differenceInMinutes menit.";
             $status = 2; // TERLAMBAT
+            $isrewardbatal = 1;
 
             try {
                 $rwtpembatalan = RiwayatPembatalanReward::create([
@@ -224,6 +227,7 @@ class PresensiController extends Controller
                     'foto_masuk' => $saveberkas->id,
                     'status_presensi_id' => 1,
                     'kategori_presensi_id' => $status,
+                    'is_pembatalan_reward' => $isrewardbatal,
                 ]);
 
                 $checkinTime = Carbon::now();
