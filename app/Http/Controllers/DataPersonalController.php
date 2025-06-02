@@ -854,17 +854,8 @@ class DataPersonalController extends Controller
                 'size' => $dataupload['size'],
             ]);
 
-        $originaldata = [
-            'id' => $user->fotoprofil->id,
-            'filename' => $user->fotoprofil->filename,
-            'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $user->fotoprofil->path
-        ];
-
-        $updateddata = [
-            'id' => $saveberkas->id,
-            'filename' => $saveberkas->filename,
-            'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public'.$saveberkas->path
-        ];
+        $originaldata = $user->foto_profil;
+        $updateddata = $saveberkas->id;
       }
 
       $cekdata = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)
@@ -909,7 +900,7 @@ class DataPersonalController extends Controller
       ]);
 
 
-      return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil diajukan, Mohon tunggu penngajuan anda sedang diverifikasi', $datadiubah), Response::HTTP_OK);
+      return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil diajukan, Mohon tunggu pengajuan anda sedang diverifikasi', $datadiubah), Response::HTTP_OK);
       //   return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $request->value_diubah['value']), Response::HTTP_OK);
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
