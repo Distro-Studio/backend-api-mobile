@@ -94,7 +94,7 @@ class LoginController extends Controller
             // $tokenResult->accessToken->expires_at = $tokenExpiration;
             // $tokenResult->accessToken->save();
 
-            $users = User::where('id', Auth::user()->id)->with('roles')->first();
+            $users = User::where('id', Auth::user()->id)->with('roles')->with('fotoprofil')->first();
             $users->arrtoken = [
                 'token' => $token
             ];
@@ -104,6 +104,8 @@ class LoginController extends Controller
             $users->unit_kerja = [
                 $unitkerja,
             ];
+
+            $users->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.$users->fotoprofil->path;
 
             $users->makeHidden('password');
 
