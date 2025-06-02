@@ -15,6 +15,7 @@ use App\Models\Jadwal;
 use App\Models\LokasiKantor;
 use App\Models\NonShift;
 use App\Models\Presensi;
+use App\Models\RiwayatPembatalanReward;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -144,6 +145,15 @@ class PresensiController extends Controller
             $differenceInMinutes = $end->diffInMinutes($start);
             // $status = "Karyawan terlambat $differenceInMinutes menit.";
             $status = 2; // TERLAMBAT
+
+            try {
+                $rwtpembatalan = RiwayatPembatalanReward::create([
+                    'data_karyawan_id' => $datakaryawan->id,
+                    'tipe_pembatalan' => 'presensi',
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pembatalan reward gagal: ' . $e->getMessage()), Response::HTTP_NOT_FOUND);
+            }
         } elseif ($end->eq($start)) {
             $differenceInMinutes = 0;
             // $status = "Karyawan tepat waktu.";
