@@ -150,6 +150,8 @@ class PresensiController extends Controller
                 $rwtpembatalan = RiwayatPembatalanReward::create([
                     'data_karyawan_id' => $datakaryawan->id,
                     'tipe_pembatalan' => 'presensi',
+                    'tgl_pembatalan' => Carbon::now()->format('Y-m-d'),
+                    'keterangan' => 'Pembatalan reward presensi otomatis karena karyawan terlambat presensi ' . $differenceInMinutes . 'menit.',
                 ]);
             } catch (\Exception $e) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pembatalan reward gagal: ' . $e->getMessage()), Response::HTTP_NOT_FOUND);

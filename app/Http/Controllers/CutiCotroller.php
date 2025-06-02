@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\Cuti;
+use App\Models\DataKaryawan;
 use App\Models\HakCuti;
 use App\Models\Notifikasi;
 use App\Models\TipeCuti;
@@ -186,9 +187,13 @@ class CutiCotroller extends Controller
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Kuota cuti sudah habis'), Response::HTTP_NOT_ACCEPTABLE);
       }
 
+      $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+      $hakcuti = HakCuti::where('data_karyawan_id', $datakaryawan->id)->where('tipe_cuti_id', $request->jenis_cuti)->first();
+
       $cutis = Cuti::create([
         'user_id' => Auth::user()->id,
         'tipe_cuti_id' => $request->jenis_cuti,
+        'hak_cuti_id' => $hakcuti->id,
         'tgl_from' => $request->tgl_mulai,
         'tgl_to' => $request->tgl_selesai,
         'durasi' => $request->durasi,
