@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\DataKaryawan;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,12 +58,15 @@ class UserController extends Controller
         }
     }
 
+    $user = User::where('id', Auth::user()->id)->with('fotoprofil', 'dataKaryawan')->first();
+    $user->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.$user->fotoprofil->path;
+
     return response()->json([
       'status' => Response::HTTP_OK,
       'message' => 'User berhasil di dapatkan',
       'data' =>
         [
-          'user' => Auth::user()->makeHidden('password'),
+          'user' => $user,
           'unit_kerja' => Auth::user()->dataKaryawan->unitkerja,
           'masa_str' => $masastr,
           'masa_sip' => $masasip,

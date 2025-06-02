@@ -669,7 +669,7 @@ class DataPersonalController extends Controller
 
     $data = $berkas->map(function ($i) {
       return [
-        'url' => env('URL_STORAGE') . $i->path,
+        'url' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $i->path,
         'name' => $i->nama,
         'ext' => StorageFileHelper::getExtensionFromMimeType($i->ext),
       ];
@@ -758,6 +758,7 @@ class DataPersonalController extends Controller
   public function updatedatapersonal(Request $request)
   {
     $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+    $user = User::where('id', Auth::user()->id)->with('fotoprofil')->first();
 
     if (!$datakaryawan) {
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data karyawan tidak ditemukan.'), Response::HTTP_NOT_FOUND);
@@ -836,6 +837,34 @@ class DataPersonalController extends Controller
 
       if ($request->kolom_diubah == 'gelar_belakang') {
         $originaldata = $datakaryawan->gelar_belakang;
+      }
+
+      if($request->kolom_diubah == 'foto_profil') {
+        $dataupload = StorageFileHelper::uploadToServer($request, Str::random(8), 'value_diubah');
+        $saveberkas = Berkas::create([
+                'user_id' => Auth::user()->id,
+                'file_id' => $dataupload['id_file']['id'],
+                'nama' => 'Foto Profil ' . Auth::user()->nama,
+                'kategori_berkas_id' => 4, //Lainnya
+                'status_berkas_id' => 1,
+                'path' => $dataupload['path'],
+                'tgl_upload' => date('Y-m-d'),
+                'nama_file' => $dataupload['nama_file'],
+                'ext' => $dataupload['ext'],
+                'size' => $dataupload['size'],
+            ]);
+
+        $originaldata = [
+            'id' => $user->fotoprofil->id,
+            'filename' => $user->fotoprofil->filename,
+            'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $user->fotoprofil->path
+        ];
+
+        $updateddata = [
+            'id' => $saveberkas->id,
+            'filename' => $saveberkas->filename,
+            'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public'.$saveberkas->path
+        ];
       }
 
       $cekdata = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)
