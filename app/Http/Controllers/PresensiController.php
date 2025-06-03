@@ -215,7 +215,7 @@ class PresensiController extends Controller
                     'size' => $dataupload['size'],
                 ]);
 
-
+                $rwt = RiwayatPembatalanReward::where('id', $rwtpembatalan->id)->first();
 
                 $presensi = Presensi::create([
                     'user_id' => Auth::user()->id,
@@ -229,6 +229,9 @@ class PresensiController extends Controller
                     'kategori_presensi_id' => $status,
                     'is_pembatalan_reward' => $isrewardbatal,
                 ]);
+
+                $rwt->presensi_id = $presensi->id;
+                $rwt->save();
 
                 $checkinTime = Carbon::now();
                 if($jadwalid) {
@@ -273,7 +276,7 @@ class PresensiController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
         }
 
-
+        $isrewardbatal = 0;
 
         //cek lokasi user
         $lokasi = LokasiKantor::where('id', 1)->first();
@@ -407,6 +410,22 @@ class PresensiController extends Controller
 
                 if($chekoutTime->lessThan($outTime)) {
                     DataKaryawan::where('user_id', Auth::user()->id)->update(['status_reward_presensi' => 0]);
+                    $isrewardbatal = 1;
+
+                    $checkpresensi->is_pembatalan_reward = $isrewardbatal;
+                    $checkpresensi->save();
+
+
+                    try {
+                        $rwtpembatalan = RiwayatPembatalanReward::create([
+                            'data_karyawan_id' => $datakaryawan->id,
+                            'tipe_pembatalan' => 'presensi',
+                            'tgl_pembatalan' => Carbon::now()->format('Y-m-d'),
+                            'keterangan' => 'Pembatalan reward presensi otomatis karena karyawan pulang lebih awal',
+                        ]);
+                    } catch (\Exception $e) {
+                        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pembatalan reward gagal: ' . $e->getMessage()), Response::HTTP_NOT_FOUND);
+                    }
                 }
 
                 $activity = ActivityLog::create([
