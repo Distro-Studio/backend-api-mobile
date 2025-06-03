@@ -17,6 +17,7 @@ class DataKeluarga extends Model
     'nama_keluarga' => 'string',
     'hubungan' => 'string',
     'pendidikan_terakhir' => 'string',
+    'jenis_kelamin' => 'integer',
     'status_hidup' => 'boolean',
     'pekerjaan' => 'string',
     'status_keluarga_id' => 'integer',
