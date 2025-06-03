@@ -105,7 +105,7 @@ class LoginController extends Controller
                 $unitkerja,
             ];
 
-            $users->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.$users->fotoprofil->path;
+            // $users->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.$users->fotoprofil->path;
 
             $users->makeHidden('password');
 
