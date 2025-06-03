@@ -59,7 +59,9 @@ class UserController extends Controller
     }
 
     $user = User::where('id', Auth::user()->id)->with('fotoprofil', 'dataKaryawan')->first();
-    $user->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.$user->fotoprofil->path;
+    if($user->foto_profil) {
+      $user->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.$user->fotoprofil->path;
+    }
 
     return response()->json([
       'status' => Response::HTTP_OK,
