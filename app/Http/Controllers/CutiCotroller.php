@@ -55,7 +55,7 @@ class CutiCotroller extends Controller
     // }
 
     try {
-        $hakcuti = HakCuti::with('tipecuti')->where('data_karyawan_id', Auth::user()->id)->get();
+        $hakcuti = HakCuti::with('tipecuti')->where('data_karyawan_id', Auth::user()->data_karyawan_id)->get();
         $hakcuti->map(function ($item) {
                 $item->nama = $item->tipecuti->nama;  // Menambahkan nama dari relasi tipecuti
                 return $item;
