@@ -142,7 +142,7 @@ class PresensiController extends Controller
         // } else {
         //     $status = 'lebih awal';
         // }
-
+        $rwtpembatalan = null;
         if ($end->gt($start)) {
             $differenceInMinutes = $end->diffInMinutes($start);
             // $status = "Karyawan terlambat $differenceInMinutes menit.";
@@ -215,7 +215,6 @@ class PresensiController extends Controller
                     'size' => $dataupload['size'],
                 ]);
 
-                $rwt = RiwayatPembatalanReward::where('id', $rwtpembatalan->id)->first();
 
                 $presensi = Presensi::create([
                     'user_id' => Auth::user()->id,
@@ -230,8 +229,11 @@ class PresensiController extends Controller
                     'is_pembatalan_reward' => $isrewardbatal,
                 ]);
 
-                $rwt->presensi_id = $presensi->id;
-                $rwt->save();
+                if($rwtpembatalan){
+                    $rwt = RiwayatPembatalanReward::where('id', $rwtpembatalan->id)->first();
+                    $rwt->presensi_id = $presensi->id;
+                    $rwt->save();
+                }
 
                 $checkinTime = Carbon::now();
                 if($jadwalid) {
