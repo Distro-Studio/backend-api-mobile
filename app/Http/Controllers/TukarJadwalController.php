@@ -157,7 +157,7 @@ class TukarJadwalController extends Controller
 
         try {
         $tukarJadwal = TukarJadwal::where('id', $request->tukar_jadwal_id)->with('userDitukar')->first();
-
+        $message = 'Berhasil menyetujui tukar jadwal';
         if($request->is_acc) {
             $tukarJadwal->acc_user_ditukar = 2;
 
@@ -169,6 +169,8 @@ class TukarJadwalController extends Controller
 
         }else {
             $tukarJadwal->acc_user_ditukar = 3;
+            $tukarJadwal->status_penukaran_id = 5;
+            $message = 'Berhasil menolak tukar jadwal';
 
             Notifikasi::create([
                 'kategori_notifikasi_id' => 2,
@@ -180,7 +182,7 @@ class TukarJadwalController extends Controller
         $tukarJadwal->save();
 
 
-        return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Tukar jadwal berhasil'), Response::HTTP_OK);
+        return response()->json(new WithoutDataResource(Response::HTTP_OK, $message), Response::HTTP_OK);
         } catch(\Exception $e) {
         return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
