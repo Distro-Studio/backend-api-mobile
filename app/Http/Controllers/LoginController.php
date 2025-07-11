@@ -112,9 +112,44 @@ class LoginController extends Controller
 
             $users->makeHidden('password');
 
-            $users->masa_berlaku_str = $dataKaryawan->masa_berlaku_str;
-            $users->masa_berlaku_sip = $dataKaryawan->masa_berlaku_sip;
+            $duesip = null;
+            $duestr = null;
 
+            // Ambil tanggal masa_berlaku_str dari database
+            if ($dataKaryawan->masa_berlaku_str != null) {
+                // Hitung tanggal 6 bulan sebelumnya
+                $reminderStr = Carbon::createFromFormat('d-m-Y', $dataKaryawan->masa_berlaku_str)
+                    ->subMonths(7); // Tanggal 6 bulan sebelum masa_berlaku_str
+                
+                // Cek apakah tanggal hari ini lebih besar (lebih awal) dari reminderStr
+                if (Carbon::now()->greaterThan($reminderStr)) {
+                    // Jika ya, lakukan sesuatu (misalnya peringatan atau penyesuaian)
+                    // Anda bisa mengatur status atau flag di sini
+                    // $statusReminder = "Tanggal masa berlaku sudah lewat 6 bulan.";
+                    $duestr = $dataKaryawan->masa_berlaku_str;
+                } else {
+                    $duestr = null;
+                }
+            }
+
+            // Cek masa_berlaku_sip dan lakukan hal yang sama jika diperlukan
+            if ($dataKaryawan->masa_berlaku_sip != null) {
+                $reminderSip = Carbon::createFromFormat('d-m-Y', $dataKaryawan->masa_berlaku_sip)
+                    ->subMonths(3); // Tanggal 3 bulan sebelum masa_berlaku_sip
+                
+                if (Carbon::now()->greaterThan($reminderSip)) {
+                    // Jika ya, lakukan sesuatu
+                    // $statusSip = "Tanggal SIP sudah lewat 3 bulan.";
+                    $duesip = $dataKaryawan->masa_berlaku_sip;
+                } else {
+                    $duesip = null;
+                    // $statusSip = "Tanggal SIP masih dalam jangka waktu yang valid.";
+                }
+            }
+
+            // Menyimpan hasil reminder ke objek users untuk dikirimkan sebagai respons
+            $users->masa_berlaku_str = $duestr;
+            $users->masa_berlaku_sip = $duesip;
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Login Berhasil', $users), Response::HTTP_OK);
 
