@@ -954,6 +954,7 @@ class DataPersonalController extends Controller
         //     ];
         $statushidup = 1;
         $isbpjs = 1;
+        $ismenikah = 1;
         if ($keluargaItem['status_hidup']) {
           $statushidup = 1;
         } else {
@@ -965,12 +966,19 @@ class DataPersonalController extends Controller
         } else {
           $isbpjs = 0;
         }
+
+        if ($keluargaItem['is_menikah']) {
+          $ismenikah = 1;
+        } else {
+          $ismenikah = 0;
+        }
+
         $updated_data[] = [
           'data_keluarga_id' => $keluargaItem['data_keluarga_id'] ?? null,
-          'hubungan' => $keluargaItem['hubungan'],
-          'nama_keluarga' => $keluargaItem['nama_keluarga'],
-          'status_hidup' => $statushidup,
-          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir'] ?? null,
+          'hubungan' => $keluargaItem['hubungan'] ?? null,
+          'nama_keluarga' => $keluargaItem['nama_keluarga'] ?? null,
+          'status_hidup' => $statushidup ?? null,
+          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir_id'] ?? null,
           'tempat_lahir' => $keluargaItem['tempat_lahir'] ?? null,
           'tgl_lahir' => $keluargaItem['tgl_lahir'] ?? null,
           'agama' => $keluargaItem['agama'] ?? null,
@@ -979,11 +987,12 @@ class DataPersonalController extends Controller
           'kategori_agama_id' => $keluargaItem['kategori_agama_id'] ?? null,
           'kategori_darah_id' => $keluargaItem['kategori_darah_id'] ?? null,
           'no_rm' => $keluargaItem['no_rm'] ?? null,
-          'pekerjaan' => $keluargaItem['pekerjaan'],
-          'no_hp' => $keluargaItem['no_hp'],
-          'email' => $keluargaItem['email'],
-          'is_bpjs' => $isbpjs,
-          'id' => $keluargaItem['id'] ?? null
+          'pekerjaan' => $keluargaItem['pekerjaan'] ?? null,
+          'no_hp' => $keluargaItem['no_hp'] ?? null,
+          'email' => $keluargaItem['email'] ?? null,
+          'is_bpjs' => $isbpjs ?? null,
+          'is_menikah' => $ismenikah ?? null,
+          'id' => $keluargaItem['id'] ?? null //lupa dari mana
         ];
       }
 
@@ -1038,8 +1047,8 @@ class DataPersonalController extends Controller
         'pendidikan_terakhir' => $k['pendidikan_terakhir'] ?? null, // Akses dengan notasi array
         'tempat_lahir' => $keluargaItem['tempat_lahir'] ?? null,
         'tgl_lahir' => $keluargaItem['tgl_lahir'] ?? null,
-        'agama' => $keluargaItem['agama'] ?? null,
-        'goldar' => $keluargaItem['goldar'] ?? null,
+        // 'agama' => $keluargaItem['agama'] ?? null,
+        // 'goldar' => $keluargaItem['goldar'] ?? null,
         'jenis_kelamin' => $keluargaItem['jenis_kelamin'] ?? null,
         'kategori_agama_id' => $keluargaItem['kategori_agama_id'] ?? null,
         'kategori_darah_id' => $keluargaItem['kategori_darah_id'] ?? null,
@@ -1049,6 +1058,7 @@ class DataPersonalController extends Controller
         'no_hp' => $k['no_hp'], // Akses dengan notasi array
         'email' => $k['email'], // Akses dengan notasi array
         'is_bpjs' => $k['is_bpjs'],
+        // 'is_menikah' => $k['is_menikah'],
       ]);
     }
 
