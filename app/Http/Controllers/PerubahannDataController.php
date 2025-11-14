@@ -25,7 +25,13 @@ class PerubahannDataController extends Controller
       // if (!$foto) {
       //     $foto = null;
       // }
+      $fotprof = null;
+      if(Auth::user()->foto_profil) {
+          Auth::user()->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.Auth::user()->fotoprofil->path;
+          $fotprof = 'https://192.168.0.20/RskiSistem24/file-storage/public'.Auth::user()->fotoprofil->path;
+      }
       $data = [
+        'fotoprofil' => $fotprof,
         // 'foto_profil' => env('URL_STORAGE') . $foto->path,
         'nama' => Auth::user()->nama ?? null,
         'kompetensi' => $personal->kompetensi->nama_kompetensi ?? null,
@@ -46,6 +52,9 @@ class PerubahannDataController extends Controller
         'tahun_lulus' => $personal->tahun_lulus ?? null,
         'pendidikan_terakhir' => $personal->pendidikanTerakhir ?? null,
         'gelar_depan' => $personal->gelar_depan ?? null,
+        'riwayat_penyakit' => $personal->riwayat_penyakit ?? null,
+        'asal_sekolah' => $personal->asal_sekolah ?? null,
+        'gelar_belakang' => $personal->gelar_belakang ?? null,
       ];
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data personal ditemukan', $data), Response::HTTP_OK);

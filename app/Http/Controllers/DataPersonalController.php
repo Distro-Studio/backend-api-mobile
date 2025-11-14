@@ -794,13 +794,14 @@ class DataPersonalController extends Controller
         $originaldata = $datakaryawan->no_kk;
       }
 
-      if ($request->kolom_diubah == 'kategori_agama_id') {
+      if ($request->kolom_diubah == 'agama') {
         $originaldata = $datakaryawan->kategori_agama_id;
         $updateddata = $request->value_diubah['value'];
       }
 
-      if ($request->kolom_diubah == 'kategori_darah_id') {
+      if ($request->kolom_diubah == 'golongan_darah') {
         $originaldata = $datakaryawan->kategori_darah_id;
+        $updateddata = $request->value_diubah['value'];
       }
 
       if ($request->kolom_diubah == 'tinggi_badan') {
@@ -839,13 +840,17 @@ class DataPersonalController extends Controller
         $originaldata = $datakaryawan->gelar_belakang;
       }
 
+      if ($request->kolom_diubah == 'riwayat_penyakit') {
+        $originaldata = $datakaryawan->riwayat_penyakit;
+      }
+
       if($request->kolom_diubah == 'foto_profil') {
         $dataupload = StorageFileHelper::uploadToServer($request, Str::random(8), 'value_diubah');
         $saveberkas = Berkas::create([
                 'user_id' => Auth::user()->id,
                 'file_id' => $dataupload['id_file']['id'],
                 'nama' => 'Foto Profil ' . Auth::user()->nama,
-                'kategori_berkas_id' => 4, //Lainnya
+                'kategori_berkas_id' => 3, //Lainnya
                 'status_berkas_id' => 1,
                 'path' => $dataupload['path'],
                 'tgl_upload' => date('Y-m-d'),
