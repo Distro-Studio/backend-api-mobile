@@ -144,7 +144,8 @@ class CutiCotroller extends Controller
         $overlapQuery = Cuti::where('user_id', $userId)
             ->where(function ($query) use ($sdate, $edate) {
                 $query->where('tgl_from', '<=', $edate)
-                      ->where('tgl_to', '>=', $sdate);
+                      ->where('tgl_to', '>=', $sdate)
+                      ->whereNotIn('status_cuti_id', [1,5]);
             });
 
         $overlapResults = $overlapQuery->get();

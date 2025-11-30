@@ -946,6 +946,7 @@ class DataPersonalController extends Controller
           'no_hp' => $item->no_hp,
           'email' => $item->email,
           'is_bpjs' => $item->is_bpjs,
+          'is_menikah' => $item->is_menikah,
           'id' => $item->id
         ];
       });
