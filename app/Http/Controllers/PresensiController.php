@@ -257,7 +257,8 @@ class PresensiController extends Controller
 
                 return response()->json(new DataResource(Response::HTTP_OK, 'Presensi berhasil dilakukan', $presensi), Response::HTTP_OK);
             } catch (\Exception $e){
-                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+                // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } else {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda diluar radius kantor'), Response::HTTP_NOT_ACCEPTABLE);
