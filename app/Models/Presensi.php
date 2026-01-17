@@ -27,6 +27,7 @@ class Presensi extends Model
         'foto_keluar' => 'integer',
         'kategori_presensi_id' => 'integer',
         'note' => 'string',
+        'is_pembatalan_reward' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

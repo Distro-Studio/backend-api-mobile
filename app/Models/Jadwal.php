@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Jadwal extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = ['id'];
 
@@ -34,5 +35,17 @@ class Jadwal extends Model
     public function userDitukar()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function presensi()
+    {
+        return $this->hasMany(Presensi::class);
+    }
+
+    public function nextJadwal()
+    {
+        return $this->hasOne(Jadwal::class, 'user_id', 'user_id')
+            ->whereNotNull('tgl_mulai') // Pastikan tidak null
+            ->where('tgl_mulai', '>', $this->tgl_selesai);
     }
 }

@@ -33,6 +33,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'foto_profil' => 'integer',
         'password' => 'hashed',
         'role_id' => 'integer',
         'data_karyawan_id' => 'integer',
@@ -43,6 +44,11 @@ class User extends Authenticatable
     public function dataKaryawan()
     {
         return $this->hasOne(DataKaryawan::class, 'user_id', 'id');
+    }
+
+    public function fotoprofil()
+    {
+        return $this->belongsTo(Berkas::class, 'foto_profil', 'id');
     }
 
     // public function

@@ -33,7 +33,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_1->id,
                     'nama' => $d->berkas_1->nama,
                     'nama_file' => $d->berkas_1->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_1->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_1->path,
                     'ext' => $d->berkas_1->ext,
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext)
                     'size' => $d->berkas_1->size,
@@ -42,7 +42,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_2->id,
                     'nama' => $d->berkas_2->nama,
                     'nama_file' => $d->berkas_2->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_2->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_2->path,
                     'ext' => $d->berkas_2->ext,
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext)
                     'size' => $d->berkas_2->size,
@@ -51,7 +51,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_3->id,
                     'nama' => $d->berkas_3->nama,
                     'nama_file' => $d->berkas_3->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_3->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_3->path,
                     'ext' => $d->berkas_3->ext,
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext)
                     'size' => $d->berkas_3->size,
@@ -85,7 +85,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_1->id,
                     'nama' => $d->berkas_1->nama,
                     'nama_file' => $d->berkas_1->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_1->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_1->path,
                     'ext' => $d->berkas_1->ext,
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext)
                     'size' => $d->berkas_1->size,
@@ -94,7 +94,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_2->id,
                     'nama' => $d->berkas_2->nama,
                     'nama_file' => $d->berkas_2->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_2->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_2->path,
                     'ext' => $d->berkas_2->ext,
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext)
                     'size' => $d->berkas_2->size,
@@ -103,7 +103,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_3->id,
                     'nama' => $d->berkas_3->nama,
                     'nama_file' => $d->berkas_3->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_3->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_3->path,
                     'ext' => $d->berkas_3->ext,
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext)
                     'size' => $d->berkas_3->size,
@@ -137,7 +137,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_1->id,
                     'nama' => $d->berkas_1->nama,
                     'nama_file' => $d->berkas_1->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_1->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_1->path,
                     'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext),
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext)
                     'size' => $d->berkas_1->size,
@@ -146,7 +146,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_2->id,
                     'nama' => $d->berkas_2->nama,
                     'nama_file' => $d->berkas_2->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_2->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_2->path,
                     'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext),
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext)
                     'size' => $d->berkas_2->size,
@@ -155,7 +155,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_3->id,
                     'nama' => $d->berkas_3->nama,
                     'nama_file' => $d->berkas_3->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_3->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_3->path,
                     'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext),
                     // 'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext)
                     'size' => $d->berkas_3->size,
@@ -190,7 +190,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_1->id,
                     'nama' => $d->berkas_1->nama,
                     'nama_file' => $d->berkas_1->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_1->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_1->path,
                     // 'ext' => $d->berkas_1->ext,
                     'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_1->ext),
                     'size' => $d->berkas_1->size,
@@ -199,7 +199,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_2->id,
                     'nama' => $d->berkas_2->nama,
                     'nama_file' => $d->berkas_2->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_2->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_2->path,
                     // 'ext' => $d->berkas_2->ext,
                     'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_2->ext),
                     'size' => $d->berkas_2->size,
@@ -208,7 +208,7 @@ class CMSController extends Controller
                     'id' => $d->berkas_3->id,
                     'nama' => $d->berkas_3->nama,
                     'nama_file' => $d->berkas_3->nama_file,
-                    'path' => env('URL_STORAGE') . $d->berkas_3->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $d->berkas_3->path,
                     // 'ext' => $d->berkas_3->ext,
                     'ext' => StorageFileHelper::getExtensionFromMimeType($d->berkas_3->ext),
                     'size' => $d->berkas_3->size,

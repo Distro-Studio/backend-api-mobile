@@ -145,6 +145,8 @@ class DataPersonalController extends Controller
       $data->riwayat_penyakit = $request->riwayat_penyakit;
       $data->asal_sekolah = $request->asal_sekolah;
       $data->gelar_belakang = $request->gelar_belakang;
+      $data->created_str = $request-> created_str;
+      $data->created_sip = $request->created_sip;
       $data->save();
 
       $user->data_completion_step = 2;
@@ -183,54 +185,116 @@ class DataPersonalController extends Controller
       $keluarga = json_encode($request->keluarga, JSON_UNESCAPED_SLASHES);
       $datakeluarga = json_decode(stripslashes($keluarga), true);
 
-      foreach ($datakeluarga['keluarga'] as $k) {
-        if($k['hubungan']['value'] == 'Anak Ke-1' || $k['hubungan']['value'] == 'Anak Ke-2' || $k['hubungan']['value'] == 'Anak Ke-3'){
-            $cekUmur = Carbon::parse($data['tgl_lahir'])->age;
-            if ($cekUmur > 25 && $data['is_bpjs'] == 1) {
-                return response()->json([
-                    'status' => Response::HTTP_BAD_REQUEST,
-                    'message' => "Tidak dapat memperbarui data karena anak '{$data['nama_keluarga']}' dengan usia {$cekUmur} tahun tidak memenuhi syarat untuk BPJS Kesehatan"
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-
-        }
+      foreach ($datakeluarga as $k) {
         $keluarga = DataKeluarga::create([
           'data_karyawan_id' => $data->id,
           'nama_keluarga' => $k['nama_keluarga'],
           'hubungan' => $k['hubungan']['value'],
+          'tgl_lahir' => $k['tgl_lahir'],
           'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'],
           'status_hidup' => $k['status_hidup']['value'],
           'pekerjaan' => $k['pekerjaan'],
           'no_hp' => $k['no_hp'],
           'email' => $k['email'],
-          'is_bpjs' => $k['is_bpjs'],
-          'tgl_lahir' => $k['tgl_lahir'],
-          'is_menikah' => $k['is_menikah'],
           'status_keluarga_id' => 1,
-          'verifikator_1' => null,
+          'is_menikah' => $k['is_menikah'],
+          'is_bpjs' => $k['is_bpjs']
         ]);
-        // return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $k), Response::HTTP_OK);
-
       }
 
-      $user = User::where('id', $userLoggedin)->update(['data_completion_step' => 3]);
+      User::where('id', $userLoggedin)->update(['data_completion_step' => 3]);
 
       $this->createNotifikasiKeluarga($userLoggedin);
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
     } catch (\Exception $e) {
-        // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+      // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Error: ' . $e->getMessage() . ' Line: ' . $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
+  // public function storekeluarga(Request $request)
+  // {
+  //   $validator = Validator::make($request->all(), [
+  //     'keluarga' => 'required',
+  //   ], [
+  //     'keluarga.required' => 'Keluarga harus diisi',
+  //   ]);
+
+  //   if ($validator->fails()) {
+  //     return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
+  //   }
+
+  //   $userLoggedin = Auth::user()->id;
+
+  //   try {
+  //     $data = DataKaryawan::where('user_id', $userLoggedin)->first();
+
+  //     if (!$data) {
+  //       return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'), Response::HTTP_NOT_FOUND);
+  //     }
+
+  //     $keluarga = json_encode($request->keluarga, JSON_UNESCAPED_SLASHES);
+  //     $datakeluarga = json_decode(stripslashes($keluarga), true);
+
+  //     if (!isset($datakeluarga['keluarga'])) {
+  //       return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Struktur data keluarga tidak valid'), Response::HTTP_BAD_REQUEST);
+  //     }
+
+  //     // Periksa setiap kolom yang diperlukan
+  //     $requiredColumns = [
+  //       'nama_keluarga',
+  //       'hubungan',
+  //       'tgl_lahir',
+  //       'pendidikan_terakhir',
+  //       'status_hidup',
+  //       'is_menikah',
+  //       'is_bpjs',
+  //     ];
+
+  //     foreach ($datakeluarga['keluarga'] as $index => $k) {
+  //       $missingColumns = [];
+  //       foreach ($requiredColumns as $column) {
+  //         if (!isset($k[$column])) {
+  //           $missingColumns[] = $column;
+  //         }
+  //       }
+
+  //       if (!empty($missingColumns)) {
+  //         return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Kolom berikut tidak ditemukan atau tidak valid: ' . implode(', ', $missingColumns)), Response::HTTP_BAD_REQUEST);
+  //       }
+
+  //       $keluarga = DataKeluarga::create([
+  //         'data_karyawan_id' => $data->id,
+  //         'nama_keluarga' => $k['nama_keluarga'],
+  //         'hubungan' => $k['hubungan']['value'],
+  //         'tgl_lahir' => $k['tgl_lahir'],
+  //         'pendidikan_terakhir' => $k['pendidikan_terakhir']['value'],
+  //         'status_hidup' => $k['status_hidup']['value'],
+  //         'pekerjaan' => $k['pekerjaan'] ?? null,
+  //         'no_hp' => $k['no_hp'] ?? null,
+  //         'email' => $k['email'] ?? null,
+  //         'status_keluarga_id' => 1,
+  //         'is_menikah' => $k['is_menikah'],
+  //         'is_bpjs' => $k['is_bpjs'],
+  //       ]);
+  //     }
+
+  //     $user = User::where('id', $userLoggedin)->update(['data_completion_step' => 3]);
+
+  //     $this->createNotifikasiKeluarga($userLoggedin);
+
+  //     return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $keluarga), Response::HTTP_OK);
+  //   } catch (\Exception $e) {
+  //     return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
+  //   }
+  // }
 
   public function getkeluarga()
   {
     try {
       //code...
       $karyawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
-      $data = DataKeluarga::where('data_karyawan_id', $karyawan->id)->with('pendidikanTerakhir')->get();
+      $data = DataKeluarga::where('data_karyawan_id', $karyawan->id)->with('pendidikanTerakhir', 'statusKeluarga', 'kategoriAgama', 'kategoriDarah')->get();
       if ($data->isEmpty()) {
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data user tidak ditemukan'), Response::HTTP_NOT_FOUND);
       }
@@ -250,11 +314,22 @@ class DataPersonalController extends Controller
       'hubungan' => 'required',
       'pendidikan_terakhir' => 'required',
       'status_hidup' => 'required',
+      'tempat_lahir' => 'required',
+      'jenis_kelamin' => 'required|in:0,1',
+      'kategori_agama_id' => 'required|integer|exists:kategori_agamas,id',
+      'kategori_darah_id' => 'required|integer|exists:kategori_darahs,id',
     ], [
       'nama_keluarga.required' => 'Nama harus diisi',
       'hubungan.required' => 'Hubungan keluarga harus diisi',
       'pendidikan_terakhir.required' => 'Pendidikan terakhir harus diisi',
       'status_hidup.required' => 'Status hidup harus diisi',
+      'tempat_lahir.required' => 'Tempat lahir harus diisi',
+      'jenis_kelamin.required' => 'Jenis kelamin harus diisi',
+      'kategori_agama_id.required' => 'Agama harus diisi',
+      'kategori_darah_id.required' => 'Golongan darah harus diisi',
+      'kategori_darah_id.exists' => 'Golongan darah tidak valid',
+      'kategori_agama_id.exists' => 'Agama tidak valid',
+      'jenis_kelamin.in' => 'Jenis kelamin harus Pria atau Wanita',
     ]);
 
     if ($validator->fails()) {
@@ -270,6 +345,11 @@ class DataPersonalController extends Controller
       $dataKeluarga->pekerjaan = $request->pekerjaan;
       $dataKeluarga->no_hp = $request->no_hp;
       $dataKeluarga->email = $request->email;
+      $dataKeluarga->tempat_lahir = $request->tempat_lahir;
+      $dataKeluarga->jenis_kelamin = $request->jenis_kelamin;
+      $dataKeluarga->kategori_agama_id = $request->kategori_agama_id;
+      $dataKeluarga->kategori_darah_id = $request->kategori_darah_id;
+      $dataKeluarga->no_rm = $request->no_rm;
       $dataKeluarga->save();
 
       return response()->json(new DataResource(Response::HTTP_OK, 'Data berhasil disimpan', $dataKeluarga), Response::HTTP_OK);
@@ -589,7 +669,7 @@ class DataPersonalController extends Controller
 
     $data = $berkas->map(function ($i) {
       return [
-        'url' => env('URL_STORAGE') . $i->path,
+        'url' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $i->path,
         'name' => $i->nama,
         'ext' => StorageFileHelper::getExtensionFromMimeType($i->ext),
       ];
@@ -678,6 +758,7 @@ class DataPersonalController extends Controller
   public function updatedatapersonal(Request $request)
   {
     $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+    $user = User::where('id', Auth::user()->id)->with('fotoprofil')->first();
 
     if (!$datakaryawan) {
       return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Data karyawan tidak ditemukan.'), Response::HTTP_NOT_FOUND);
@@ -713,13 +794,14 @@ class DataPersonalController extends Controller
         $originaldata = $datakaryawan->no_kk;
       }
 
-      if ($request->kolom_diubah == 'kategori_agama_id') {
+      if ($request->kolom_diubah == 'agama') {
         $originaldata = $datakaryawan->kategori_agama_id;
         $updateddata = $request->value_diubah['value'];
       }
 
-      if ($request->kolom_diubah == 'kategori_darah_id') {
+      if ($request->kolom_diubah == 'golongan_darah') {
         $originaldata = $datakaryawan->kategori_darah_id;
+        $updateddata = $request->value_diubah['value'];
       }
 
       if ($request->kolom_diubah == 'tinggi_badan') {
@@ -756,6 +838,29 @@ class DataPersonalController extends Controller
 
       if ($request->kolom_diubah == 'gelar_belakang') {
         $originaldata = $datakaryawan->gelar_belakang;
+      }
+
+      if ($request->kolom_diubah == 'riwayat_penyakit') {
+        $originaldata = $datakaryawan->riwayat_penyakit;
+      }
+
+      if($request->kolom_diubah == 'foto_profil') {
+        $dataupload = StorageFileHelper::uploadToServer($request, Str::random(8), 'value_diubah');
+        $saveberkas = Berkas::create([
+                'user_id' => Auth::user()->id,
+                'file_id' => $dataupload['id_file']['id'],
+                'nama' => 'Foto Profil ' . Auth::user()->nama,
+                'kategori_berkas_id' => 3, //Lainnya
+                'status_berkas_id' => 1,
+                'path' => $dataupload['path'],
+                'tgl_upload' => date('Y-m-d'),
+                'nama_file' => $dataupload['nama_file'],
+                'ext' => $dataupload['ext'],
+                'size' => $dataupload['size'],
+            ]);
+
+        $originaldata = $user->foto_profil;
+        $updateddata = $saveberkas->id;
       }
 
       $cekdata = RiwayatPerubahan::where('data_karyawan_id', $datakaryawan->id)
@@ -800,7 +905,7 @@ class DataPersonalController extends Controller
       ]);
 
 
-      return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil diajukan, Mohon tunggu penngajuan anda sedang diverifikasi', $datadiubah), Response::HTTP_OK);
+      return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil diajukan, Mohon tunggu pengajuan anda sedang diverifikasi', $datadiubah), Response::HTTP_OK);
       //   return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $request->value_diubah['value']), Response::HTTP_OK);
     } catch (\Exception $e) {
       return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -828,11 +933,20 @@ class DataPersonalController extends Controller
           'hubungan' => $item->hubungan,
           'nama_keluarga' => $item->nama_keluarga,
           'status_hidup' => $item->status_hidup,
-          'pendidikan_terakhir' => $item->pendidikanTerakhir->id,
+          'pendidikan_terakhir' => $item->pendidikan_terakhir ?? null,
+          'tempat_lahir' => $item->tempat_lahir ?? null,
+          'tgl_lahir' => $item->tgl_lahir ?? null,
+          'agama' => $item->agama ?? null,
+          'goldar' => $item->goldar ?? null,
+          'jenis_kelamin' => $item->jenis_kelamin ?? null,
+          'kategori_agama_id' => $item->kategori_agama_id ?? null,
+          'kategori_darah_id' => $item->kategori_darah_id ?? null,
+          'no_rm' => $item->no_rm ?? null,
           'pekerjaan' => $item->pekerjaan,
           'no_hp' => $item->no_hp,
           'email' => $item->email,
           'is_bpjs' => $item->is_bpjs,
+          'is_menikah' => $item->is_menikah,
           'id' => $item->id
         ];
       });
@@ -846,6 +960,7 @@ class DataPersonalController extends Controller
         //     ];
         $statushidup = 1;
         $isbpjs = 1;
+        $ismenikah = 1;
         if ($keluargaItem['status_hidup']) {
           $statushidup = 1;
         } else {
@@ -857,17 +972,33 @@ class DataPersonalController extends Controller
         } else {
           $isbpjs = 0;
         }
+
+        if ($keluargaItem['is_menikah']) {
+          $ismenikah = 1;
+        } else {
+          $ismenikah = 0;
+        }
+
         $updated_data[] = [
           'data_keluarga_id' => $keluargaItem['data_keluarga_id'] ?? null,
-          'hubungan' => $keluargaItem['hubungan'],
-          'nama_keluarga' => $keluargaItem['nama_keluarga'],
-          'status_hidup' => $statushidup,
-          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir']['id'],
-          'pekerjaan' => $keluargaItem['pekerjaan'],
-          'no_hp' => $keluargaItem['no_hp'],
-          'email' => $keluargaItem['email'],
-          'is_bpjs' => $isbpjs,
-          'id' => $keluargaItem['id'] ?? null
+          'hubungan' => $keluargaItem['hubungan'] ?? null,
+          'nama_keluarga' => $keluargaItem['nama_keluarga'] ?? null,
+          'status_hidup' => $statushidup ?? null,
+          'pendidikan_terakhir' => $keluargaItem['pendidikan_terakhir_id'] ?? null,
+          'tempat_lahir' => $keluargaItem['tempat_lahir'] ?? null,
+          'tgl_lahir' => $keluargaItem['tgl_lahir'] ?? null,
+          'agama' => $keluargaItem['agama'] ?? null,
+          'goldar' => $keluargaItem['goldar'] ?? null,
+          'jenis_kelamin' => $keluargaItem['jenis_kelamin'] ?? null,
+          'kategori_agama_id' => $keluargaItem['kategori_agama_id'] ?? null,
+          'kategori_darah_id' => $keluargaItem['kategori_darah_id'] ?? null,
+          'no_rm' => $keluargaItem['no_rm'] ?? null,
+          'pekerjaan' => $keluargaItem['pekerjaan'] ?? null,
+          'no_hp' => $keluargaItem['no_hp'] ?? null,
+          'email' => $keluargaItem['email'] ?? null,
+          'is_bpjs' => $isbpjs ?? null,
+          'is_menikah' => $ismenikah ?? null,
+          'id' => $keluargaItem['id'] ?? null //lupa dari mana
         ];
       }
 
@@ -919,12 +1050,21 @@ class DataPersonalController extends Controller
         'data_keluarga_id' => $k['data_keluarga_id'] ?? null, // Akses dengan notasi array
         'nama_keluarga' => $k['nama_keluarga'], // Akses dengan notasi array
         'hubungan' => $k['hubungan'], // Akses dengan notasi array
-        'pendidikan_terakhir' => $k['pendidikan_terakhir']['id'], // Akses dengan notasi array
+        'pendidikan_terakhir' => $k['pendidikan_terakhir'] ?? null, // Akses dengan notasi array
+        'tempat_lahir' => $keluargaItem['tempat_lahir'] ?? null,
+        'tgl_lahir' => $keluargaItem['tgl_lahir'] ?? null,
+        // 'agama' => $keluargaItem['agama'] ?? null,
+        // 'goldar' => $keluargaItem['goldar'] ?? null,
+        'jenis_kelamin' => $keluargaItem['jenis_kelamin'] ?? null,
+        'kategori_agama_id' => $keluargaItem['kategori_agama_id'] ?? null,
+        'kategori_darah_id' => $keluargaItem['kategori_darah_id'] ?? null,
+        'no_rm' => $keluargaItem['no_rm'] ?? null,
         'status_hidup' => $k['status_hidup'], // Akses dengan notasi array
         'pekerjaan' => $k['pekerjaan'], // Akses dengan notasi array
         'no_hp' => $k['no_hp'], // Akses dengan notasi array
         'email' => $k['email'], // Akses dengan notasi array
         'is_bpjs' => $k['is_bpjs'],
+        // 'is_menikah' => $k['is_menikah'],
       ]);
     }
 
@@ -944,6 +1084,19 @@ class DataPersonalController extends Controller
 
     return response()->json(new DataResource(Response::HTTP_OK, 'Perubahan berhasil disimpan', $datadiubah), Response::HTTP_OK);
     // return response()->json(new DataResource(Response::HTTP_NOT_FOUND, 'Perubahan berhasil disimpan', $datakeluarga), Response::HTTP_NOT_FOUND);
+  }
+
+  public function getBMIStatus($bmi)
+  {
+    if ($bmi < 18.5) {
+      return 'Berat badan kurang';
+    } elseif ($bmi >= 18.5 && $bmi <= 24.9) {
+      return 'Berat badan normal';
+    } elseif ($bmi >= 25 && $bmi <= 29.9) {
+      return 'Berat badan berlebih (overweight)';
+    } else {
+      return 'Obesitas';
+    }
   }
 
   public function getdatakaryawandetail()
@@ -970,29 +1123,26 @@ class DataPersonalController extends Controller
 
     $role = $karyawan->user->roles->first();
 
-    // $berkasFields = [
-    //   'file_ktp' => $karyawan->file_ktp ?? null,
-    //   'file_kk' => $karyawan->file_kk ?? null,
-    //   'file_sip' => $karyawan->file_sip ?? null,
-    //   'file_bpjs_kesehatan' => $karyawan->file_bpjsksh ?? null,
-    //   'file_bpjs_ketenagakerjaan' => $karyawan->file_bpjsktk ?? null,
-    //   'file_ijazah' => $karyawan->file_ijazah ?? null,
-    //   'file_sertifikat' => $karyawan->file_sertifikat ?? null,
-    // ];
+    if (empty($karyawan->bmi_value) || empty($karyawan->bmi_ket)) {
+        // Hitung BMI jika data kosong
+        // $tinggiBadan = $karyawan->tinggi_badan;
+        // $beratBadan = $karyawan->berat_badan;
 
-    // $baseUrl = env('STORAGE_SERVER_DOMAIN');
+        $weight = $karyawan->berat_badan;
+        $height = $karyawan->tinggi_badan / 100; // Konversi cm ke meter
 
-    // $formattedPaths = [];
-    // foreach ($berkasFields as $field => $berkasId) {
-    //   $berkas = Berkas::where('id', $berkasId)->first();
-    //   if ($berkas) {
-    //     $extension = StorageServerHelper::getExtensionFromMimeType($berkas->ext);
-    //     // $formattedPaths[$field] = $baseUrl . $berkas->path . '.' . $extension;
-    //     $formattedPaths[$field] = $baseUrl . $berkas->path;
-    //   } else {
-    //     $formattedPaths[$field] = null;
-    //   }
-    // }
+        if ($height && $weight) {
+            $bmi = $weight / ($height * $height); // Rumus BMI
+            $karyawan->bmi_value = $bmi;
+            $karyawan->bmi_ket = $this->getBMIStatus($bmi); // Menentukan status BMI
+        } else {
+            $karyawan->bmi_value = null;
+            $karyawan->bmi_ket = 'Data tidak lengkap';
+        }
+    }
+
+    $created_sip = $karyawan->created_str;
+    $created_str = $karyawan->created_sip;
 
     // Format the karyawan data
     $formattedData = [
@@ -1079,6 +1229,8 @@ class DataPersonalController extends Controller
       'bmi_value' => $karyawan->bmi_value,
       'bmi_ket' => $karyawan->bmi_ket,
       'masa_diklat' => $karyawan->masa_diklat,
+      'created_str' => $created_str,
+      'created_sip' => $created_sip,
       'created_at' => $karyawan->created_at,
       'updated_at' => $karyawan->updated_at
     ];
@@ -1088,6 +1240,59 @@ class DataPersonalController extends Controller
       'message' => "Detail karyawan '{$karyawan->user->nama}' berhasil ditampilkan.",
       'data' => $formattedData,
     ], Response::HTTP_OK);
+  }
+
+  public function storefotoprofil(Request $request)
+  {
+    $validator = Validator::make($request->all(), [
+        'file' => 'required|file',
+    ]);
+
+    $userLoggedin = Auth::user()->id;
+
+    if ($validator->fails()) {
+        return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
+    }
+
+    try {
+        if(Auth::user()->foto_profil == null) {
+            $dataupload = StorageFileHelper::uploadToServer($request, Str::random(8), 'file');
+            $saveberkas = Berkas::create([
+                'user_id' => $userLoggedin,
+                'file_id' => $dataupload['id_file']['id'],
+                'nama' => 'Foto Profil '. Auth::user()->nama,
+                'kategori_berkas_id' => 3, //Sistem
+                'status_berkas_id' => 1,
+                'path' => $dataupload['path'],
+                'tgl_upload' => date('Y-m-d'),
+                'nama_file' => $dataupload['nama_file'],
+                'ext' => $dataupload['ext'],
+                'size' => $dataupload['size'],
+            ]);
+
+            $user = User::find($userLoggedin);
+            $user->foto_profil = $saveberkas->id;
+            $user->save();
+        }else{
+            $berkas = Berkas::find(Auth::user()->foto_profil)->first();
+            $dataupload = StorageFileHelper::uploadToServer($request, $berkas->nama_file, 'file');
+
+            $berkas->file_id = $dataupload['id_file']['id'];
+            $berkas->path = $dataupload['path'];
+            $berkas->nama_file = $dataupload['nama_file'];
+            $berkas->tgl_upload = date('Y-m-d');
+            $berkas->ext = $dataupload['ext'];
+            $berkas->size = $dataupload['size'];
+            $berkas->save();
+        }
+
+
+        $this->createNotifikasiBerkas($userLoggedin);
+
+        return response()->json(new DataResource(Response::HTTP_OK, 'Berkas berhasil di upload', $saveberkas), Response::HTTP_OK);
+    } catch (\Exception $e) {
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
   }
 
   private function createNotifikasiBerkas($userId)

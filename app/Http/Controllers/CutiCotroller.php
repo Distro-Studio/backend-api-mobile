@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Resources\DataResource;
 use App\Http\Resources\WithoutDataResource;
 use App\Models\Cuti;
+use App\Models\DataKaryawan;
+use App\Models\HakCuti;
 use App\Models\Notifikasi;
 use App\Models\TipeCuti;
 use Carbon\Carbon;
@@ -18,38 +20,49 @@ class CutiCotroller extends Controller
 {
   public function getstatistik()
   {
+    // try {
+    //   $tipecuti = TipeCuti::all();
+    //   // $startDate = Carbon::now('Asia/Jakarta')->startOfMonth()->addDay();
+    //   // $endDate = Carbon::now()->endOfMonth();
+
+    //   // if ($request->tgl_mulai != null) {
+    //   //     $startDate = Carbon::parse($request->tgl_mulai);
+    //   // }
+
+    //   // if ($request->tgl_selesai != null) {
+    //   //     $endDate = Carbon::parse($request->tgl_selesai)->tomorrow();
+    //   // }
+
+    //   foreach ($tipecuti as $leaveType) {
+    //     // $leaveType->used = Cuti::where('tipe_cuti_id', $leaveType->id)->where('status_cuti_id', 2)->where('user_id', Auth::user()->id)->whereBetween('created_at', [$startDate, $endDate])->count();
+    //     $usedDays = Cuti::where('tipe_cuti_id', $leaveType->id)
+    //       ->where('status_cuti_id', 4) // Only consider approved leaves
+    //       ->where('user_id', Auth::user()->id)
+    //       ->whereYear('created_at', Carbon::now()->year) // Within the current year
+    //       ->get()
+    //       ->sum(function ($cuti) {
+    //         $tglFrom = Carbon::parse($cuti->tgl_from);
+    //         $tglTo = Carbon::parse($cuti->tgl_to);
+    //         return $tglFrom->diffInDays($tglTo) + 1;
+    //       });
+    //     $leaveType->used = $usedDays;
+    //   }
+    //   // return response()->json(new DataResource(Response::HTTP_OK, 'List statistik cuti berhasil didapatkan', $startDate), Response::HTTP_OK);
+    //   return response()->json(new DataResource(Response::HTTP_OK, 'List statistik cuti berhasil didapatkan', $tipecuti), Response::HTTP_OK);
+    // } catch (\Exception $e) {
+    //   // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
+    //   return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+    // }
+
     try {
-      $tipecuti = TipeCuti::all();
-      // $startDate = Carbon::now('Asia/Jakarta')->startOfMonth()->addDay();
-      // $endDate = Carbon::now()->endOfMonth();
-
-      // if ($request->tgl_mulai != null) {
-      //     $startDate = Carbon::parse($request->tgl_mulai);
-      // }
-
-      // if ($request->tgl_selesai != null) {
-      //     $endDate = Carbon::parse($request->tgl_selesai)->tomorrow();
-      // }
-
-      foreach ($tipecuti as $leaveType) {
-        // $leaveType->used = Cuti::where('tipe_cuti_id', $leaveType->id)->where('status_cuti_id', 2)->where('user_id', Auth::user()->id)->whereBetween('created_at', [$startDate, $endDate])->count();
-        $usedDays = Cuti::where('tipe_cuti_id', $leaveType->id)
-          ->where('status_cuti_id', 4) // Only consider approved leaves
-          ->where('user_id', Auth::user()->id)
-          ->whereYear('created_at', Carbon::now()->year) // Within the current year
-          ->get()
-          ->sum(function ($cuti) {
-            $tglFrom = Carbon::parse($cuti->tgl_from);
-            $tglTo = Carbon::parse($cuti->tgl_to);
-            return $tglFrom->diffInDays($tglTo) + 1;
-          });
-        $leaveType->used = $usedDays;
-      }
-      // return response()->json(new DataResource(Response::HTTP_OK, 'List statistik cuti berhasil didapatkan', $startDate), Response::HTTP_OK);
-      return response()->json(new DataResource(Response::HTTP_OK, 'List statistik cuti berhasil didapatkan', $tipecuti), Response::HTTP_OK);
+        $hakcuti = HakCuti::with('tipecuti')->where('data_karyawan_id', Auth::user()->data_karyawan_id)->get();
+        $hakcuti->map(function ($item) {
+                $item->nama = $item->tipecuti->nama;  // Menambahkan nama dari relasi tipecuti
+                return $item;
+            });
+        return response()->json(new DataResource(Response::HTTP_OK, 'List statistik cuti berhasil didapatkan', $hakcuti), Response::HTTP_OK);
     } catch (\Exception $e) {
-      // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e), Response::HTTP_INTERNAL_SERVER_ERROR);
-      return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -131,7 +144,8 @@ class CutiCotroller extends Controller
         $overlapQuery = Cuti::where('user_id', $userId)
             ->where(function ($query) use ($sdate, $edate) {
                 $query->where('tgl_from', '<=', $edate)
-                      ->where('tgl_to', '>=', $sdate);
+                      ->where('tgl_to', '>=', $sdate)
+                      ->whereNotIn('status_cuti_id', [1,5]);
             });
 
         $overlapResults = $overlapQuery->get();
@@ -174,9 +188,13 @@ class CutiCotroller extends Controller
         return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Kuota cuti sudah habis'), Response::HTTP_NOT_ACCEPTABLE);
       }
 
+      $datakaryawan = DataKaryawan::where('user_id', Auth::user()->id)->first();
+      $hakcuti = HakCuti::where('data_karyawan_id', $datakaryawan->id)->where('tipe_cuti_id', $request->jenis_cuti)->first();
+
       $cutis = Cuti::create([
         'user_id' => Auth::user()->id,
         'tipe_cuti_id' => $request->jenis_cuti,
+        'hak_cuti_id' => $hakcuti->id,
         'tgl_from' => $request->tgl_mulai,
         'tgl_to' => $request->tgl_selesai,
         'durasi' => $request->durasi,

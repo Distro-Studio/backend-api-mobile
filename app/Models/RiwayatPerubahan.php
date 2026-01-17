@@ -15,6 +15,7 @@ class RiwayatPerubahan extends Model
     'id' => 'integer',
     'data_karyawan_id' => 'integer',
     'jenis_perubahan' => 'string',
+    'pendidikan_terakhir' => 'integer',
     'kolom' => 'string',
     'status_perubahan_id' => 'integer',
     'verifikator_1' => 'integer',
@@ -23,6 +24,6 @@ class RiwayatPerubahan extends Model
     'updated_at' => 'datetime',
   ];
 
-//   public function 
+//   public function
 
 }

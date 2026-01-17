@@ -104,9 +104,9 @@ class GetListController extends Controller
   {
     try {
       if ($request->limit == 0) {
-        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->get();
+        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->orderBy('created_at', 'desc')->get();
       } else {
-        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->take($request->limit)->get();
+        $pengumuman = Pengumuman::whereJsonContains('user_id', Auth::user()->id)->where('tgl_mulai', '<=', Carbon::now())->where('tgl_berakhir', '>=', Carbon::now())->orderBy('created_at', 'desc')->take($request->limit)->get();
       }
 
       if ($pengumuman->isEmpty()) {
@@ -179,8 +179,60 @@ class GetListController extends Controller
             $originaldata = $agamaori;
             $updateddata = $agamau;
         }else if($item->kolom == 'Data Keluarga'){
-            $originaldata = json_decode($item->original_data);
-            $updateddata = json_decode($item->updated_data);
+            $originaldata = json_decode($item->original_data, true); // Decode as array
+            $updateddata = json_decode($item->updated_data, true);   // Decode as array
+
+            if($originaldata) {
+                // Convert to collection to use map()
+                $originaldata = collect($originaldata)->map(function($item){
+                    return [
+                        "data_keluarga_id" => $item['data_keluarga_id'] ?? null,
+                        "hubungan" => $item['hubungan'] ?? null,
+                        "nama_keluarga" => $item['nama_keluarga'] ?? null,
+                        "status_hidup" => $item['status_hidup'] ?? null,
+                        "pendidikan_terakhir" => KategoriPendidikan::where('id', $item['pendidikan_terakhir'])->first() ?? null,
+                        "tempat_lahir" => $item['tempat_lahir'] ?? null,
+                        "tgl_lahir" => $item['tgl_lahir'] ?? null,
+                        "agama" => KategoriAgama::where('id', $item['kategori_agama_id'])->first() ?? null,
+                        "goldar" => KategoriDarah::where('id', $item['kategori_darah_id'])->first() ?? null,
+                        "jenis_kelamin" => $item['jenis_kelamin'] ?? null,
+                        "kategori_agama_id" => KategoriAgama::where('id', $item['kategori_agama_id'])->first() ?? null,
+                        "kategori_darah_id" => KategoriDarah::where('id', $item['kategori_darah_id'])->first() ?? null,
+                        "no_rm" => $item['no_rm'] ?? null,
+                        "pekerjaan" => $item['pekerjaan'] ?? null,
+                        "no_hp" => $item['no_hp'] ?? null,
+                        "email" => $item['email'] ?? null,
+                        "is_bpjs" => $item['is_bpjs'] ?? null,
+                        "id" => $item['id'] ?? null
+                    ];
+                });
+            }
+
+            if($updateddata) {
+                // Convert to collection to use map()
+                $updateddata = collect($updateddata)->map(function($items){
+                    return [
+                        "data_keluarga_id" => $items['data_keluarga_id'] ?? null,
+                        "hubungan" => $items['hubungan'] ?? null,
+                        "nama_keluarga" => $items['nama_keluarga'] ?? null,
+                        "status_hidup" => $items['status_hidup'] ?? null,
+                        "pendidikan_terakhir" => KategoriPendidikan::where('id', $items['pendidikan_terakhir'])->first() ?? null,
+                        "tempat_lahir" => $items['tempat_lahir'] ?? null,
+                        "tgl_lahir" => $items['tgl_lahir'] ?? null,
+                        "agama" => KategoriAgama::where('id', $items['kategori_agama_id'])->first() ?? null,
+                        "goldar" => KategoriDarah::where('id', $items['kategori_darah_id'])->first() ?? null,
+                        "jenis_kelamin" => $items['jenis_kelamin'] ?? null,
+                        "kategori_agama_id" => KategoriAgama::where('id', $items['kategori_agama_id'])->first() ?? null,
+                        "kategori_darah_id" => KategoriDarah::where('id', $items['kategori_darah_id'])->first() ?? null,
+                        "no_rm" => $items['no_rm'] ?? null,
+                        "pekerjaan" => $items['pekerjaan'] ?? null,
+                        "no_hp" => $items['no_hp'] ?? null,
+                        "email" => $items['email'] ?? null,
+                        "is_bpjs" => $items['is_bpjs'] ?? null,
+                        "id" => $items['id'] ?? null
+                    ];
+                });
+            }
         }else {
             $originaldata = $item->original_data;
             $updateddata = $item->updated_data;
@@ -206,19 +258,31 @@ class GetListController extends Controller
   public function getalldiklat()
   {
     try {
-        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)->whereDate(DB::raw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y')"), '>', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->with('image');
-        $diklat->map(function($item){
-            $item->path = env('URL_STORAGE') . $item->image->path;
-            $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
-            unset($item->image);
-        });
+        $today = now()->format('Y-m-d'); // Format tanggal hari ini
+
+        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)
+                    ->whereRaw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y') >= ?", [$today])
+                    ->with('image')
+                    ->get();
+
+        // return response()->json(new DataResource(Response::HTTP_OK, 'List diklat berhasil didapatkan', $diklat->toSql()), Response::HTTP_OK);
         // return response()->json(new DataResource(Response::HTTP_OK, 'List diklat berhasil didapatkan', $diklat->toSql()->get()), Response::HTTP_OK);
         if($diklat->isEmpty()) {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'List diklat tidak ditemukan'), Response::HTTP_NOT_FOUND);
         }
+
+        $diklat->map(function($item){
+            if($item->gambar != null){
+                $item->path = 'https://192.168.0.20/RskiSistem24/file-storage/public' . $item->image->path;
+                $item->ext = StorageFileHelper::getExtensionFromMimeType($item->ext);
+                unset($item->image);
+            }
+        });
+
+
         return response()->json(new DataResource(Response::HTTP_OK, 'List diklat berhasil didapatkan', $diklat), Response::HTTP_OK);
     } catch (\Exception $e) {
-        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+        return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage() . ' ' . $e->getLine()), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -281,7 +345,7 @@ class GetListController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_BAD_REQUEST, 'Notifikasi tidak ditemukan'), Response::HTTP_BAD_REQUEST);
         }
 
-        $notif->delete();
+        Notifikasi::where('user_id', Auth::user()->id)->where('is_read', 1)->delete();
 
         return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Notifkasi berhasil dihapus'), Response::HTTP_OK);
     } catch (\Exception $e) {

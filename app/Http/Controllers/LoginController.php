@@ -94,23 +94,67 @@ class LoginController extends Controller
             // $tokenResult->accessToken->expires_at = $tokenExpiration;
             // $tokenResult->accessToken->save();
 
-            $users = User::where('id', Auth::user()->id)->with('roles')->first();
+            $users = User::where('id', Auth::user()->id)->with('roles')->with('fotoprofil')->first();
             $users->arrtoken = [
                 'token' => $token
             ];
 
-            $dataKaryawan = DataKaryawan::select('unit_kerja_id')->where('user_id', Auth::user()->id)->with('unitkerja')->first();
+            $dataKaryawan = DataKaryawan::where('user_id', Auth::user()->id)->with('unitkerja')->first();
             $unitkerja = UnitKerja::where('id', $dataKaryawan->unit_kerja_id)->first();
             $users->unit_kerja = [
                 $unitkerja,
             ];
 
+            if($users->foto_profil) {
+                $users->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.$users->fotoprofil->path;
+            }
+
+
             $users->makeHidden('password');
+
+            $duesip = null;
+            $duestr = null;
+
+            // Ambil tanggal masa_berlaku_str dari database
+            if ($dataKaryawan->masa_berlaku_str != null) {
+                // Hitung tanggal 6 bulan sebelumnya
+                $reminderStr = Carbon::createFromFormat('d-m-Y', $dataKaryawan->masa_berlaku_str)
+                    ->subMonths(7); // Tanggal 6 bulan sebelum masa_berlaku_str
+                
+                // Cek apakah tanggal hari ini lebih besar (lebih awal) dari reminderStr
+                if (Carbon::now()->greaterThan($reminderStr)) {
+                    // Jika ya, lakukan sesuatu (misalnya peringatan atau penyesuaian)
+                    // Anda bisa mengatur status atau flag di sini
+                    // $statusReminder = "Tanggal masa berlaku sudah lewat 6 bulan.";
+                    $duestr = $dataKaryawan->masa_berlaku_str;
+                } else {
+                    $duestr = null;
+                }
+            }
+
+            // Cek masa_berlaku_sip dan lakukan hal yang sama jika diperlukan
+            if ($dataKaryawan->masa_berlaku_sip != null) {
+                $reminderSip = Carbon::createFromFormat('d-m-Y', $dataKaryawan->masa_berlaku_sip)
+                    ->subMonths(3); // Tanggal 3 bulan sebelum masa_berlaku_sip
+                
+                if (Carbon::now()->greaterThan($reminderSip)) {
+                    // Jika ya, lakukan sesuatu
+                    // $statusSip = "Tanggal SIP sudah lewat 3 bulan.";
+                    $duesip = $dataKaryawan->masa_berlaku_sip;
+                } else {
+                    $duesip = null;
+                    // $statusSip = "Tanggal SIP masih dalam jangka waktu yang valid.";
+                }
+            }
+
+            // Menyimpan hasil reminder ke objek users untuk dikirimkan sebagai respons
+            $users->masa_berlaku_str = $duestr;
+            $users->masa_berlaku_sip = $duesip;
 
             return response()->json(new DataResource(Response::HTTP_OK, 'Login Berhasil', $users), Response::HTTP_OK);
 
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         // if(Auth::attempt($request->only('username', 'password'))){

@@ -57,7 +57,8 @@ class BerkasController extends Controller
     public function getallberkas()
     {
         try {
-            $berkas = Berkas::where('user_id', Auth::user()->id)->where('kategori_berkas_id', 1)->where('status_berkas_id', 2)->with('kategori_berkas', 'status_berkas', 'verifikator')->latest()->get();
+            // $berkas = Berkas::where('user_id', Auth::user()->id)->where('kategori_berkas_id', '!=',3)->where('status_berkas_id', 2)->with('kategori_berkas', 'status_berkas', 'verifikator')->latest()->get();
+            $berkas = Berkas::where('user_id', Auth::user()->id)->where('kategori_berkas_id', '!=',3)->with('kategori_berkas', 'status_berkas', 'verifikator')->latest()->get();
 
             if ($berkas->isEmpty()) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Berkas tidak ditemukan'), Response::HTTP_NOT_FOUND);
@@ -72,7 +73,7 @@ class BerkasController extends Controller
                     'tgl_upload' => $i->tgl_upload,
                     'ext' => $ext,
                     'size' => $i->size,
-                    'path' => env('URL_STORAGE') . $i->path,
+                    'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public' . $i->path,
                     'kategori_berkas' => $i->kategori_berkas,
                     'status_berkas' => $i->status_berkas,
                     'verifikator' => $i->verifikator,
@@ -165,7 +166,7 @@ class BerkasController extends Controller
             $berkas->delete();
             return response()->json(new WithoutDataResource(Response::HTTP_OK, 'Berkas ' . $name . ' berhasil di hapus'), Response::HTTP_OK);
         } catch (\Exception $e) {
-            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

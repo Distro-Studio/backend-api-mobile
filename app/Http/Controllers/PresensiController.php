@@ -15,6 +15,7 @@ use App\Models\Jadwal;
 use App\Models\LokasiKantor;
 use App\Models\NonShift;
 use App\Models\Presensi;
+use App\Models\RiwayatPembatalanReward;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -42,6 +43,8 @@ class PresensiController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
         }
 
+        $isrewardbatal = 0;
+
 
         // $checkuser = UserActiveHelper::checkActive(User::where('id', Auth::user()->id)->first());
         // if (!$checkuser) {
@@ -56,23 +59,25 @@ class PresensiController extends Controller
             $now = Carbon::now();
             // $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
             $jadwal = Jadwal::where('user_id', Auth::user()->id)
-            ->where(function ($query) use ($today, $yesterday, $now) {
-                // Kondisi 1: Jadwal hari ini
-                $query->whereDate('tgl_mulai', $today);
-                // ->whereHas('shift', function ($shiftQuery) use ($now) {
-                //   $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
-                // });
+              ->where(function ($query) use ($today, $yesterday, $now) {
+                  // Kondisi 1: Jadwal hari ini
+                  $query->whereDate('tgl_mulai', $today);
 
-                // Kondisi 2: Shift malam
-                $query->orWhere(function ($query) use ($today, $yesterday, $now) {
-                    $query->whereDate('tgl_mulai', $yesterday)
-                        ->whereDate('tgl_selesai', '>=', $today)
-                        ->whereHas('shift', function ($shiftQuery) use ($now) {
-                            $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
-                        });
-                });
-            })->with('shift')
-            ->first();
+                  // Kondisi 2: Shift malam (misalnya mulai kemarin dan selesai hari ini)
+                  $query->orWhere(function ($query) use ($today, $yesterday, $now) {
+                      $query->whereDate('tgl_mulai', $yesterday)
+                          ->whereDate('tgl_selesai', $today)
+                          ->whereHas('presensi', function($shiftQuerys) use ($now) {
+                              $shiftQuerys->whereNull('jam_keluar');
+                          })
+                          ->whereHas('shift', function ($shiftQuery) use ($now) {
+                              // Menyaring shift yang masih aktif sampai sekarang (jam keluar setelah sekarang)
+                              $shiftQuery->where('jam_to', '>=', $now->format('H:i:s'));
+                          });
+                  });
+              })
+              ->with('shift')
+              ->first();
 
 
             // $jadwal = Jadwal::where('user_id', Auth::user()->id)->where('tgl_mulai', date('Y-m-d'))->with('shift')->first();
@@ -137,11 +142,23 @@ class PresensiController extends Controller
         // } else {
         //     $status = 'lebih awal';
         // }
-
+        $rwtpembatalan = null;
         if ($end->gt($start)) {
             $differenceInMinutes = $end->diffInMinutes($start);
             // $status = "Karyawan terlambat $differenceInMinutes menit.";
             $status = 2; // TERLAMBAT
+            $isrewardbatal = 1;
+
+            try {
+                $rwtpembatalan = RiwayatPembatalanReward::create([
+                    'data_karyawan_id' => $datakaryawan->id,
+                    'tipe_pembatalan' => 'presensi',
+                    'tgl_pembatalan' => Carbon::now()->format('Y-m-d'),
+                    'keterangan' => 'Pembatalan reward presensi otomatis karena karyawan terlambat presensi ' . $differenceInMinutes . 'menit.',
+                ]);
+            } catch (\Exception $e) {
+                return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pembatalan reward gagal: ' . $e->getMessage()), Response::HTTP_NOT_FOUND);
+            }
         } elseif ($end->eq($start)) {
             $differenceInMinutes = 0;
             // $status = "Karyawan tepat waktu.";
@@ -199,7 +216,6 @@ class PresensiController extends Controller
                 ]);
 
 
-
                 $presensi = Presensi::create([
                     'user_id' => Auth::user()->id,
                     'data_karyawan_id' => $datakaryawan->id,
@@ -210,7 +226,14 @@ class PresensiController extends Controller
                     'foto_masuk' => $saveberkas->id,
                     'status_presensi_id' => 1,
                     'kategori_presensi_id' => $status,
+                    'is_pembatalan_reward' => $isrewardbatal,
                 ]);
+
+                if($rwtpembatalan){
+                    $rwt = RiwayatPembatalanReward::where('id', $rwtpembatalan->id)->first();
+                    $rwt->presensi_id = $presensi->id;
+                    $rwt->save();
+                }
 
                 $checkinTime = Carbon::now();
                 if($jadwalid) {
@@ -234,7 +257,8 @@ class PresensiController extends Controller
 
                 return response()->json(new DataResource(Response::HTTP_OK, 'Presensi berhasil dilakukan', $presensi), Response::HTTP_OK);
             } catch (\Exception $e){
-                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+                // return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, 'Something wrong'), Response::HTTP_INTERNAL_SERVER_ERROR);
+                return response()->json(new WithoutDataResource(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage()), Response::HTTP_INTERNAL_SERVER_ERROR);
             }
         } else {
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, 'Anda diluar radius kantor'), Response::HTTP_NOT_ACCEPTABLE);
@@ -255,7 +279,7 @@ class PresensiController extends Controller
             return response()->json(new WithoutDataResource(Response::HTTP_NOT_ACCEPTABLE, $validator->errors()), Response::HTTP_NOT_ACCEPTABLE);
         }
 
-
+        $isrewardbatal = 0;
 
         //cek lokasi user
         $lokasi = LokasiKantor::where('id', 1)->first();
@@ -306,6 +330,18 @@ class PresensiController extends Controller
             if(!$checkpresensi){
                 return response()->json(new DataResource(Response::HTTP_IM_USED, 'Presensi belum dilakukan', $checkpresensi), Response::HTTP_IM_USED);
             }
+
+            // Add the 15-minute validation HERE
+            // $startTime = Carbon::parse($checkpresensi->jam_masuk);
+            // $endTime = Carbon::now();
+            // $minutesDifference = $startTime->diffInMinutes($endTime);
+
+            // if ($minutesDifference < 15) {
+            //     return response()->json(new WithoutDataResource(
+            //         Response::HTTP_NOT_ACCEPTABLE,
+            //         'Presensi keluar tidak valid. Minimal durasi presensi adalah 15 menit.'
+            //     ), Response::HTTP_NOT_ACCEPTABLE);
+            // }
 
             try{
                 // $presensisebelum = Presensi::where('user_id', Auth::user()->id)->where('jam_keluar', NULL)->update(['presensi' => 0]);
@@ -377,6 +413,22 @@ class PresensiController extends Controller
 
                 if($chekoutTime->lessThan($outTime)) {
                     DataKaryawan::where('user_id', Auth::user()->id)->update(['status_reward_presensi' => 0]);
+                    $isrewardbatal = 1;
+
+                    $checkpresensi->is_pembatalan_reward = $isrewardbatal;
+                    $checkpresensi->save();
+
+
+                    try {
+                        $rwtpembatalan = RiwayatPembatalanReward::create([
+                            'data_karyawan_id' => $datakaryawan->id,
+                            'tipe_pembatalan' => 'presensi',
+                            'tgl_pembatalan' => Carbon::now()->format('Y-m-d'),
+                            'keterangan' => 'Pembatalan reward presensi otomatis karena karyawan pulang lebih awal',
+                        ]);
+                    } catch (\Exception $e) {
+                        return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Pembatalan reward gagal: ' . $e->getMessage()), Response::HTTP_NOT_FOUND);
+                    }
                 }
 
                 $activity = ActivityLog::create([
@@ -568,7 +620,7 @@ class PresensiController extends Controller
                             'file_id' => $fotoMasukBerkas->file_id,
                             'nama' => $fotoMasukBerkas->nama,
                             'nama_file' => $fotoMasukBerkas->nama_file,
-                            'path' => env('URL_STORAGE').$fotoMasukUrl,
+                            'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public'.$fotoMasukUrl,
                             'ext' => $fotoMasukBerkas->ext,
                             'size' => $fotoMasukBerkas->size,
                         ] : null,
@@ -578,7 +630,7 @@ class PresensiController extends Controller
                             'file_id' => $fotoKeluarBerkas->file_id,
                             'nama' => $fotoKeluarBerkas->nama,
                             'nama_file' => $fotoKeluarBerkas->nama_file,
-                            'path' => env('URL_STORAGE').$fotoKeluarUrl,
+                            'path' => 'https://192.168.0.20/RskiSistem24/file-storage/public'.$fotoKeluarUrl,
                             'ext' => $fotoKeluarBerkas->ext,
                             'size' => $fotoKeluarBerkas->size,
                         ] : null,

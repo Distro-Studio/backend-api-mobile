@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\DataResource;
+use App\Http\Resources\WithoutDataResource;
+use App\Models\DataKaryawan;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,15 +15,99 @@ class UserController extends Controller
 {
   public function checkuser()
   {
-    // return response()->json(new DataResource(Response::HTTP_OK, 'User berhasil di dapatkan', Auth::user()));
+    $masastr = null;
+    $masasip = null;
+    $checkuser = DataKaryawan::where('user_id', Auth::user()->id)->first();
+    if (!$checkuser) {
+      return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'User tidak ditemukan'), Response::HTTP_NOT_FOUND);
+    }
+
+    // if($checkuser->masa_berlaku_str != null){
+    //     $masaBerlaku = Carbon::parse($checkuser->masa_berlaku_str);
+
+    //     // Tentukan tanggal mulai untuk pemberitahuan 7 bulan sebelum masa berlaku berakhir
+    //     $alertStartDate = $masaBerlaku->copy()->subMonths(7);
+
+    //     // Tentukan tanggal akhir (masa berlaku habis)
+    //     $alertEndDate = $masaBerlaku;
+
+    //     // Cek setiap bulan antara alertStartDate dan alertEndDate
+    //     $currentDate = Carbon::now();
+
+    //     if ($currentDate->between($alertStartDate, $alertEndDate)) {
+    //         // Tampilkan alert jika sekarang adalah bulan yang sesuai
+    //         $masastr = 'Masa berlaku STR anda akan habis pada tanggal ' . $masaBerlaku->format('d-m-Y') . '. Silahkan segera perbarui STR anda';
+    //     }
+    // }
+
+    // if($checkuser->masa_berlaku_sip != null){
+    //     $masaBerlakusip = Carbon::parse($checkuser->masa_berlaku_sip);
+
+    //     // Tentukan tanggal mulai untuk pemberitahuan 3 bulan sebelum masa berlaku berakhir
+    //     $alertStartDatesip = $masaBerlakusip->copy()->subMonths(3);
+
+    //     // Tentukan tanggal akhir (masa berlaku habis)
+    //     $alertEndDatesip = $masaBerlakusip;
+
+    //     // Cek setiap bulan antara alertStartDatesip dan alertEndDatesip
+    //     $currentDatesip = Carbon::now();
+
+    //     if ($currentDatesip->between($alertStartDatesip, $alertEndDatesip)) {
+    //         // Tampilkan alert jika sekarang adalah bulan yang sesuai
+    //         $masasip = 'Masa berlaku SIP anda akan habis pada tanggal ' . $masaBerlakusip->format('d-m-Y') . '. Silahkan segera perbarui SIP anda';
+    //     }
+    // }
+
+    $user = User::where('id', Auth::user()->id)->with('fotoprofil', 'dataKaryawan')->first();
+    // Variabel untuk menyimpan hasil kondisi masa_berlaku_str dan masa_berlaku_sip
+    $duesip = null;
+    $duestr = null;
+    
+    // Ambil data masa_berlaku_str dari dataKaryawan
+    $dataKaryawan = $user->dataKaryawan; // Mengambil dataKaryawan yang sudah ada dalam $user
+    
+    if ($dataKaryawan->masa_berlaku_str != null) {
+        // Hitung tanggal 7 bulan sebelumnya
+        $reminderStr = Carbon::createFromFormat('d-m-Y', $dataKaryawan->masa_berlaku_str)
+            ->subMonths(7); // Tanggal 7 bulan sebelum masa_berlaku_str
+        
+        // Cek apakah tanggal hari ini lebih besar (lebih awal) dari reminderStr
+        if (Carbon::now()->greaterThan($reminderStr)) {
+            // Jika ya, berarti masa berlaku lebih dari 7 bulan
+            $dataKaryawan->masa_berlaku_str = $dataKaryawan->masa_berlaku_str;
+            $masastr = $dataKaryawan->masa_berlaku_str;
+        } else {
+            $dataKaryawan->masa_berlaku_str = null; // Jika tidak, berarti masa berlaku masih berlaku
+        }
+    }
+    
+    // Cek masa_berlaku_sip dan lakukan hal yang sama jika diperlukan
+    if ($dataKaryawan->masa_berlaku_sip != null) {
+        $reminderSip = Carbon::createFromFormat('d-m-Y', $dataKaryawan->masa_berlaku_sip)
+            ->subMonths(3); // Tanggal 3 bulan sebelum masa_berlaku_sip
+        
+        if (Carbon::now()->greaterThan($reminderSip)) {
+            // Jika ya, berarti SIP sudah lewat
+            $dataKaryawan->masa_berlaku_sip = $dataKaryawan->masa_berlaku_sip;
+            $masasip = $dataKaryawan->masa_berlaku_sip;
+        } else {
+            $dataKaryawan->masa_berlaku_sip = null; // Jika tidak, berarti SIP masih berlaku
+        }
+    }
+
+    if($user->foto_profil) {
+      $user->fotoprofil->path = 'https://192.168.0.20/RskiSistem24/file-storage/public'.$user->fotoprofil->path;
+    }
 
     return response()->json([
       'status' => Response::HTTP_OK,
       'message' => 'User berhasil di dapatkan',
       'data' =>
         [
-          'user' => Auth::user()->makeHidden('password'),
-          'unit_kerja' => Auth::user()->dataKaryawan->unitkerja
+          'user' => $user,
+          'unit_kerja' => Auth::user()->dataKaryawan->unitkerja,
+          'masa_str' => $masastr,
+          'masa_sip' => $masasip,
         ]
     ], Response::HTTP_OK);
   }
