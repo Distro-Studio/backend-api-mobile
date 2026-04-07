@@ -189,8 +189,12 @@ class DiklatController extends Controller
 
             $peserta = PesertaDiklat::where('peserta', Auth::user()->id)
                 ->with('diklat', 'diklat.image', 'diklat.kategori', 'diklat.status', 'diklat.dokumen')
-                ->orderByDesc('created_at')
                 ->get();
+
+            $peserta = $peserta->sortByDesc(function ($item) {
+                return $item->diklat->tgl_mulai ?? null;
+            })->values();
+
             if($peserta->isEmpty()) {
                 return response()->json(new WithoutDataResource(Response::HTTP_NOT_FOUND, 'Tidak ada riwayat diklat'), Response::HTTP_NOT_FOUND);
             }
