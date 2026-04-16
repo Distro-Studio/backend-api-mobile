@@ -260,7 +260,7 @@ class GetListController extends Controller
     try {
         $today = now()->format('Y-m-d'); // Format tanggal hari ini
 
-        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 4)
+        $diklat = Diklat::where('kategori_diklat_id', 1)->where('status_diklat_id', 6)
                     ->whereRaw("STR_TO_DATE(tgl_mulai, '%d-%m-%Y') >= ?", [$today])
                     ->with('image')
                     ->get();
