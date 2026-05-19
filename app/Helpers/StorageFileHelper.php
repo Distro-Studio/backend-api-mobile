@@ -10,7 +10,7 @@ class StorageFileHelper
 {
     public static function uploadToServer(Request $request, $filename='File Upload', $filerequestname)
     {
-        $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
+        $response = Http::asForm()->post('https://storage.sikarski.cloud/api/login',[
             'username' => 'usermobilerski',
             'password' => '12345678'
         ]);
@@ -20,7 +20,7 @@ class StorageFileHelper
 
         $responseupload = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->asMultipart()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/upload',[
+        ])->asMultipart()->post('https://storage.sikarski.cloud/api/upload',[
             'filename' => $filename,
             'file' => fopen($file->getRealPath(), 'r'),
             'kategori' => 'Umum'
@@ -31,14 +31,14 @@ class StorageFileHelper
 
         $logout = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/logout');
+        ])->post('https://storage.sikarski.cloud/api/logout');
 
         return $dataupload;
     }
 
     public static function checkfile(Berkas $berkas)
     {
-        $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
+        $response = Http::asForm()->post('https://storage.sikarski.cloud/api/login',[
             'username' => 'usermobilerski',
             'password' => '12345678'
         ]);
@@ -47,14 +47,14 @@ class StorageFileHelper
 
         $responseupload = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/get-file',[
+        ])->asForm()->post('https://storage.sikarski.cloud/api/get-file',[
             'id_file' => $berkas->file_id,
         ]);
 
 
         $logout = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/logout');
+        ])->post('https://storage.sikarski.cloud/api/logout');
 
 
     }
@@ -63,7 +63,7 @@ class StorageFileHelper
         // dd($berkas->ext);
         // $berkasfile = Berkas::where('id', 5)->first();
         $ext = explode('/', $berkas->ext);
-        $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
+        $response = Http::asForm()->post('https://storage.sikarski.cloud/api/login',[
             'username' => 'usermobilerski',
             'password' => '12345678'
         ]);
@@ -72,7 +72,7 @@ class StorageFileHelper
 
         $responseupload = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/get-file',[
+        ])->asForm()->post('https://storage.sikarski.cloud/api/get-file',[
             'id_file' => $berkas->file_id,
         ]);
 
@@ -81,7 +81,7 @@ class StorageFileHelper
 
         $logout = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/logout');
+        ])->post('https://storage.sikarski.cloud/api/logout');
 
         if ($responseupload->successful()) {
             // Mengambil nama file dari header atau set default
@@ -104,7 +104,7 @@ class StorageFileHelper
     }
 
     public static function deleteFromServer(Berkas $berkas) {
-        $response = Http::asForm()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/login',[
+        $response = Http::asForm()->post('https://storage.sikarski.cloud/api/login',[
             'username' => 'usermobilerski',
             'password' => '12345678'
         ])->throw();
@@ -113,7 +113,7 @@ class StorageFileHelper
 
         $responseupload = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->asMultipart()->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/delete-file',[
+        ])->asMultipart()->post('https://storage.sikarski.cloud/api/delete-file',[
             'file_id' => $berkas->file_id,
         ])->throw();
 
@@ -122,7 +122,7 @@ class StorageFileHelper
 
         $logout = Http::withHeaders([
             'Authorization' => 'Bearer ' . $token,
-        ])->post('https://192.168.0.20/RskiSistem24/file-storage/public/api/logout')->throw();
+        ])->post('https://storage.sikarski.cloud/api/logout')->throw();
 
         return $dataupload;
     }
