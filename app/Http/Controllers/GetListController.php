@@ -60,6 +60,9 @@ class GetListController extends Controller
       $query = DataKaryawan::select('id', 'user_id', 'kompetensi_id')
         ->where('unit_kerja_id', $data->unit_kerja_id)
         ->where('user_id', '!=', Auth::user()->id)
+        ->whereHas('user', function ($query) {
+            $query->where('status_aktif', 2);
+        })
         ->with([
           'user',
           'kompetensi',
